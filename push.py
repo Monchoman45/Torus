@@ -32,7 +32,7 @@ while len(dirs):
 	dirnames = dirnames[1:]
 	for file in dir:
 		if file.endswith('.js') or file.endswith('.css'):
-			with open(dirname + file) as f: files['MediaWiki:Torus.js/' + dirname + file] = f.read()
+			with open(dirname + file, 'r') as f: files['MediaWiki:Torus.js/' + dirname + file] = f.read()
 			print('\t' + dirname + file + ': ' + str(len(files['MediaWiki:Torus.js/' + dirname + file])))
 		elif file[0] != '.' and file != sys.argv[0]:
 			dirs.append(os.listdir(dirname + file))
@@ -72,14 +72,14 @@ sock.request(
 pages = json.loads(sock.getresponse().read().decode('utf-8'))['query']['pages']
 
 for page in pages:
-	print('Publishing: ' + pages[page]['title'] + ' ...')
+	print('Publishing: ' + pages[page]['title'] + ' ... ', end='')
 	sock.request(
 		'POST',
 		'/api.php',
-		'action=edit&title=' + pages[page]['title'] + '&text=' + files[pages[page]['title']] + '&reason=' + quote(sys.argv[4]) + '&token=' + quote(pages[page]['edittoken']),
-		{'Connection': 'Keep alive', 'Cookie': session}
+		'action=edit&title=' + pages[page]['title'] + '&text=' + quote(files[pages[page]['title']]) + '&summary=' + quote(sys.argv[4]) + '&token=' + quote(pages[page]['edittoken']) + '&format=json',
+		{'Content-Type': 'application/x-www-form-urlencoded', 'Connection': 'Keep alive', 'Cookie': session}
 	)
-	sock.getresponse()
+	print(json.loads(sock.getresponse().read().decode('utf-8'))['edit']['result'])
 
 print('Logging out...')
 sock.request('GET', '/api.php?action=logout', '', {'Cookie': session})
