@@ -143,7 +143,7 @@ Torus.options.save = function() {
 		}
 	}
 	save.version = Torus.options.version;
-	window.localStorage.setItem('torus-options', save);
+	window.localStorage.setItem('torus-options', JSON.stringify(save));
 	return save;
 }
 
@@ -151,10 +151,8 @@ Torus.options.load = function() {
 	var load = JSON.parse(window.localStorage.getItem('torus-options'));
 	if(!load) {return;}
 	else if(load.version != Torus.options.version) {
-		if(load.version != 201.7) {
-			window.localStorage.removeItem('torus-options');
-			return;
-		}
+		window.localStorage.removeItem('torus-options');
+		return;
 	}
 
 	for(var i in load) {
@@ -178,5 +176,4 @@ Torus.options.load = function() {
 			}
 		}
 	}
-	if(load.version == 201.7) {Torus.options.save();} //this should make the version 1 instead of 201.7
 }
