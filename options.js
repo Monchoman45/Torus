@@ -1,4 +1,5 @@
 Torus.options = {
+	version: 1,
 	selected: 'pings',
 	pings: {
 		general: {
@@ -141,7 +142,7 @@ Torus.options.save = function() {
 			}
 		}
 	}
-	save = JSON.stringify({version: Torus.version, options: save});
+	save.version = Torus.options.version;
 	window.localStorage.setItem('torus-options', save);
 	return save;
 }
@@ -149,11 +150,13 @@ Torus.options.save = function() {
 Torus.options.load = function() {
 	var load = JSON.parse(window.localStorage.getItem('torus-options'));
 	if(!load) {return;}
-	else if(load.version != Torus.version) {
-		window.localStorage.removeItem('torus-options');
-		return;
+	else if(load.version != Torus.options.version) {
+		if(load.version != 201.7) {
+			window.localStorage.removeItem('torus-options');
+			return;
+		}
 	}
-	else {load = load.options;}
+
 	for(var i in load) {
 		if(typeof load[i] == 'object') {
 			if(!Torus.options[i]) {
@@ -175,4 +178,5 @@ Torus.options.load = function() {
 			}
 		}
 	}
+	if(load.version == 201.7) {Torus.options.save();} //this should make the version 1 instead of 201.7
 }

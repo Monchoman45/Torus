@@ -7,7 +7,7 @@
 window.Torus = {
 	init: false,
 	local: 0,
-	version: 201.7, //2.0.1r7
+	version: 202, //2.0.2
 	chats: {},
 	listeners: {
 		open: [],
