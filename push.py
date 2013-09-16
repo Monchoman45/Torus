@@ -60,7 +60,7 @@ sock.request(
 	'action=login&lgname=' + user +'&lgpassword=' + password + '&lgtoken=' + token + '&format=json',
 	{'Connection': 'Keep alive', 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': session}
 )
-sock.getresponse()
+sock.getresponse().read()
 
 print('Fetching tokens...')
 sock.request(
@@ -79,7 +79,9 @@ for page in pages:
 		'action=edit&title=' + pages[page]['title'] + '&text=' + quote(files[pages[page]['title']]) + '&summary=' + quote(sys.argv[4]) + '&token=' + quote(pages[page]['edittoken']) + '&format=json',
 		{'Content-Type': 'application/x-www-form-urlencoded', 'Connection': 'Keep alive', 'Cookie': session}
 	)
-	print(json.loads(sock.getresponse().read().decode('utf-8'))['edit']['result'])
+	response = json.loads(sock.getresponse().read().decode('utf-8'))
+	if 'edit' in response: print(response['edit']['result'])
+	else: print('Error ' + response['error']['code'] + ': ' + response['error']['info'])
 
 print('Logging out...')
 sock.request('GET', '/api.php?action=logout', '', {'Cookie': session})
