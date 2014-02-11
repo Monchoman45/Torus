@@ -3,7 +3,7 @@ Torus.ui.addRoom = function(room, name) {
 	if(!room) {throw new Error('Invalid room ' + room + '. (ui.addRoom)');}
 	if(room > 0) {name = (Torus.data.ids[room] ? Torus.data.ids[room] : room);}
 	else if(!name) {throw new Error('Special rooms must be named');}
-	
+
 	if(Torus.chats[room]) {return;}
 	Torus.ui.ids['tabs'].innerHTML += '<span id="torus-tab-' + room + '" class="torus-tab" onclick="event.preventDefault(); if(event.shiftKey && Torus.ui.active != ' + room + ') {Torus.ui.show(' + room + ');} else {Torus.ui.activate(' + room + ');}">' + name + (room > 0 ? '<span class="torus-tab-close" onclick="event.stopPropagation(); Torus.close(' + room + ', \'closed\');">x</span>' : '') + '</span>';
 	if(room > 0) {
@@ -76,9 +76,9 @@ Torus.ui.addRoom = function(room, name) {
 Torus.ui.removeRoom = function(room) {
 	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
 	if(!Torus.chats[room]) {throw new Error('Invalid room ' + room + '. (ui.removeRoom)');}
-	
+
 	if(room > 0 && Torus.chats[room].connected) {return Torus.close(room);} //function was called when the room is still open
-	
+
 	if(Torus.ui.active == room) {
 		if(Torus.chats[room].parent) {Torus.ui.activate(Torus.chats[room].parent);}
 		else {Torus.ui.activate(0);}
@@ -106,7 +106,7 @@ Torus.ui.render = function() {
 		rooms.push(Torus.logs.messages[Torus.ui.active]);
 		indexes.push(Torus.logs.messages[Torus.ui.active].length - 1);
 	}
-	
+
 	Torus.ui.ids['window'].innerHTML = '';
 	for(var i = 0; i < Torus.options.messages.general.max.value && rooms.length > 0; i++) {
 		var message = rooms[0][indexes[0]];
@@ -125,13 +125,13 @@ Torus.ui.render = function() {
 		if(i == 0) {Torus.ui.ids['window'].appendChild(Torus.ui.renderLine(message));}
 		else {Torus.ui.ids['window'].insertBefore(Torus.ui.renderLine(message), Torus.ui.ids['window'].firstChild);}
 	}
-	
+
 	Torus.ui.ids['sidebar'].innerHTML = '';
 	for(var i in Torus.chats[Torus.ui.active].userlist) {
 		if(i == 'length') {continue;}
 		Torus.ui.updateUser(Torus.ui.active, i);
 	}
-	
+
 	if(Torus.ui.active > 0) {Torus.chats[Torus.ui.active].callListeners('render');}
 	for(var i = 0; i < Torus.ui.viewing.length; i++) {
 		if(Torus.ui.viewing[i] > 0) {Torus.chats[Torus.ui.viewing[i]].callListeners('render');}
@@ -142,7 +142,7 @@ Torus.ui.render = function() {
 Torus.ui.activate = function(room) {
 	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
 	if(!Torus.chats[room]) {throw new Error('Invalid room ' + room + '. (ui.activate)');}
-	
+
 	var tabs = Torus.ui.ids['tabs'].children;
 	for(var i = 0; i < tabs.length; i++) {
 		if(tabs[i].id == 'torus-tab-' + Torus.ui.active) {
@@ -154,17 +154,17 @@ Torus.ui.activate = function(room) {
 			break;
 		}
 	}
-	
+
 	if(Torus.ui.active == -1) {Torus.options.save();}
-	
+
 	Torus.ui.active = room;
 	for(var i = 0; i < tabs.length; i++) {
 		if(tabs[i].id == 'torus-tab-' + room) {tabs[i].className += ' torus-tab-active'; break;}
 	}
-	
+
 	Torus.ui.ids['sidebar'].innerHTML = '';
 	if(room > 0) {Torus.ui.updateUser(room, wgUserName);}
-	
+
 	if(room > 0) {
 		if(!Torus.chats[room].parent) {Torus.ui.ids['info'].innerHTML = 'Public room' + (Torus.data.ids[room] ? ' of <a href="http://' + Torus.data.ids[room] + '.wikia.com" onclick="event.preventDefault(); window.open(this.href, \'torus\');">' + Torus.data.ids[room] + '</a>' : '') + '. (' + room + ')';}
 		else {Torus.ui.ids['info'].innerHTML = 'Private room of ' + (Torus.data.ids[Torus.chats[room].parent] ? '<a href="http://' + Torus.data.ids[Torus.chats[room].parent] + '.wikia.com" onclick="event.preventDefault(); window.open(this.href, \'torus\');">' + Torus.data.ids[Torus.chats[room].parent] + '</a>' : Torus.chats[room].parent) + ', between ' + Torus.chats[room].users.slice(0, Torus.chats[room].users.length - 1).join(', ') + ' and ' + Torus.chats[room].users[Torus.chats[room].users.length - 1] + '. (' + room + ')';}
@@ -172,7 +172,7 @@ Torus.ui.activate = function(room) {
 	else {Torus.ui.ids['info'].innerHTML = '';}
 
 	if(room >= 0) {Torus.ui.render();}
-	
+
 	Torus.ui.ids['window'].scrollTop = Torus.ui.ids['window'].scrollHeight;
 	if(room > 0) {Torus.chats[room].callListeners('activate');}
 	Torus.ui.callListeners('activate', room);
@@ -208,10 +208,10 @@ Torus.ui.show = function(room) {
 	for(var i = 0; i < tabs.length; i++) {
 		if(tabs[i].id == 'torus-tab-' + room) {tabs[i].className += ' torus-tab-viewing'; break;}
 	}
-	
+
 	Torus.ui.render();
 	Torus.ui.ids['window'].scrollTop = Torus.ui.ids['window'].scrollHeight;
-	
+
 	if(room > 0) {Torus.chats[room].callListeners('show');}
 	Torus.ui.callListeners('show', room);
 }
@@ -220,16 +220,16 @@ Torus.ui.addLine = function(message) {
 	if(isNaN(message.room * 1)) {message.room = Torus.data.domains[message.room];}
 	if(!Torus.chats[message.room]) {throw new Error('Invalid room ' + message.room + '. (ui.addLine)');}
 	if(message.room < 0) {throw new Error('Cannot add lines to special rooms. (ui.addLine)');}
-	
+
 	Torus.logs.messages[message.room].push(message);
 	//Torus.logs.plain[message.room].push(message);
-	
+
 	if(message.room == Torus.ui.active || (Torus.chats[message.room].viewing && Torus.ui.active >= 0)) {
 		var scroll = false;
 		if(Torus.ui.ids['window'].offsetHeight + Torus.ui.ids['window'].scrollTop >= Torus.ui.ids['window'].scrollHeight) {scroll = true;}
 		Torus.ui.ids['window'].appendChild(Torus.ui.renderLine(message));
 		if(scroll) {Torus.ui.ids['window'].scrollTop = Torus.ui.ids['window'].scrollHeight;}
-		
+
 		if(Torus.ui.ids['window'].children.length > Torus.options.messages.general.max.value) {Torus.ui.ids['window'].removeChild(Torus.ui.ids['window'].children[0]);}
 	}
 }
@@ -290,7 +290,7 @@ Torus.ui.updateUser = function(room, name, props) {
 		}
 	}
 	props = Torus.chats[room].userlist[name];
-	
+
 	if(Torus.ui.active == room) {
 		var userlist = Torus.ui.ids['sidebar'].getElementsByTagName('li');
 		var changed = false;
@@ -321,7 +321,7 @@ Torus.ui.updateUser = function(room, name, props) {
 			}
 			if(!added) {sidebar.appendChild(li);} //is at the end of the alphabet
 		}
-		
+
 		li.className = 'torus-user ' + (props.mod || props.staff ? 'torus-user-' + (props.staff ? 'staff' : 'mod') + ' ' : '') + 'torus-user-' + encodeURIComponent(name);
 		li.innerHTML = (props.mod || props.staff ? '<img class="torus-user-icon-' + (props.staff ? 'staff' : 'mod') + '" src="http://images2.wikia.nocookie.net/monchbox/images/' + (props.staff ? 'f/f3/Icon-staff' : '6/6b/Icon-chatmod') + '.png">' : '') + '&nbsp;<span class="torus-user-name' + (props.statusState.toLowerCase() == 'away' ? ' torus-user-away' : '') + '">' + name + '</span>';
 	}
@@ -347,7 +347,7 @@ Torus.ui.removeUser = function(room, name) {
 Torus.ui.renderPopup = function(name, room, coords) {
 	if(!room || room <= 0) {room = Torus.ui.active;}
 	if(!name || !Torus.chats[room].userlist[name]) {throw new Error('Invalid user ' + name + '. (ui.renderPopup)');}
-	
+
 	var target = Torus.chats[room].userlist[name];
 	var user = Torus.chats[room].userlist[wgUserName];
 	var html = '<img id="torus-popup-avatar" src="' + target.avatar + '"><div id="torus-popup-info"><div><span id="torus-popup-name">' + name + '</span>';
@@ -368,7 +368,7 @@ Torus.ui.renderPopup = function(name, room, coords) {
 	else {html += '<a class="torus-popup-action torus-popup-action-disabled">Kick</a><a class="torus-popup-action torus-popup-action-disabled">Ban</a>';}
 	html += '</div>';
 	Torus.ui.ids['popup'].innerHTML = html;
-	
+
 	Torus.ui.ids['popup'].style.display = 'block';
 	if(coords) {
 		Torus.ui.ids['popup'].style.right = 'auto';
@@ -399,7 +399,7 @@ Torus.ui.unrenderPopup = function() {
 
 Torus.ui.ping = function(room) {
 	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
-	
+
 	if(Torus.options.pings.general.enabled && Torus.ui.window.parentNode && Torus.data.pinginterval == 0) {
 		Torus.data.titleflash = document.title;
 		document.title = Torus.options.pings.general.alert.value;
@@ -433,7 +433,7 @@ Torus.ui.inputListener = function(event) {
 			Torus.data.history.unshift('');
 		}
 		Torus.data.histindex = 0;
-		
+
 		while(this.value.charAt(0) == '/') {
 			if(this.value.indexOf('\n') != -1) {
 				var result = Torus.commands.eval(this.value.substring(1, this.value.indexOf('\n')));

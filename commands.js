@@ -6,7 +6,7 @@ Torus.commands = {
 				if(!Torus.data.domains[room]) {return 'Unable to look up ' + room + ' in database. Try [[w:c:' + room + ':Special:Torus]].';}
 				else {room = Torus.data.domains[room];}
 			}
-			
+
 			if(room <= 0) {
 				for(var i in Torus.chats) {
 					Torus.close(i);
@@ -86,7 +86,7 @@ Torus.commands = {
 			for(var i = 0; i < arguments.length; i++) {message += ' ' + arguments[i];}
 			message = message.substring(1);
 			var user = Torus.chats[Torus.ui.active].userlist[wgUserName];
-			
+
 			if(user.statusState == 'away') {
 				if(user.oldState == 'away') {Torus.io.setStatus(Torus.ui.active, 'here', '');}
 				else {Torus.io.setStatus(Torus.ui.active, user.oldState, user.oldMessage);}
@@ -148,7 +148,7 @@ Torus.commands = {
 			var str = '';
 			for(var i = 0; i < arguments.length; i++) {str += ' ' + arguments[i];}
 			str = str.substring(1);
-			
+
 			if(str) {
 				var help = Torus.commands.eval(str, 'help');
 				if(!help) {Torus.alert('No help data for ' + str);}

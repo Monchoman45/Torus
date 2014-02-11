@@ -112,19 +112,19 @@ Torus.callListeners = Torus.ui.callListeners = Torus.io.callListeners = function
 Torus.open = function(room, key, server, port, session, transport) {
 	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
 	if(room <= 0) {throw new Error('Invalid room ' + room + '. (open)');}
-	
+
 	if(!Torus.chats[room] || (Torus.chats[room].connected == false && Torus.chats[room].connecting == false)) {
 		if(!Torus.chats[room]) {
 			Torus.ui.addRoom(room);
 			Torus.ui.activate(room);
 		}
 		Torus.chats[room].connecting = true;
-		
+
 		if(key === false) {throw new Error('\'key\' is false. (open)');}
 		else if(!key) {
 			Torus.io.spider(function(data) {
 				if(!data) {throw new Error('Can\'t spider: wiki does not have chat. (open)');}
-				
+
 				if(!server) {server = data.nodeHostname;}
 				if(!port) {port = data.nodePort;}
 				Torus.chats[room].connecting = false;
@@ -144,7 +144,7 @@ Torus.open = function(room, key, server, port, session, transport) {
 			});
 			return;
 		}
-		
+
 		if(transport) {Torus.chats[room].transport = transport;}
 		Torus.chats[room].socket = Torus.io.transports[Torus.chats[room].transport](room, key, server, port, session);
 		Torus.alert('Connecting to ' + (Torus.data.ids[room] ? Torus.data.ids[room] : room) + '...');
@@ -155,7 +155,7 @@ Torus.open = function(room, key, server, port, session, transport) {
 Torus.close = function(room, message) {
 	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
 	if(!Torus.chats[room] || room <= 0) {throw new Error('Invalid room ' + room + '. (close)');}
-	
+
 	if(Torus.chats[room].socket) {
 		Torus.chats[room].socket.silence();
 		Torus.chats[room].socket.close();
@@ -170,7 +170,7 @@ Torus.close = function(room, message) {
 Torus.reopen = function(room) {
 	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
 	if(!Torus.chats[room] || room <= 0) {throw new Error('Invalid room ' + room + '. (reopen)');}
-	
+
 	Torus.alert('Reconnecting...', room);
 	Torus.chats[room].socket.silence();
 	Torus.chats[room].socket.close();
@@ -193,7 +193,7 @@ Torus.logout = function() {
 
 Torus.alert = function(text, room) {
 	if(!room) {room = 0;}
-	
+
 	if(text.indexOf('\n') != -1) {
 		var spl = text.split('\n');
 		for(var i = 0; i < spl.length; i++) {

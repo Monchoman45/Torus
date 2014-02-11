@@ -1,7 +1,7 @@
 Torus.io.sendMessage = function(room, message, hist) {
 	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
 	if(!Torus.chats[room] || room < 0) {throw new Error('Invalid room ' + room + '. (io.sendMessage)');}
-	
+
 	message += '';
 	if(room == 0) {Torus.alert(message);}
 	else {
@@ -10,9 +10,9 @@ Torus.io.sendMessage = function(room, message, hist) {
 			Torus.data.history.unshift('');
 		}
 		Torus.data.histindex = 0;
-		
+
 		if(Torus.chats[room].parent) {Torus.io.sendCommand(Torus.chats[room].parent, 'openprivate', {roomId: room, users: Torus.chats[room].users});}
-		
+
 		message = {attrs: {msgType: 'chat', 'text': message}};
 		Torus.chats[room].socket.send(JSON.stringify(message));
 	}
@@ -21,7 +21,7 @@ Torus.io.sendMessage = function(room, message, hist) {
 Torus.io.sendCommand = function(room, command, args) {
 	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
 	if(!Torus.chats[room] || room < 0) {throw new Error('Invalid room ' + room + '. (io.sendCommand)');}
-	
+
 	var command = {attrs: {msgType: 'command', command: command}};
 	for(var i in args) {command.attrs[i] = args[i];}
 	Torus.chats[room].socket.send(JSON.stringify(command));
@@ -30,7 +30,7 @@ Torus.io.sendCommand = function(room, command, args) {
 Torus.io.setStatus = function(room, state, message) {
 	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
 	if(!Torus.chats[room] || room <= 0) {throw new Error('Invalid room ' + room + '. (io.setStatus)');}
-	
+
 	var user = Torus.chats[room].userlist[wgUserName];
 	if(!state) {state = user.statusState;}
 	if(!message) {message = user.statusMessage;}
@@ -49,14 +49,14 @@ Torus.io.giveMod = function(room, user) {
 Torus.io.kick = function(room, user) {
 	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
 	if(!Torus.chats[room] || room <= 0) {throw new Error('Invalid room ' + room + '. (io.kick)');}
-	
+
 	Torus.io.sendCommand(room, 'kick', {userToKick: user});
 }
 
 Torus.io.ban = function(room, user, expiry, reason) {
 	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
 	if(!Torus.chats[room] || room <= 0) {throw new Error('Invalid room ' + room + '. (io.ban)');}
-	
+
 	if(!expiry) {expiry = 0;} //this is also an unban
 	else if(typeof expiry == 'string') {expiry = Torus.util.expiryToSeconds(expiry);}
 	if(!reason) {
@@ -69,13 +69,13 @@ Torus.io.ban = function(room, user, expiry, reason) {
 Torus.io.openPrivate = function(room, users, callback, id) {
 	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
 	if(!Torus.chats[room] || room <= 0) {throw new Error('Invalid room ' + room + '. (io.openPrivate)');}	
-	
+
 	var username = false;
 	for(var i in users) {
 		if(users[i] == wgUserName) {username = true; break;}
 	}
 	if(!username) {users.push(wgUserName);}
-	
+
 	if(!id) {
 		Torus.io.getPrivateId(users, function(id) {
 			return Torus.io.openPrivate(room, users, callback, id);
@@ -166,7 +166,7 @@ Torus.io.spider = function(callback) {
 Torus.io.session = function(room, key, server, port, callback) {
 	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
 	if(!Torus.chats[room] || room <= 0) {throw new Error('Invalid room ' + room + '. (io.session)');}
-	
+
 	if(key === false) {throw new Error('\'key\' is false. (io.session)');}
 	else if(!key || typeof key == 'function') { //key is callback
 		Torus.io.spider(function(data) {
@@ -196,7 +196,7 @@ Torus.io.session = function(room, key, server, port, callback) {
 Torus.io.receive = function(room, message) {
 	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
 	if(!Torus.chats[room] || room <= 0) {throw new Error('Invalid room ' + room + '. (io.receive)');}
-	
+
 	data = JSON.parse(message.data);
 
 	var event = {
@@ -277,7 +277,7 @@ Torus.io.receive = function(room, message) {
 				}
 			}
 			Torus.ui.render();
-			
+
 			if(Torus.chats[room].parent) {
 				event.parent = Torus.chats[room].parent;
 				Torus.ui.ping(Torus.chats[room].parent);
@@ -301,7 +301,7 @@ Torus.io.receive = function(room, message) {
 				event.user = data.attrs.name;
 				event.id = data.attrs.timeStamp;
 				event.time = data.attrs.timeStamp;
-				
+
 				while(event.text.indexOf('<') != -1) {event.text = event.text.replace('<', '&lt;');}
 				while(event.text.indexOf('>') != -1) {event.text = event.text.replace('>', '&gt;');}
 				event.text = Torus.util.parseLinks(event.text, (Torus.chats[room].parent ? Torus.chats[room].parent : room));
@@ -358,7 +358,7 @@ Torus.io.receive = function(room, message) {
 				event.text = Torus.util.parseLinks(data.attrs.text, (Torus.chats[room].parent ? Torus.chats[room].parent : room));
 			}
 			Torus.ui.addLine(event);
-			
+
 			if(Torus.chats[room].parent && data.attrs.name != wgUserName) {Torus.ui.ping(room);}
 			break;
 		case 'join':
@@ -414,7 +414,7 @@ Torus.io.receive = function(room, message) {
 			return;
 		default: console.log(event); break;
 	}
-	
+
 	Torus.chats[room].callListeners(event.event, event);
 	Torus.io.callListeners(event.event, event);
 }

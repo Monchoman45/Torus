@@ -8,7 +8,7 @@ Torus.util.colorHash = function(str) {
 		hue = 31 * hue + str.charCodeAt(i); //same hash algorithm as webchat, except this is case sensitive
 	}
 	hue = (hue % 360 + Torus.options.misc.user_colors.hue.value) % 360;
-	
+
 	var c = val * sat;
 	var m = val - c;
 	var C = Math.floor((c + m) * 255).toString(16);

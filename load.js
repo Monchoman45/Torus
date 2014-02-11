@@ -33,12 +33,12 @@ Torus.onload = function() {
 		Torus.ui.popupTimeout = setTimeout(Torus.ui.unrenderPopup, 500);
 	}
 	Torus.ui.ids['input'].getElementsByTagName('textarea')[0].onkeydown = Torus.ui.inputListener;
-	
+
 	Torus.chats[0] = Torus.chats[-1] = true;
 	Torus.logs.messages[0] = [];
 	Torus.ui.activate(0);
 	Torus.ui.show(0);
-	
+
 	window.addEventListener('beforeunload', function() {Torus.options.save(); Torus.logout();});
 	Torus.options.load();
 
@@ -48,7 +48,7 @@ Torus.onload = function() {
 	for(var i in Torus.data.domains) {
 		if(!Torus.data.ids[Torus.data.domains]) {Torus.data.ids[Torus.data.domains[i]] = i;}
 	}
-	
+
 	var domain = document.location.host.substring(0, document.location.host.indexOf('.wikia.com'));
 	if(domain.indexOf('preview.') == 0) {domain = domain.substring(8);}
 	if(Torus.data.domains[domain]) {Torus.local = Torus.data.domains[domain];}
@@ -69,7 +69,7 @@ Torus.onload = function() {
 			else if(wgCanonicalNamespace == 'Special' && wgTitle == 'Torus' && Torus.options.misc.connection.local.value) {Torus.open(Torus.local, data.chatkey, data.nodeHostname, data.nodePort);}
 		});
 	}
-	
+
 	if(wgCanonicalNamespace == 'Special' && wgTitle == 'Torus') {
 		document.title = 'Torus - It\'s a donut - ' + wgSiteName;
 		if(skin == 'oasis') {

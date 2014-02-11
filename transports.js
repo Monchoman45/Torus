@@ -1,6 +1,6 @@
 Torus.io.transports.websocket = function(room, key, server, port, session) {
 	if(!room || room <= 0 || !key || !server || !port || !session) {throw new Error('Invalid transport parameters. (io.transports.websocket)');}
-	
+
 	var ws = new WebSocket('ws://' + server + ':' + port + '/socket.io/1/websocket/' + session + '/?name=' + encodeURIComponent(wgUserName) + '&key=' + key + '&roomId=' + room + '&client=Torus&version=' + Torus.version);
 	ws.onmessage = function(event) {
 		if(event.data.substring(0, 3) != '2::') {Torus.logs.socket[room].push({id: (new Date()).getTime(), message: event.data});}
@@ -53,7 +53,7 @@ Torus.io.transports.websocket = function(room, key, server, port, session) {
 
 Torus.io.transports['xhr-polling'] = function(room, key, server, port, session) {
 	if(!room || room <= 0 || !key || !server || !port || !session) {throw new Error('Invalid transport parameters. (io.transports.xhr-polling)');}
-	
+
 	var sock = {
 		xhr: null,
 		send: function(message) {
