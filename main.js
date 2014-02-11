@@ -40,6 +40,7 @@ window.Torus = {
 	},
 	ui: {
 		window: document.createElement('div'),
+		ids: {},
 		active: 0,
 		viewing: [],
 		listeners: {

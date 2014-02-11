@@ -8,12 +8,12 @@ Torus.onload = function() {
 	document.head.appendChild(css);
 	Torus.ui.window.id = 'torus';
 	Torus.ui.window.innerHTML = '<div id="torus-tabs"><span id="torus-tab--1" class="torus-tab" onclick="Torus.ui.activate(-1); Torus.options.render(Torus.options.selected);"><img width="18" src="http://images2.wikia.nocookie.net/__cb20110812214252/monchbox/images/a/a1/Gear_icon.png" style="vertical-align:top;"> Options</span><span id="torus-tab-0" class="torus-tab" onclick="event.preventDefault(); if(event.shiftKey && Torus.ui.active != 0) {Torus.ui.show(0);} else {Torus.ui.activate(0);}">Status</span></div><ul id="torus-sidebar"></ul><div id="torus-popup" style="display:none;"></div><div id="torus-info"></div><div id="torus-window"></div><div id="torus-input"><textarea id="torus-input-box"></textarea></div>';
-	Torus.ui.window.tabs = Torus.ui.window.children[0];
-	Torus.ui.window.sidebar = Torus.ui.window.children[1];
-	Torus.ui.window.popup = Torus.ui.window.children[2];
-	Torus.ui.window.info = Torus.ui.window.children[3];
-	Torus.ui.window.window = Torus.ui.window.children[4];
-	Torus.ui.window.input = Torus.ui.window.children[5];
+	Torus.ui.ids['tabs'] = Torus.ui.window.children[0];
+	Torus.ui.ids['sidebar'] = Torus.ui.window.children[1];
+	Torus.ui.ids['popup'] = Torus.ui.window.children[2];
+	Torus.ui.ids['info'] = Torus.ui.window.children[3];
+	Torus.ui.ids['window'] = Torus.ui.window.children[4];
+	Torus.ui.ids['input'] = Torus.ui.window.children[5];
 	Torus.ui.window.onmouseover = function() {
 		if(Torus.data.pinginterval != 0) {
 			clearInterval(Torus.data.pinginterval);
@@ -25,21 +25,21 @@ Torus.onload = function() {
 		//	setTimeout('Torus.io.setStatus(' + Torus.ui.active + ', \'away\', \'\'); Torus.chats[' + Torus.ui.active + '].autoAway = true;', 5 * 60 * 1000);
 		//}
 	}
-	Torus.ui.window.sidebar.onmouseover = Torus.ui.window.popup.onmouseover = function(event) {
+	Torus.ui.ids['sidebar'].onmouseover = Torus.ui.ids['popup'].onmouseover = function(event) {
 		clearTimeout(Torus.ui.popupTimeout);
 		Torus.ui.popupTimeout = 0;
 	}
-	Torus.ui.window.sidebar.onmouseout = Torus.ui.window.popup.onmouseout = function(event) {
+	Torus.ui.ids['sidebar'].onmouseout = Torus.ui.ids['popup'].onmouseout = function(event) {
 		Torus.ui.popupTimeout = setTimeout(Torus.ui.unrenderPopup, 500);
 	}
-	Torus.ui.window.input.getElementsByTagName('textarea')[0].onkeydown = Torus.ui.inputListener;
+	Torus.ui.ids['input'].getElementsByTagName('textarea')[0].onkeydown = Torus.ui.inputListener;
 	
 	Torus.chats[0] = Torus.chats[-1] = true;
 	Torus.logs.messages[0] = [];
 	Torus.ui.activate(0);
 	Torus.ui.show(0);
 	
-	window.onbeforeunload = function() {Torus.options.save(); Torus.logout();}
+	window.addEventListener('beforeunload', function() {Torus.options.save(); Torus.logout();});
 	Torus.options.load();
 
 	Torus.data.domains = {

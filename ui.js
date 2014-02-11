@@ -5,7 +5,7 @@ Torus.ui.addRoom = function(room, name) {
 	else if(!name) {throw new Error('Special rooms must be named');}
 	
 	if(Torus.chats[room]) {return;}
-	Torus.ui.window.tabs.innerHTML += '<span id="torus-tab-' + room + '" class="torus-tab" onclick="event.preventDefault(); if(event.shiftKey && Torus.ui.active != ' + room + ') {Torus.ui.show(' + room + ');} else {Torus.ui.activate(' + room + ');}">' + name + (room > 0 ? '<span class="torus-tab-close" onclick="event.stopPropagation(); Torus.close(' + room + ', \'closed\');">x</span>' : '') + '</span>';
+	Torus.ui.ids['tabs'].innerHTML += '<span id="torus-tab-' + room + '" class="torus-tab" onclick="event.preventDefault(); if(event.shiftKey && Torus.ui.active != ' + room + ') {Torus.ui.show(' + room + ');} else {Torus.ui.activate(' + room + ');}">' + name + (room > 0 ? '<span class="torus-tab-close" onclick="event.stopPropagation(); Torus.close(' + room + ', \'closed\');">x</span>' : '') + '</span>';
 	if(room > 0) {
 		if(!Torus.options.pings[name]) {
 			Torus.options.pings[name] = {};
@@ -84,7 +84,7 @@ Torus.ui.removeRoom = function(room) {
 		else {Torus.ui.activate(0);}
 	}
 	if(Torus.chats[room].viewing) {Torus.ui.show(room);}
-	var tabs = Torus.ui.window.tabs;
+	var tabs = Torus.ui.ids['tabs'];
 	for(var i = 0; i < tabs.children.length; i++) {
 		if(tabs.children[i].id == 'torus-tab-' + room) {tabs.removeChild(tabs.children[i]); break;}
 	}
@@ -107,7 +107,7 @@ Torus.ui.render = function() {
 		indexes.push(Torus.logs.messages[Torus.ui.active].length - 1);
 	}
 	
-	Torus.ui.window.window.innerHTML = '';
+	Torus.ui.ids['window'].innerHTML = '';
 	for(var i = 0; i < Torus.options.messages.general.max.value && rooms.length > 0; i++) {
 		var message = rooms[0][indexes[0]];
 		var source = 0;
@@ -122,11 +122,11 @@ Torus.ui.render = function() {
 			rooms.splice(source, 1);
 			indexes.splice(source, 1);
 		}
-		if(i == 0) {Torus.ui.window.window.appendChild(Torus.ui.renderLine(message));}
-		else {Torus.ui.window.window.insertBefore(Torus.ui.renderLine(message), Torus.ui.window.window.firstChild);}
+		if(i == 0) {Torus.ui.ids['window'].appendChild(Torus.ui.renderLine(message));}
+		else {Torus.ui.ids['window'].insertBefore(Torus.ui.renderLine(message), Torus.ui.ids['window'].firstChild);}
 	}
 	
-	Torus.ui.window.sidebar.innerHTML = '';
+	Torus.ui.ids['sidebar'].innerHTML = '';
 	for(var i in Torus.chats[Torus.ui.active].userlist) {
 		if(i == 'length') {continue;}
 		Torus.ui.updateUser(Torus.ui.active, i);
@@ -143,7 +143,7 @@ Torus.ui.activate = function(room) {
 	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
 	if(!Torus.chats[room]) {throw new Error('Invalid room ' + room + '. (ui.activate)');}
 	
-	var tabs = Torus.ui.window.tabs.children;
+	var tabs = Torus.ui.ids['tabs'].children;
 	for(var i = 0; i < tabs.length; i++) {
 		if(tabs[i].id == 'torus-tab-' + Torus.ui.active) {
 			var classes = tabs[i].className.split(' ');
@@ -162,18 +162,18 @@ Torus.ui.activate = function(room) {
 		if(tabs[i].id == 'torus-tab-' + room) {tabs[i].className += ' torus-tab-active'; break;}
 	}
 	
-	Torus.ui.window.sidebar.innerHTML = '';
+	Torus.ui.ids['sidebar'].innerHTML = '';
 	if(room > 0) {Torus.ui.updateUser(room, wgUserName);}
 	
 	if(room > 0) {
-		if(!Torus.chats[room].parent) {Torus.ui.window.info.innerHTML = 'Public room' + (Torus.data.ids[room] ? ' of <a href="http://' + Torus.data.ids[room] + '.wikia.com" onclick="event.preventDefault(); window.open(this.href, \'torus\');">' + Torus.data.ids[room] + '</a>' : '') + '. (' + room + ')';}
-		else {Torus.ui.window.info.innerHTML = 'Private room of ' + (Torus.data.ids[Torus.chats[room].parent] ? '<a href="http://' + Torus.data.ids[Torus.chats[room].parent] + '.wikia.com" onclick="event.preventDefault(); window.open(this.href, \'torus\');">' + Torus.data.ids[Torus.chats[room].parent] + '</a>' : Torus.chats[room].parent) + ', between ' + Torus.chats[room].users.slice(0, Torus.chats[room].users.length - 1).join(', ') + ' and ' + Torus.chats[room].users[Torus.chats[room].users.length - 1] + '. (' + room + ')';}
+		if(!Torus.chats[room].parent) {Torus.ui.ids['info'].innerHTML = 'Public room' + (Torus.data.ids[room] ? ' of <a href="http://' + Torus.data.ids[room] + '.wikia.com" onclick="event.preventDefault(); window.open(this.href, \'torus\');">' + Torus.data.ids[room] + '</a>' : '') + '. (' + room + ')';}
+		else {Torus.ui.ids['info'].innerHTML = 'Private room of ' + (Torus.data.ids[Torus.chats[room].parent] ? '<a href="http://' + Torus.data.ids[Torus.chats[room].parent] + '.wikia.com" onclick="event.preventDefault(); window.open(this.href, \'torus\');">' + Torus.data.ids[Torus.chats[room].parent] + '</a>' : Torus.chats[room].parent) + ', between ' + Torus.chats[room].users.slice(0, Torus.chats[room].users.length - 1).join(', ') + ' and ' + Torus.chats[room].users[Torus.chats[room].users.length - 1] + '. (' + room + ')';}
 	}
-	else {Torus.ui.window.info.innerHTML = '';}
+	else {Torus.ui.ids['info'].innerHTML = '';}
 
 	if(room >= 0) {Torus.ui.render();}
 	
-	Torus.ui.window.window.scrollTop = Torus.ui.window.window.scrollHeight;
+	Torus.ui.ids['window'].scrollTop = Torus.ui.ids['window'].scrollHeight;
 	if(room > 0) {Torus.chats[room].callListeners('activate');}
 	Torus.ui.callListeners('activate', room);
 }
@@ -182,7 +182,7 @@ Torus.ui.show = function(room) {
 	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
 	if(room < 0 || !Torus.chats[room]) {throw new Error('Invalid room ' + room + '. (ui.show)');}
 
-	var tabs = Torus.ui.window.tabs.children;
+	var tabs = Torus.ui.ids['tabs'].children;
 	if(Torus.chats[room].viewing) {
 		Torus.chats[room].viewing = false;
 		for(var i = 0; i < Torus.ui.viewing.length; i++) {
@@ -210,7 +210,7 @@ Torus.ui.show = function(room) {
 	}
 	
 	Torus.ui.render();
-	Torus.ui.window.window.scrollTop = Torus.ui.window.window.scrollHeight;
+	Torus.ui.ids['window'].scrollTop = Torus.ui.ids['window'].scrollHeight;
 	
 	if(room > 0) {Torus.chats[room].callListeners('show');}
 	Torus.ui.callListeners('show', room);
@@ -226,11 +226,11 @@ Torus.ui.addLine = function(message) {
 	
 	if(message.room == Torus.ui.active || (Torus.chats[message.room].viewing && Torus.ui.active >= 0)) {
 		var scroll = false;
-		if(Torus.ui.window.window.offsetHeight + Torus.ui.window.window.scrollTop >= Torus.ui.window.window.scrollHeight) {scroll = true;}
-		Torus.ui.window.window.appendChild(Torus.ui.renderLine(message));
-		if(scroll) {Torus.ui.window.window.scrollTop = Torus.ui.window.window.scrollHeight;}
+		if(Torus.ui.ids['window'].offsetHeight + Torus.ui.ids['window'].scrollTop >= Torus.ui.ids['window'].scrollHeight) {scroll = true;}
+		Torus.ui.ids['window'].appendChild(Torus.ui.renderLine(message));
+		if(scroll) {Torus.ui.ids['window'].scrollTop = Torus.ui.ids['window'].scrollHeight;}
 		
-		if(Torus.ui.window.window.children.length > Torus.options.messages.general.max.value) {Torus.ui.window.window.removeChild(Torus.ui.window.window.children[0]);}
+		if(Torus.ui.ids['window'].children.length > Torus.options.messages.general.max.value) {Torus.ui.ids['window'].removeChild(Torus.ui.ids['window'].children[0]);}
 	}
 }
 
@@ -292,7 +292,7 @@ Torus.ui.updateUser = function(room, name, props) {
 	props = Torus.chats[room].userlist[name];
 	
 	if(Torus.ui.active == room) {
-		var userlist = Torus.ui.window.sidebar.getElementsByTagName('li');
+		var userlist = Torus.ui.ids['sidebar'].getElementsByTagName('li');
 		var changed = false;
 		for(var i = 0; i < userlist.length; i++) {
 			if(userlist[i].className.indexOf('torus-user-' + encodeURIComponent(name)) != -1) { //is encodeURIComponent sufficient for this?
@@ -304,7 +304,7 @@ Torus.ui.updateUser = function(room, name, props) {
 		if(!changed) {
 			var li = document.createElement('li');
 			li.onmouseover = function(event) {Torus.ui.renderPopup(name);}
-			var sidebar = Torus.ui.window.sidebar;
+			var sidebar = Torus.ui.ids['sidebar'];
 			var added = false;
 			for(var i = 0; i < sidebar.children.length; i++) {
 				var child = sidebar.children[i].children[sidebar.children[i].children.length - 1].textContent;
@@ -334,7 +334,7 @@ Torus.ui.removeUser = function(room, name) {
 	delete Torus.chats[room].userlist[name];
 	Torus.chats[room].userlist.length--;
 	if(Torus.ui.active == room) {
-		var users = Torus.ui.window.sidebar.getElementsByTagName('li');
+		var users = Torus.ui.ids['sidebar'].getElementsByTagName('li');
 		for(var i = 0; i < users.length; i++) {
 			if(users[i].className.indexOf('torus-user-' + encodeURIComponent(name)) != -1) {
 				users[i].parentNode.removeChild(users[i]);
@@ -367,19 +367,20 @@ Torus.ui.renderPopup = function(name, room, coords) {
 	if(user.staff || user.givemod || (user.mod && !target.givemod && !target.staff)) {html += '<a class="torus-popup-action" onclick="Torus.io.kick(' + room + ', \'' + name + '\');">Kick</a><a class="torus-popup-action"><div id="torus-popup-banmodal"><div><label>Expiry:</label> <input type="text" id="torus-popup-banexpiry" placeholder="1 day" onkeyup="if(event.keyCode == 13) {if(this.value) {Torus.io.ban(' + room + ', \'' + name + '\', Torus.util.expiryToSeconds(this.value), this.parentNode.nextSibling.lastChild.value);} else {Torus.io.ban(' + room + ', \'' + name + '\', 60 * 60 * 24, this.parentNode.nextSibling.lastChild.value);}}"></input></div><div>Reason: <input type="text" id="torus-popup-banreason" placeholder="Misbehaving in chat" onkeyup="if(event.keyCode == 13) {var expiry = this.parentNode.previousSibling.lastChild.value; if(expiry) {Torus.io.ban(' + room + ', \'' + name + '\', Torus.util.expiryToSeconds(expiry), this.value);} else {Torus.io.ban(' + room + ', \'' + name + '\', 60 * 60 * 24, this.value);}}"></div><div><input type="submit" id="torus-popup-banbutton" value="Ban" onclick="Torus.io.ban(' + room + ', \'' + name + '\', Torus.util.expiryToSeconds(this.parentNode.previousSibling.previousSibling.lastChild.value), this.parentNode.previousSibling.lastChild.value);"></div></div>Ban</a>';}
 	else {html += '<a class="torus-popup-action torus-popup-action-disabled">Kick</a><a class="torus-popup-action torus-popup-action-disabled">Ban</a>';}
 	html += '</div>';
-	Torus.ui.window.popup.innerHTML = html;
+	Torus.ui.ids['popup'].innerHTML = html;
 	
-	Torus.ui.window.popup.style.display = 'block';
+	Torus.ui.ids['popup'].style.display = 'block';
 	if(coords) {
-		Torus.ui.window.popup.style.right = 'auto';
-		Torus.ui.window.popup.style.left = coords.x + 'px';
-		Torus.ui.window.popup.style.top = coords.y + 'px';
+		Torus.ui.ids['popup'].style.right = 'auto';
+		Torus.ui.ids['popup'].style.left = coords.x + 'px';
+		Torus.ui.ids['popup'].style.top = coords.y + 'px';
 	}
 	else {
-		var userlist = Torus.ui.window.sidebar.children;
+		var userlist = Torus.ui.ids['sidebar'].children;
 		for(var i = 0; i < userlist.length; i++) {
 			if(userlist[i].lastChild.innerHTML == name) {
-				Torus.ui.window.popup.style.top = userlist[i].offsetTop - Torus.ui.window.sidebar.scrollTop + 'px';
+				if(userlist[i].offsetTop - Torus.ui.ids['sidebar'].scrollTop + Torus.ui.ids['popup'].offsetHeight > Torus.ui.window.offsetHeight) {Torus.ui.ids['popup'].style.top = Torus.ui.window.offsetHeight - Torus.ui.ids['popup'].offsetHeight + 'px';}
+				else {Torus.ui.ids['popup'].style.top = userlist[i].offsetTop - Torus.ui.ids['sidebar'].scrollTop + 'px';}
 				break;
 			}
 		}
@@ -388,18 +389,18 @@ Torus.ui.renderPopup = function(name, room, coords) {
 }
 
 Torus.ui.unrenderPopup = function() {
-	Torus.ui.window.popup.style.top = '';
-	Torus.ui.window.popup.style.right = '';
-	Torus.ui.window.popup.style.left = '';
-	Torus.ui.window.popup.innerHTML = '';
-	Torus.ui.window.popup.style.display = 'none';
+	Torus.ui.ids['popup'].style.top = '';
+	Torus.ui.ids['popup'].style.right = '';
+	Torus.ui.ids['popup'].style.left = '';
+	Torus.ui.ids['popup'].innerHTML = '';
+	Torus.ui.ids['popup'].style.display = 'none';
 	Torus.ui.callListeners('unrenderPopup');
 }
 
 Torus.ui.ping = function(room) {
 	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
 	
-	if(Torus.options.pings.general.enabled && Torus.ui.window.window.parentNode && Torus.data.pinginterval == 0) {
+	if(Torus.options.pings.general.enabled && Torus.ui.window.parentNode && Torus.data.pinginterval == 0) {
 		Torus.data.titleflash = document.title;
 		document.title = Torus.options.pings.general.alert.value;
 		Torus.data.pinginterval = setInterval('if(document.title != Torus.options.pings.general.alert.value) {document.title = Torus.options.pings.general.alert.value;} else {document.title = Torus.data.titleflash;}', Torus.options.pings.general.interval.value);
