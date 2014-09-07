@@ -150,14 +150,12 @@ Torus.alert = function(text, room) {
 	if(text.indexOf('\n') != -1) {
 		var spl = text.split('\n');
 		for(var i = 0; i < spl.length; i++) {
-			event.rawtext = spl[i];
-			event.text = Torus.util.parse_links(spl[i]);
+			event.text = spl[i];
 			Torus.ui.add_line(event); //FIXME: ui
 		}
 	}
 	else {
-		event.rawtext = text;
-		event.text = Torus.util.parse_links(text);
+		event.text = text;
 		Torus.ui.add_line(event); //FIXME: ui
 	}
 }

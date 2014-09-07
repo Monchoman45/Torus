@@ -61,7 +61,10 @@ Torus.classes.Chat.prototype.connect = function(key, server, port, session, tran
 	if(!key || !server) {
 		var c = this; //FIXME: this forces a closure scope
 		Torus.io.spider(function(data) { //FIXME: shouldn't we close this room before throwing an error
-			if(!data) {throw new Error('Can\'t spider: wiki does not have chat. (Chat.connect)');}
+			if(!data) {
+				this.disconnect('Wiki does not have chat');
+				//throw new Error('Can\'t spider: wiki does not have chat. (Chat.connect)');
+			}
 
 			if(data.chatkey.key === false) {throw new Error('Not logged in');} //FIXME: this is dumb, do something better
 			if(!key) {key = data.chatkey;}
@@ -138,6 +141,8 @@ Torus.classes.Chat.prototype.remove_user = function(name) {
 }
 
 Torus.classes.Chat.prototype.send_message = function(message, hist) {
+	if(!this.connected) {throw new Error('Tried to send a message to room ' + this.room + ' before it finished connecting. (Chat.send_message)');}
+
 	message += '';
 	if((hist || hist == undefined) && Torus.data.history[1] != message) {
 		Torus.data.history[0] = message;
@@ -156,6 +161,8 @@ Torus.classes.Chat.prototype.send_message = function(message, hist) {
 }
 
 Torus.classes.Chat.prototype.send_command = function(command, args) {
+	if(!this.connected) {throw new Error('Tried to send a command to room ' + this.room + ' before it finished connecting. (Chat.send_command)');}
+
 	var message = {attrs: {msgType: 'command', command: command}};
 	for(var i in args) {message.attrs[i] = args[i];}
 
@@ -214,24 +221,6 @@ Torus.classes.Chat.prototype.open_private = function(users, callback, id) {
 		}
 	}
 }
-
-/*Torus.classes.Chat.prototype.session = function(key, server, port, callback) {
-	if(!key || !server || !port) {throw new Error('Bad call to Chat.session');}
-
-	var index = io.j.length;
-	var script = document.createElement('script');
-	
-	script.src = 'http://' + server + ':' + port + '/socket.io/?EIO=2&name=' + encodeURIComponent(wgUserName) + '&key=' + key + '&roomId=' + this.room + '&jsonp=' + index + '&client=Torus&version=' + Torus.version;
-	script.onload = function() {document.head.removeChild(this);}
-	document.head.appendChild(script);
-	Torus.io.polling++;
-	io.j.push(function(data) {
-		Torus.io.polling--;
-		if(Torus.io.polling == 0) {io.j = [];}
-		if(typeof data == 'string') {data = data.substring(0, data.indexOf(':'));} //otherwise it's an Error
-		if(typeof callback == 'function') {callback.call(Torus, data);}
-	});
-}*/
 
 Torus.classes.Chat.prototype.event_initial = function(data) {
 	var event = new Torus.classes.IOEvent('initial', this.room);

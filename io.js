@@ -5,11 +5,12 @@ Torus.io.ajax = function(method, post, callback) {
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', '/index.php?action=ajax&rs=ChatAjax&method=' + method + '&client=Torus&version=' + Torus.version, true);
 	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	xhr.responseType = 'json';
 	xhr.onreadystatechange = function() {
 		if(this.readyState == 4) {
 			this.onreadystatechange = null;
 			if(this.status == 200) {
-				if(typeof callback == 'function') {callback.call(Torus, this.responseText);}
+				if(typeof callback == 'function') {callback.call(Torus, this.response);}
 			}
 			else {throw new Error('Request returned response ' + this.status + '. (io.ajax)');}
 		}
@@ -19,13 +20,12 @@ Torus.io.ajax = function(method, post, callback) {
 
 Torus.io.getPrivateId = function(users, callback) {
 	Torus.io.ajax('getPrivateRoomId', {users: JSON.stringify(users)}, function(data) {
-		if(typeof callback == 'function') {callback.call(Torus, JSON.parse(data).id);}
+		if(typeof callback == 'function') {callback.call(Torus, data.id);}
 	});
 }
 
 Torus.io.getBlockedPrivate = function(callback) {
 	Torus.io.ajax('getListOfBlockedPrivate', {}, function(data) {
-		data = JSON.parse(data);
 		Torus.data.blockedBy = data.blockedByChatUsers;
 		Torus.data.blocked = data.blockedChatUsers;
 		if(typeof callback == 'function') {callback.call(Torus, data);}
@@ -35,7 +35,7 @@ Torus.io.getBlockedPrivate = function(callback) {
 Torus.io.block = function(user, callback) {
 	Torus.io.ajax('blockOrBanChat', {userToBan: user, dir: 'add'}, function(data) {
 		Torus.data.blocked.push(user);
-		if(typeof callback == 'function') {callback.call(Torus, JSON.parse(data));}
+		if(typeof callback == 'function') {callback.call(Torus, data);}
 	});
 }
 
@@ -44,17 +44,18 @@ Torus.io.unblock = function(user, callback) {
 		for(var i = 0; i < Torus.data.blocked.length; i++) {
 			if(Torus.data.blocked[i] == user) {Torus.data.blocked.splice(i, 1); break;}
 		}
-		if(typeof callback == 'function') {callback.call(Torus, JSON.parse(data));}
+		if(typeof callback == 'function') {callback.call(Torus, data);}
 	});
 }
 
 Torus.io.spider = function(callback) {
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET', '/wikia.php?controller=Chat&format=json&client=Torus&version=' + Torus.version, true);
+	xhr.responseType = 'json';
 	xhr.onreadystatechange = function() {
 		if(this.readyState == 4) {
 			if(this.status == 200) {
-				if(typeof callback == 'function') {callback.call(Torus, JSON.parse(this.responseText));}
+				if(typeof callback == 'function') {callback.call(Torus, this.response);}
 			}
 			else if(this.status == 404) { //wiki doesn't have chat
 				if(typeof callback == 'function') {callback.call(Torus, null);}

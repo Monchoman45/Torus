@@ -4,6 +4,8 @@ Torus.util = {
 
 Torus.util.xFF[0] = 255; //don't ask
 
+Torus.util.debug = function() {console.log.apply(console, arguments);}
+
 Torus.util.compare_strings = function(str1, str2) {
 	for(var i = 0; i < str1.length && i < str2.length; i++) {
 		if(str1.charAt(i) == str2.charAt(i)) {continue;}
@@ -47,7 +49,7 @@ Torus.util.parse_links = function (text, wiki) {
 	if(!isNaN(wiki * 1)) {wiki = '';}
  
 	var ref = 0;
-	while(text.indexOf('http', ref) != -1) {
+	while(text.indexOf('http', ref) != -1) { //search for plain links
 		if(text.charAt(text.indexOf('http', ref) - 1) != '[' && (text.indexOf('http://', ref) == text.indexOf('http', ref) || text.indexOf('https://', ref) == text.indexOf('http', ref))) {
 			var start = text.indexOf('http', ref);
 			var space = text.indexOf(' ', start);
@@ -66,72 +68,69 @@ Torus.util.parse_links = function (text, wiki) {
 		}
 		ref = text.indexOf('http', ref) + (link ? link.length - 9 : 1);
 	}
+
 	ref = 0;
-	while(text.indexOf('[[', ref) != -1) {
-		if(text.indexOf(']]', text.indexOf('[[', ref)) != -1) {
-			var open = text.indexOf('[[', ref);
-			var pipe = text.indexOf('|', open);
-			var close = text.indexOf(']]', open);
-			if(text.indexOf('\n', open) != -1 && text.indexOf('\n', open) < close) {ref = open + 1; continue;}
-			if(pipe != -1 && pipe < close) { //is [[page|display]]
-				if(pipe == close - 1) { //is [[page|page]], pipe trick
-					var title = text.substring(open + 2, pipe);
-					var display = title.substring(title.indexOf(':') + 1);
-				}
-				else {
-					var title = text.substring(open + 2, pipe);
-					var display = text.substring(pipe + 1, close);
-				}
+	while(text.indexOf('[[', ref) != -1) { //search for wikilinks
+		var open = text.indexOf('[[', ref);
+		var pipe = text.indexOf('|', open);
+		var close = text.indexOf(']]', open);
+
+		if(close == -1) {break;} //no closing ]] for this opening [[
+		if(text.indexOf('\n', open) != -1 && text.indexOf('\n', open) < close) {ref = open + 1; continue;} //there is a newline between the opening [[ and the closing ]], this link is bad
+
+		if(pipe != -1 && pipe < close) { //there is a pipe in the link
+			if(pipe == close - 1) { //is [[page|]], pipe trick
+				var title = text.substring(open + 2, pipe);
+				var display = title.substring(title.indexOf(':') + 1); //strip everything up to first :
+				if(display[display.length - 1] == ')' && display.lastIndexOf('(') != -1) {display = display.substring(0, display.lastIndexOf('('));} //strip trailing parens
 			}
-			else { //is [[page]]
-				var title = text.substring(open + 2, close);
-				var display = title;
+			else { //is [[page|display]]
+				var title = text.substring(open + 2, pipe);
+				var display = text.substring(pipe + 1, close);
 			}
-			if(!title) {ref = open + 1; continue;} //skip [[]] and [[|<anything>]]
- 
-			var page = title;
-			if(title.indexOf('w:c:') == 0) {
-				if(title.indexOf(':', 5) != -1) {var domain = title.substring(4, title.indexOf(':', 5));}
-				else {var domain = title.substring(4);}
-				if(page == 'w:c:' + domain) {page = '';}
-				else if(page == 'w:c:') {ref = open + 1; continue;}
-				else {
-					page = page.substring(page.indexOf(':', 4) + 1);
-					title = title.substring(0, title.indexOf(':', 4)) + ':' + page.charAt(0).toUpperCase() + page.substring(1);
-				}
-			}
-			else if(title.indexOf('w:') == 0) {
-				var domain = 'c';
-				if(page == 'w:') {page = '';}
-				else {
-					page = page.substring(page.indexOf(':', 2) + 1);
-					title = 'w:' + page.charAt(0).toUpperCase() + page.substring(1);
-				}
-			}
-			else if(title.indexOf('c:') == 0) {
-				if(title.indexOf(':', 3) != -1) {var domain = title.substring(2, title.indexOf(':', 3));}
-				else {var domain = title.substring(2);}
-				if(page == 'c:' + domain) {page = '';}
-				else if(page == 'c:') {ref = open + 1; continue;}
-				else {
-					page = page.substring(page.indexOf(':', 2) + 1);
-					title = title.substring(0, title.indexOf(':', 2)) + ':' + page.charAt(0).toUpperCase() + page.substring(1);
-				}
-			}
-			else if(wiki) {
-				var domain = wiki;
-				title = page.charAt(0).toUpperCase() + page.substring(1);
-			}
-			else {ref = open + 1; continue;} //no domain was specified and we don't know the local domain
-			if(pipe + 1 == close) {var link = '<a href="http://' + domain + '.wikia.com/wiki/' + encodeURIComponent(page.charAt(0).toUpperCase() + page.substring(1)).replace(/%3A/g, ':').replace(/%20/g, '_').replace(/%2F/g, '/') + '" title="' + title + '" onclick="Torus.ui.click_link.call(this, event);">' + display.substring(display.indexOf(':') + 1) + '</a>'} //pipe trick
-			else {var link = '<a href="http://' + domain + '.wikia.com/wiki/' + encodeURIComponent(page.charAt(0).toUpperCase() + page.substring(1)).replace(/%3A/g, ':').replace(/%20/g, '_').replace(/%2F/g, '/') + '" title="' + title + '" onclick="Torus.ui.click_link.call(this, event);">' + display + '</a>';}
-			text = text.substring(0, open) + link + text.substring(close + 2);
-			ref = open + link.length;
 		}
-		else {break;}
+		else { //is [[page]]
+			var title = text.substring(open + 2, close);
+			var display = title;
+		}
+		if(!title) {ref = open + 1; continue;} //skip [[]] and [[|anything]]
+
+		if(title.indexOf('c:') == 0) {title = 'w:' + title;} //c: on central is w:c: everywhere else
+		if(title.indexOf('w:c:') == 0) { //w:c:domain link
+			if(title == 'w:c:') {ref = open + 1; continue;} //this link goes nowhere
+
+			if(title.indexOf(':', 4) != -1) { //is [[w:c:domain:page]]
+				var domain = title.substring(4, title.indexOf(':', 4));
+				var page = Torus.util.normalize_pagename(title.substring(title.indexOf(':', 4) + 1));
+				title = title.substring(0, title.indexOf(':', 4)) + ':' + page;
+			}
+			else { //is [[w:c:domain]]
+				var domain = title.substring(4);
+				var page = '';
+			}
+		}
+		else if(title.indexOf('w:') == 0) { //w: central link
+			var domain = 'c';
+			if(title == 'w:') {var page = '';}
+			else {
+				var page = Torus.util.normalize_pagename(title.substring(2));
+				title = 'w:' + page;
+			}
+		}
+		else if(wiki) { //local link
+			var domain = wiki;
+			var page = Torus.util.normalize_pagename(title);
+			title = page;
+		}
+		else {ref = open + 1; continue;} //no domain was specified and we don't know the local domain
+
+		var link = '<a href="http://' + domain + '.wikia.com/wiki/' + encodeURIComponent(page).replace(/%3A/g, ':').replace(/%20/g, '_').replace(/%2F/g, '/') + '" title="' + title + '" onclick="Torus.ui.click_link.call(this, event);">' + display + '</a>';
+		text = text.substring(0, open) + link + text.substring(close + 2);
+		ref = open + link.length;
 	}
+
 	ref = 0;
-	while(text.indexOf('[http', ref) != -1) {
+	while(text.indexOf('[http', ref) != -1) { //search for external wikilinks
 		if(text.indexOf('[http://', ref) == text.indexOf('[http', ref) || text.indexOf('[https://', ref) == text.indexOf('[http', ref)) {
 			var start = text.indexOf('[http', ref);
 			var space = text.indexOf(' ', start);
@@ -145,6 +144,17 @@ Torus.util.parse_links = function (text, wiki) {
 		ref = start + link.length;
 	}
 	return text;
+}
+
+Torus.util.normalize_pagename = function(page) {
+	if(page.indexOf(':') != -1) { //Namespace:Title
+		var namespace = page.substring(0, page.indexOf(':'));
+		var title = page.substring(page.indexOf(':') + 1);
+		page = namespace.charAt(0).toUpperCase() + namespace.substring(1) + ':' + title.charAt(0).toUpperCase() + title.substring(1);
+	}
+	else {page = page.charAt(0).toUpperCase() + page.substring(1);} //Title (mainspace)
+	while(page.indexOf('_') != -1) {page = page.replace('_', ' ');}
+	return page;
 }
 
 Torus.util.text_index = function(text, find) { //indexOf, but ignore stuff like the href="" attribute of links
@@ -172,16 +182,22 @@ Torus.util.timestamp = function(time) {
 
 Torus.util.expiry_to_seconds = function(expiry) {
 	if(!expiry) {throw new Error('Not enough parameters. (util.expiry_to_seconds)');}
+	expiry = expiry.trim();
 	if(expiry == 'infinite' || expiry == 'indefinite') {return 60 * 60 * 24 * 365 * 1000;} //the server recognizes 1000 years as infinite
-	else if(expiry == 'unban' || expiry == 'undo') {return 0;}
-	else {
-		var quant = expiry.split(' ')[0];
-		var unit = expiry.split(' ')[1];
+	if(expiry == 'unban' || expiry == 'undo') {return 0;}
+
+	var split = expiry.split(',');
+	for(var i = 0; i < split.length; i++) {
+		var ex = split[i].trim();
+		var quant = ex.substring(0, ex.indexOf(' '));
+		var unit = ex.substring(ex.indexOf(' ') + 1);
+
 		if(quant == 'a' || quant == 'an') {quant = 1;}
 		else if(isNaN(quant * 1)) {return false;}
 		if(unit.charAt(unit.length - 1) == 's') {unit = unit.substring(0, unit.length - 1);}
+
 		switch(unit) {
-			case 'second': return quant;
+			case 'second': return quant * 1;
 			case 'minute': return quant * 60;
 			case 'hour': return quant * 60 * 60;
 			case 'day': return quant * 60 * 60 * 24;
@@ -194,35 +210,28 @@ Torus.util.expiry_to_seconds = function(expiry) {
 
 Torus.util.seconds_to_expiry = function(seconds) {
 	if(!seconds && seconds !== 0) {throw new Error('Not enough parameters. (util.seconds_to_expiry)');}
-	if(seconds == 60 * 60 * 24 * 365 * 1000) {return 'infinite';}
-	else if(seconds >= 60 * 60 * 24 * 365) { var quant = seconds / (60 * 60 * 24 * 365); //year
-		if(quant == 1) {return '1 year';} else {return quant + ' years';}
+	if(seconds == 60 * 60 * 24 * 365 * 1000 || seconds == Infinity) {return 'infinite';}
+
+	var time = [60 * 60 * 24 * 365 , 60 * 60 * 24 * 30 , 60 * 60 * 24 * 7 , 60 * 60 * 24 , 60 * 60 ,    60    ,     1   ];
+	var unit = [     'year'        ,      'month'      ,      'week'      ,    'day'     , 'hour'  , 'minute' , 'second'];
+
+	var str = '';
+	for(var i = 0; i < time.length; i++) { //long division is fun
+		var num = Math.floor(seconds / time[i]);
+		if(num > 0) {
+			if(num == 1) {str += '1 ' + unit[i] + ', ';}
+			else {str += num + ' ' + unit[i] + 's, ';}
+			seconds -= num * time[i];
+		}
 	}
-	else if(seconds >= 60 * 60 * 24 * 30) { var quant = seconds / (60 * 60 * 24 * 30); //month
-		if(quant == 1) {return '1 month';} else {return quant + ' months';}
-	}
-	else if(seconds >= 60 * 60 * 24 * 7) { var quant = seconds / (60 * 60 * 24 * 7); //week
-		if(quant == 1) {return '1 week';} else {return quant + ' weeks';}
-	}
-	else if(seconds >= 60 * 60 * 24) { var quant = seconds / (60 * 60 * 24); //day
-		if(quant == 1) {return '1 day';} else {return quant + ' days';}
-	}
-	else if(seconds >= 60 * 60) { var quant = seconds / (60 * 60); //hour
-		if(quant == 1) {return '1 hour';} else {return quant + ' hours';}
-	}
-	else if(seconds >= 60) { var quant = seconds / 60; //minute
-		if(quant == 1) {return '1 minute';} else {return quant + ' minutes';}
-	}
-	else if(seconds == 1) {return '1 second';} //second
-	else if(seconds == 0) {return 'unban';}
-	else {return seconds + ' seconds';}
+	return str.substring(0, str.length - 2);
 }
 
 Torus.util.int_to_stupid = function(num) { //i still cannot believe they thought this was a good idea
-	var b_stupid = '';
+	var b_stupid = ''; //build backwards
 	for(num; num != 0; num = Math.floor(num / 10)) {b_stupid += String.fromCharCode(num % 10);}
 	var stupid = '';
-	for(var i = b_stupid.length - 1; i >= 0; i--) {stupid += b_stupid.charAt(i);}
+	for(var i = b_stupid.length - 1; i >= 0; i--) {stupid += b_stupid.charAt(i);} //reverse
 	return stupid;
 }
 

@@ -805,7 +805,7 @@ Torus.ui.onload = function() {
 	Torus.ui.activate(0);
 	Torus.ui.show(0);
 
-	var domain = document.location.host.substring(0, document.location.host.indexOf('.wikia.com'));
+	var domain = window.location.hostname.substring(0, document.location.hostname.indexOf('.wikia.com'));
 	if(domain.indexOf('preview.') == 0) {domain = domain.substring(8);}
 	if(Torus.data.domains[domain]) {Torus.local = Torus.data.domains[domain];}
 	else {

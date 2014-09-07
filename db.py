@@ -14,6 +14,7 @@ wikis = [
 	'clubpenguin',
 	'community',
 	'elderscrolls',
+	'gta',
 	'mlp',
 	'monchbox',
 	'runescape',
