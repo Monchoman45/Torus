@@ -34,12 +34,12 @@ while len(dirs):
 		if file.endswith('.js') or file.endswith('.css'):
 			with open(dirname + file, 'r') as f: files['MediaWiki:Torus.js/' + dirname + file] = f.read()
 			print('\t' + dirname + file + ': ' + str(len(files['MediaWiki:Torus.js/' + dirname + file])))
-		elif file[0] != '.' and file != sys.argv[0]:
+		elif file[0] != '.' and not file.endswith('.py'):
 			dirs.append(os.listdir(dirname + file))
 			dirnames.append(dirname + file)
 
 print('Connecting...')
-sock = http.client.HTTPConnection(sys.argv[1], timeout=30)
+sock = http.client.HTTPConnection(sys.argv[1], timeout=300)
 
 print('Logging in as ' + sys.argv[2] + '...')
 user = quote(sys.argv[2])

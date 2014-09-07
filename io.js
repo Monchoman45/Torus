@@ -1,111 +1,13 @@
-Torus.io.sendMessage = function(room, message, hist) {
-	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
-	if(!Torus.chats[room] || room < 0) {throw new Error('Invalid room ' + room + '. (io.sendMessage)');}
-
-	message += '';
-	if(room == 0) {Torus.alert(message);}
-	else {
-		if((hist || hist == undefined) && Torus.data.history[1] != message) {
-			Torus.data.history[0] = message;
-			Torus.data.history.unshift('');
-		}
-		Torus.data.histindex = 0;
-
-		if(Torus.chats[room].parent) {Torus.io.sendCommand(Torus.chats[room].parent, 'openprivate', {roomId: room, users: Torus.chats[room].users});}
-
-		message = {attrs: {msgType: 'chat', 'text': message}};
-		Torus.chats[room].socket.send(JSON.stringify(message));
-	}
-}
-
-Torus.io.sendCommand = function(room, command, args) {
-	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
-	if(!Torus.chats[room] || room < 0) {throw new Error('Invalid room ' + room + '. (io.sendCommand)');}
-
-	var command = {attrs: {msgType: 'command', command: command}};
-	for(var i in args) {command.attrs[i] = args[i];}
-	Torus.chats[room].socket.send(JSON.stringify(command));
-}
-
-Torus.io.setStatus = function(room, state, message) {
-	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
-	if(!Torus.chats[room] || room <= 0) {throw new Error('Invalid room ' + room + '. (io.setStatus)');}
-
-	var user = Torus.chats[room].userlist[wgUserName];
-	if(!state) {state = user.statusState;}
-	if(!message) {message = user.statusMessage;}
-	user.oldState = user.statusState;
-	user.oldMessage = user.statusMessage;
-	Torus.io.sendCommand(room, 'setstatus', {statusState: state, statusMessage: message});
-}
-
-Torus.io.giveMod = function(room, user) {
-	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
-	if(!Torus.chats[room] || room <= 0) {throw new Error('Invalid room ' + room + '. (io.giveMod)');}
-
-	Torus.io.sendCommand(room, 'givechatmod', {userToPromote: user});
-}
-
-Torus.io.kick = function(room, user) {
-	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
-	if(!Torus.chats[room] || room <= 0) {throw new Error('Invalid room ' + room + '. (io.kick)');}
-
-	Torus.io.sendCommand(room, 'kick', {userToKick: user});
-}
-
-Torus.io.ban = function(room, user, expiry, reason) {
-	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
-	if(!Torus.chats[room] || room <= 0) {throw new Error('Invalid room ' + room + '. (io.ban)');}
-
-	if(!expiry) {expiry = 0;} //this is also an unban
-	else if(typeof expiry == 'string') {expiry = Torus.util.expiryToSeconds(expiry);}
-	if(!reason) {
-		if(expiry) {reason = 'Misbehaving in chat';} //is a ban
-		else {reason = 'undo';} //is an unban
-	}
-	Torus.io.sendCommand(room, 'ban', {userToBan: user, reason: reason, time: expiry});
-}
-
-Torus.io.openPrivate = function(room, users, callback, id) {
-	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
-	if(!Torus.chats[room] || room <= 0) {throw new Error('Invalid room ' + room + '. (io.openPrivate)');}	
-
-	var username = false;
-	for(var i in users) {
-		if(users[i] == wgUserName) {username = true; break;}
-	}
-	if(!username) {users.push(wgUserName);}
-
-	if(!id) {
-		Torus.io.getPrivateId(users, function(id) {
-			return Torus.io.openPrivate(room, users, callback, id);
-		});
-	}
-	else {
-		if(!Torus.chats[id]) {
-			Torus.open(id);
-			Torus.chats[id].parent = room;
-			Torus.chats[id].users = users;
-			if(typeof callback == 'function') {Torus.chats[id].addListener('open', callback);}
-		}
-		else {
-			Torus.ui.activate(id);
-			if(typeof callback == 'function') {callback.call(Torus.chats[id]);}
-		}
-	}
-}
-
 Torus.io.ajax = function(method, post, callback) {
 	var str = '';
-	for(var i in post) {
-		str += '&' + i + '=' + encodeURIComponent(post[i]);
-	}
+	for(var i in post) {str += '&' + i + '=' + encodeURIComponent(post[i]);}
 	str = str.substring(1);
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', '/index.php?action=ajax&rs=ChatAjax&method=' + method + '&client=Torus&version=' + Torus.version, true);
 	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	xhr.onreadystatechange = function() {
 		if(this.readyState == 4) {
+			this.onreadystatechange = null;
 			if(this.status == 200) {
 				if(typeof callback == 'function') {callback.call(Torus, this.responseText);}
 			}
@@ -157,264 +59,194 @@ Torus.io.spider = function(callback) {
 			else if(this.status == 404) { //wiki doesn't have chat
 				if(typeof callback == 'function') {callback.call(Torus, null);}
 			}
-			else {throw new Error('Request returned response ' + this.status + '. (io.spider)');}
+			else {throw new Error('io.spider request returned HTTP ' + this.status + '.');}
 		}
 	};
 	xhr.send();
 }
 
-Torus.io.session = function(room, key, server, port, callback) {
-	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
-	if(!Torus.chats[room] || room <= 0) {throw new Error('Invalid room ' + room + '. (io.session)');}
+Torus.io.session = function(transport, room, key, server, port, callback) {
+	if(!transport || !room || !key || !server || !port) {throw new Error('Bad call to io.session');}
 
-	if(key === false) {throw new Error('\'key\' is false. (io.session)');}
-	else if(!key || typeof key == 'function') { //key is callback
-		Torus.io.spider(function(data) {
-			if(!data) {throw new Error('Can\'t spider: wiki does not have chat. (io.session)');}
-
-			if(data.chatkey.key === false) {var realkey = false;}
-			else {var realkey = data.chatkey;}
-			Torus.io.session(room, realkey, data.nodeHostname, data.nodePort, key);
-		});
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', 'http://chat.wikia-services.com:' + port + '/socket.io/?EIO=2&transport=' + transport + '&name=' + encodeURIComponent(wgUserName) + '&key=' + key + '&roomId=' + room + '&serverId=' + server + '&client=Torus&version=' + Torus.version, true);
+	xhr.onreadystatechange = function() {
+		if(this.readyState == 4) {
+			this.onreadystatechange = null;
+			if(this.status == 200) {
+				if(typeof callback == 'function') {callback.call(Torus, JSON.parse(this.responseText.substring(5)).sid);}
+			}
+			else {throw new Error('Request returned response ' + this.status + '. (io.session)');}
+		}
 	}
-	else {
-		var index = io.j.length;
-		var script = document.createElement('script');
-		script.src = 'http://' + server + ':' + port + '/socket.io/1/?name=' + encodeURIComponent(wgUserName) + '&key=' + key + '&roomId=' + room + '&jsonp=' + index + '&client=Torus&version=' + Torus.version;
-		script.onload = function() {document.head.removeChild(this);}
-		document.head.appendChild(script);
-		Torus.io.polling++;
-		io.j.push(function(data) {
-			Torus.io.polling--;
-			if(Torus.io.polling == 0) {io.j = [];}
-			if(typeof data == 'string') {data = data.substring(0, data.indexOf(':'));} //otherwise it's an Error
-			if(typeof callback == 'function') {callback.call(Torus, data);}
-		});
-	}
+	xhr.send();
 }
 
-Torus.io.receive = function(room, message) {
-	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
-	if(!Torus.chats[room] || room <= 0) {throw new Error('Invalid room ' + room + '. (io.receive)');}
+Torus.io.transports.websocket = function(room, key, server, port, session) {
+	if(!(this instanceof Torus.io.transports.websocket)) {throw new Error('Must create transport with `new`.');}
+	if(!room || room <= 0 || !key || !server || !port || !session) {throw new Error('Invalid transport parameters. (io.transports.websocket)');}
 
-	data = JSON.parse(message.data);
+	this.ws = new WebSocket('ws://chat.wikia-services.com:' + port + '/socket.io/?EIO=2&transport=websocket&name=' + encodeURIComponent(wgUserName) + '&key=' + key + '&roomId=' + room + '&sid=' + session + '&serverId=' + server + '&client=Torus&version=' + Torus.version);
+	this.ws.onmessage = function(event) { //FIXME: closure scope
+		if(event.data.substring(0, 3) != '2::') {Torus.logs.socket[room].push({id: (new Date()).getTime(), message: event.data});}
+		switch(event.data.substring(0, 3)) {
+			case '0::': //disconnect
+				Torus.chats[room].disconnect('Server closed the connection');
+				break;
+			case '1::': //connect
+				if(!Torus.chats[room]) {throw new Error('Missing room on successful connect');}
+				Torus.chats[room].connecting = false;
+				Torus.chats[room].connected = true;
+				Torus.chats[room].send_command('initquery');
+				Torus.alert('Connected.', room);
+				Torus.io.getBlockedPrivate();
+				Torus.call_listeners(new Torus.classes.IOEvent('open', room));
+				break;
+			case '2::': //heartbeat
+				this.send('2::');
+				break;
+			case '4::': //json
+				Torus.chats[room].receive(JSON.parse(event.data.substring(4)));
+				break;
+			case '7::': //error
+				if(event.data.substring(4) == '1+0') {Torus.chats[room].reconnect();}
+				else {Torus.chats[room].disconnect('Protocol error: ' + event.data.substring(4));}
+				break;
+			case '3::': //message
+			case '5::': //event
+			case '6::': //ack
+			case '8::': //noop
+				Torus.chats[room].disconnect('Protocol error: Received unimplemented data type ' + event.data);
+				break;
+		}
+	}
+	this.ws.onerror = this.ws.onclose = function(event) {
+		if(!Torus.chats[room].connected) {
+			//Torus.alert('Websocket rejected, failing over to HTTP...', room);
+			Torus.chats[room].transport = 'polling';
+			Torus.chats[room].connecting = false;
+			Torus.open(room); //FIXME: Torus.open
+		}
+		else if(event.reason) {Torus.chats[room].disconnect(event.reason);}
+		else {Torus.chats[room].disconnect('Socket error (websocket)');}
+	}
+}
+Torus.io.transports.websocket.prototype.send = function(message) {this.ws.send('3:::' + message);}
+Torus.io.transports.websocket.prototype.close = function(silence) {
+	if(silence) {this.ws.onclose = null;}
+	this.ws.close();
+}
 
-	var event = {
-		event: message.event,
-		type: 'io',
-		id: (new Date()).getTime(),
-		room: room,
-		time: (new Date()).getTime()
+Torus.io.transports.polling = function(room, key, server, port, session) {
+	if(!(this instanceof Torus.io.transports.polling)) {throw new Error('Must create transport with `new`.');}
+	if(!room || room <= 0 || !key || !server || !port || !session) {throw new Error('Invalid transport parameters. (io.transports.polling)');}
+
+	this.xhr = null;
+	this.url = 'http://chat.wikia-services.com:' + port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + key + '&roomId=' + room + '&sid=' + session + '&serverId=' + server + '&client=Torus&version=' + Torus.version;
+	this.poll = function() {
+		this.xhr = new XMLHttpRequest();
+		this.xhr.open('GET', this.url, true);
+		this.xhr.socket = this;
+		this.xhr.onreadystatechange = function() {
+			if(this.readyState == 4) {
+				this.onreadystatechange = null;
+				if(this.socket.xhr != this) {console.log('xhr returned and found itself orphaned:', this.socket);}
+			if(this.status == 200) {
+				//As far as I know all messages begin with a null byte (to tell socket.io that they are strings)
+				//after this is the length, encoded in the single most ridiculously stupid format ever created
+				//the decimal representation of the length is encoded in binary, terminated by \ufffd: for example,
+				//if the message length is 30 bytes, then the length is encoded as \x03\x00\ufffd
+				//yes that's right, rather than use the actual number, they decided to take the same amount of space
+				//to write the number in a format that provides no advantages and is literally always harder to parse
+				//following the asinine length is the number 4 (which means message)
+				//following that is the message type, and then immediately thereafter is the actual message content
+				//I swear to god they must have been high when they designed this
+
+				for(var ufffd = this.responseText.indexOf('\ufffd'); ufffd != -1; ufffd = this.responseText.indexOf('\ufffd', ufffd + 1)) {
+					var text = this.responseText.substring(ufffd + 1, ufffd + 1 + Torus.util.stupid_to_int(this.responseText.slice(1, ufffd)));
+					var packet_type = this.responseText.charAt(ufffd + 1) * 1;
+
+					switch(packet_type) {
+						case 0: //connect
+							//sid
+							break;
+						case 1: //disconnect
+							Torus.chats[room].disconnect('Server closed the connection');
+							break;
+						case 2: //ping
+							this.socket.ping();
+							break;
+						case 4: //message
+							var message_type = this.responseText.charAt(ufffd + 2) * 1;
+							Torus.logs.socket[room].push({id: (new Date()).getTime(), type: message_type, message: text});
+							switch(message_type) { //yep, there are two of these
+								case 0: //connect
+									if(!Torus.chats[room]) {throw new Error('Missing room on successful connect');}
+									Torus.chats[room].connecting = false;
+									Torus.chats[room].connected = true;
+									Torus.chats[room].send_command('initquery');
+									Torus.alert('Connected.', room);
+									Torus.io.getBlockedPrivate();
+									Torus.call_listeners(new Torus.classes.ChatEvent('open', room));
+									break;
+								case 1: //disconnect
+									Torus.chats[room].disconnect('Server closed the connection');
+									return;
+								case 2: //event
+									Torus.chats[room].receive(JSON.parse(text.substring(2))[1]);
+									break;
+								case 4: //error
+									Torus.chats[room].disconnect('Protocol error: ' + text);
+									return;
+								case 3: //ack
+								case 5: //binary event
+								case 6: //binary ack
+									Torus.chats[room].disconnect('Protocol error: Received unimplemented data type ' + text);
+									break;
+							}
+							break;
+						case 3: //pong
+						case 6: //noop
+							break;
+						case 5: //upgrade
+						default:
+							Torus.chats[room].disconnect('Protocol error: Received unimplemented data type ' + text);
+							break;
+					}
+				}
+				this.socket.poll();
+			} //status == 200
+			else if(this.status == 404) {this.socket.poll();} //this apparently happens a lot
+			else if(this.status != 0) {Torus.chats[room].disconnect('Socket error (polling): HTTP status ' + this.status);}
+			else if(Torus.chats[room] && this.onabort) {Torus.chats[room].reconnect();} //not aborted, just died
+			} //readyState == 4
+		}
+		this.xhr.onabort = function(event) {
+			console.log(event);
+			Torus.chats[room].disconnect('aborted');
+		}
+		this.xhr.send();
 	};
-	switch(message.event) {
-		case 'initial':
-			event.users = [];
-			for(var i = 0; i < data.collections.users.models.length; i++) {
-				var attrs = data.collections.users.models[i].attrs;
-				var props = {
-					avatar: attrs.avatarSrc.replace('28px', '100px'), //enlarge the avatar
-					mod: attrs.isModerator,
-					staff: attrs.isStaff,
-					givemod: attrs.isCanGiveChatMod,
-					statusState: attrs.statusState,
-					statusMessage: attrs.statusMessage,
-					edits: attrs.editCount
-				};
-				Torus.ui.updateUser(room, attrs.name, props);
-				event.users.push({
-					event: 'updateUser',
-					type: 'io',
-					id: (new Date()).getTime(),
-					room: room,
-					time: (new Date()).getTime(),
-					user: attrs.name,
-					props: props
-				});
-			}
-			event.messages = [];
-			for(var i = 0; i < data.collections.chats.models.length; i++) {
-				var attrs = data.collections.chats.models[i].attrs;
-				var e = {
-					type: 'io',
-					id: attrs.timeStamp,
-					room: room,
-					time: attrs.timeStamp,
-					user: attrs.name
-				};
-				if(attrs.text.indexOf('* ' + attrs.name) == 0) {
-					e.event = 'me';
-					e.rawtext = e.text = attrs.text.substring(attrs.name.length + 3);
-				}
-				else if(attrs.text.indexOf('/me') == 0) {
-					event.event = 'me';
-					event.rawtext = event.text = data.attrs.text.substring(4);
-				}
-				else {
-					e.event = 'message';
-					e.rawtext = e.text = attrs.text;
-				}
-				while(e.text.indexOf('<') != -1) {e.text = e.text.replace('<', '&lt;');}
-				while(e.text.indexOf('>') != -1) {e.text = e.text.replace('>', '&gt;');}
-				e.text = Torus.util.parseLinks(e.text, (Torus.chats[room].parent ? Torus.chats[room].parent : room));
-				event.messages.push(e);
-				var log = Torus.logs.messages[room];
-				if(log.length == 0) {log.push(e);}
-				else {
-					var added = false;
-					for(var j = log.length - 1; j >= 0; j--) {
-						if(e.id > log[j].id) {
-							log.splice(j + 1, 0, e);
-							added = true;
-							break;
-						}
-						else if(e.id == log[j].id) {
-							log[j] = e;
-							added = true;
-							break;
-						}
-					}
-					if(!added) {log.unshift(e);}
-				}
-			}
-			Torus.ui.render();
-
-			if(Torus.chats[room].parent) {
-				event.parent = Torus.chats[room].parent;
-				Torus.ui.ping(Torus.chats[room].parent);
-			}
-			//Torus.chats[room].awayTimeout = setTimeout('Torus.io.setStatus(' + Torus.ui.active + ', \'away\', \'\'); Torus.chats[' + Torus.ui.active + '].autoAway = true;', 5 * 60 * 1000);
-			break;
-		case 'chat:add':
-			if(!data.attrs.isInlineAlert) {
-				if(data.attrs.text.indexOf('* ' + data.attrs.name) == 0) {
-					event.event = 'me';
-					event.rawtext = event.text = data.attrs.text.substring(data.attrs.name.length + 3);
-				}
-				else if(data.attrs.text.indexOf('/me') == 0) {
-					event.event = 'me';
-					event.rawtext = event.text = data.attrs.text.substring(4);
-				}
-				else {
-					event.event = 'message';
-					event.rawtext = event.text = data.attrs.text;
-				}
-				event.user = data.attrs.name;
-				event.id = data.attrs.timeStamp;
-				event.time = data.attrs.timeStamp;
-
-				while(event.text.indexOf('<') != -1) {event.text = event.text.replace('<', '&lt;');}
-				while(event.text.indexOf('>') != -1) {event.text = event.text.replace('>', '&gt;');}
-				event.text = Torus.util.parseLinks(event.text, (Torus.chats[room].parent ? Torus.chats[room].parent : room));
-				while(event.text.indexOf('\n') != -1) {event.text = event.text.replace('\n', '<br />');}
-				if(data.attrs.name != wgUserName) {
-					var pings = (Torus.options.pings.global.case_sensitive.value + '\n' + Torus.options.pings[(Torus.data.ids[room] ? Torus.data.ids[room] : room)].case_sensitive.value).split('\n');
-					for(var i = 0; i < pings.length; i++) {
-						var ping = pings[i];
-						if(!ping) {continue;}
-						while(ping.indexOf('<') != -1) {ping = ping.replace('<', '&lt;');} //this is a horrible solution
-						while(ping.indexOf('>') != -1) {ping = ping.replace('>', '&gt;');}
-						var index = Torus.util.textIndex(event.text, pings[i]);
-						if(index != -1) {
-							Torus.ui.ping(room);
-							event.text = event.text.substring(0, index) + '<span class="torus-message-ping">' + event.text.substring(index, index + ping.length) + '</span>' + event.text.substring(index + ping.length);
-							break;
-						}
-					}
-					pings = (Torus.options.pings.global.case_insensitive.value + '\n' + Torus.options.pings[(Torus.data.ids[room] ? Torus.data.ids[room] : room)].case_insensitive.value).toLowerCase().split('\n');
-					for(var i = 0; i < pings.length; i++) {
-						var ping = pings[i];
-						if(!ping) {continue;}
-						while(ping.indexOf('<') != -1) {ping = ping.replace('<', '&lt;');} //this is a horrible solution
-						while(ping.indexOf('>') != -1) {ping = ping.replace('>', '&gt;');}
-						var index = Torus.util.textIndex(event.text.toLowerCase(), pings[i]);
-						if(index != -1) {
-							Torus.ui.ping(room);
-							event.text = event.text.substring(0, index) + '<span class="torus-message-ping">' + event.text.substring(index, index + ping.length) + '</span>' + event.text.substring(index + ping.length);
-							break;
-						}
-					}
-				}
-			}
-			else if(data.attrs.wfMsg) {
-				switch(data.attrs.wfMsg) {
-					case 'chat-inlinealert-a-made-b-chatmod':
-						event.event = 'mod';
-						event.performer = data.attrs.msgParams[0];
-						event.target = data.attrs.msgParams[1];
-						break;
-					case 'chat-err-connected-from-another-browser':
-						//todo: make this its own event
-						event.event = 'alert';
-						event.rawtext = event.text = 'You are connected to ' + (Torus.data.ids[room] ? Torus.data.ids[room] : room) + ' from another window.';
-						break;
-					default:
-						console.log(event);
-						break;
-				}
-			}
-			else {
-				event.event = 'alert';
-				event.rawtext = data.attrs.text;
-				event.text = Torus.util.parseLinks(data.attrs.text, (Torus.chats[room].parent ? Torus.chats[room].parent : room));
-			}
-			Torus.ui.addLine(event);
-
-			if(Torus.chats[room].parent && data.attrs.name != wgUserName) {Torus.ui.ping(room);}
-			break;
-		case 'join':
-			if(Torus.chats[room].userlist[data.attrs.name]) {event.event = 'rejoin';}
-		case 'updateUser':
-			event.user = data.attrs.name;
-			event.data = {
-				avatar: data.attrs.avatarSrc.replace('28px', '100px'),
-				mod: data.attrs.isModerator,
-				staff: data.attrs.isStaff,
-				givemod: data.attrs.isCanGiveChatMod,
-				statusState: data.attrs.statusState,
-				statusMessage: data.attrs.statusMessage,
-				edits: data.attrs.editCount
-			};
-			Torus.ui.updateUser(room, data.attrs.name, event.data);
-			if(event.event == 'join') {Torus.ui.addLine(event);}
-			break;
-		case 'part':
-		case 'logout':
-			event.user = data.attrs.name;
-			if(Torus.chats[room].userlist[event.user]) {Torus.ui.removeUser(room, event.user);}
-			else {event.event = 'ghost';} //ghost part (or logout)
-			Torus.ui.addLine(event);
-			break;
-		case 'ban':
-			if(data.attrs.time == 0) {event.event = 'unban';}
-			else {
-				event.seconds = data.attrs.time;
-				event.expiry = Torus.util.secondsToExpiry(data.attrs.time);
-			}
-		case 'kick':
-			event.target = data.attrs.kickedUserName;
-			event.performer = data.attrs.moderatorName;
-			Torus.ui.addLine(event);
-			break;
-		case 'openPrivateRoom':
-			if(!Torus.chats[data.attrs.roomId]) {
-				Torus.open(data.attrs.roomId);
-				Torus.chats[data.attrs.roomId].parent = room;
-				Torus.chats[data.attrs.roomId].users = data.attrs.users;
-			}
-			event.private = data.attrs.roomId;
-			event.users = data.attrs.users;
-			break;
-		case 'forceReconnect':
-			Torus.reopen(room);
-			break;
-		case 'disableReconnect': //this would be more accurately described as force disconnect
-			Torus.chats[room].callListeners('disableReconnect', event);
-			Torus.io.callListeners('disableReconnect', event);
-			Torus.close(room, 'Server closed the connection');
-			return;
-		default: console.log(event); break;
-	}
-
-	Torus.chats[room].callListeners(event.event, event);
-	Torus.io.callListeners(event.event, event);
+	var sock = this; //FIXME: this forces a closure scope
+	this.ping_interval = setInterval(function() {sock.ping();}, 20000);
+	this.poll();
 }
+Torus.io.transports.polling.prototype.send = function(message) {
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', this.url, true);
+	xhr.setRequestHeader('Content-Type', 'application/octet-stream'); //socket.io is literally the worst
+	var data = '42["message",' + JSON.stringify(message) + ']';
+	xhr.send(new Blob(['\0', Torus.util.int_to_stupid(data.length), Torus.util.xFF, data])); //no actually though
+}
+Torus.io.transports.polling.prototype.ping = function() {
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', this.url, true);
+	xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+	xhr.send(new Blob(['\0', Torus.util.int_to_stupid(1), Torus.util.xFF, '2']));
+}
+Torus.io.transports.polling.prototype.close = function(silence) {
+	clearInterval(this.ping_interval);
+	if(silence) {this.xhr.onabort = null;}
+	this.xhr.abort();
+}
+

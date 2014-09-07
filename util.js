@@ -1,5 +1,19 @@
-Torus.util.colorHash = function(str) {
-	if(str == undefined) {throw new Error('Not enough parameters. (util.colorHash)');}
+Torus.util = {
+	xFF: new Uint8Array(1),
+}
+
+Torus.util.xFF[0] = 255; //don't ask
+
+Torus.util.compare_strings = function(str1, str2) {
+	for(var i = 0; i < str1.length && i < str2.length; i++) {
+		if(str1.charAt(i) == str2.charAt(i)) {continue;}
+		else {return str1.charCodeAt(i) - str2.charCodeAt(i);}
+	}
+	return str1.length - str2.length;
+}
+
+Torus.util.color_hash = function(str) {
+	if(str === undefined) {throw new Error('Not enough parameters. (util.colorHash)');}
 	str += ''; //cast to string
 	var hue = 0;
 	var val = Torus.options.misc.user_colors.val.value;
@@ -7,8 +21,9 @@ Torus.util.colorHash = function(str) {
 	for(var i = 0; i < str.length; i++) {
 		hue = 31 * hue + str.charCodeAt(i); //same hash algorithm as webchat, except this is case sensitive
 	}
-	hue = (hue % 360 + Torus.options.misc.user_colors.hue.value) % 360;
+	hue = (hue + Torus.options.misc.user_colors.hue.value) % 360;
 
+	//1 letter variables are fun don't you love mathematicians
 	var c = val * sat;
 	var m = val - c;
 	var C = Math.floor((c + m) * 255).toString(16);
@@ -27,9 +42,9 @@ Torus.util.colorHash = function(str) {
 	}
 }
 
-Torus.util.parseLinks = function (text, wiki) {
-	if(!text) {throw new Error('Not enough parameters. (util.parseLinks)');}
-	if(wiki && !isNaN(wiki * 1)) {wiki = Torus.data.ids[wiki];}
+Torus.util.parse_links = function (text, wiki) {
+	if(!text) {throw new Error('Not enough parameters. (util.parse_links)');}
+	if(!isNaN(wiki * 1)) {wiki = '';}
  
 	var ref = 0;
 	while(text.indexOf('http', ref) != -1) {
@@ -46,7 +61,7 @@ Torus.util.parseLinks = function (text, wiki) {
 			else {var end = text.length;}
 			var url = text.substring(start, end);
 			while(url.charAt(url.length - 1) == '.' || url.charAt(url.length - 1) == ',' || url.charAt(url.length - 1) == '!' || url.charAt(url.length - 1) == '?') {url = url.substring(0, url.length - 1); end--;}
-			var link = '<a href="' + url + '" onclick="event.preventDefault(); window.open(this.href, \'torus\');">' + url + '</a>';
+			var link = '<a href="' + url + '" onclick="Torus.ui.click_link.call(this, event);">' + url + '</a>';
 			text = text.substring(0, start) + link + text.substring(end);
 		}
 		ref = text.indexOf('http', ref) + (link ? link.length - 9 : 1);
@@ -108,8 +123,8 @@ Torus.util.parseLinks = function (text, wiki) {
 				title = page.charAt(0).toUpperCase() + page.substring(1);
 			}
 			else {ref = open + 1; continue;} //no domain was specified and we don't know the local domain
-			if(pipe + 1 == close) {var link = '<a href="http://' + domain + '.wikia.com/wiki/' + encodeURIComponent(page.charAt(0).toUpperCase() + page.substring(1)).replace(/%3A/g, ':').replace(/%20/g, '_').replace(/%2F/g, '/') + '" title="' + title + '" onclick="event.preventDefault(); window.open(this.href, \'torus\');">' + display.substring(display.indexOf(':') + 1) + '</a>'} //pipe trick
-			else {var link = '<a href="http://' + domain + '.wikia.com/wiki/' + encodeURIComponent(page.charAt(0).toUpperCase() + page.substring(1)).replace(/%3A/g, ':').replace(/%20/g, '_').replace(/%2F/g, '/') + '" title="' + title + '" onclick="event.preventDefault(); window.open(this.href, \'torus\');">' + display + '</a>';}
+			if(pipe + 1 == close) {var link = '<a href="http://' + domain + '.wikia.com/wiki/' + encodeURIComponent(page.charAt(0).toUpperCase() + page.substring(1)).replace(/%3A/g, ':').replace(/%20/g, '_').replace(/%2F/g, '/') + '" title="' + title + '" onclick="Torus.ui.click_link.call(this, event);">' + display.substring(display.indexOf(':') + 1) + '</a>'} //pipe trick
+			else {var link = '<a href="http://' + domain + '.wikia.com/wiki/' + encodeURIComponent(page.charAt(0).toUpperCase() + page.substring(1)).replace(/%3A/g, ':').replace(/%20/g, '_').replace(/%2F/g, '/') + '" title="' + title + '" onclick="Torus.ui.click_link.call(this, event);">' + display + '</a>';}
 			text = text.substring(0, open) + link + text.substring(close + 2);
 			ref = open + link.length;
 		}
@@ -124,7 +139,7 @@ Torus.util.parseLinks = function (text, wiki) {
 			if(end == -1) {break;}
 			if(space + 1 >= text.indexOf(']', start) || (text.indexOf('\n', start) != -1 && text.indexOf('\n', start) < end)) {ref = text.indexOf('[http', ref) + 1; continue;}
 			var url = text.substring(start + 1, space);
-			var link = '<a href="' + encodeURIComponent(url).replace(/%3A/g, ':').replace(/%20/g, '_').replace(/%2F/g, '/') + '" onclick="event.preventDefault(); window.open(this.href, \'torus\');">' + text.substring(space + 1, end) + '</a>';
+			var link = '<a href="' + encodeURIComponent(url).replace(/%3A/g, ':').replace(/%20/g, '_').replace(/%2F/g, '/') + '" onclick="Torus.ui.click_link.call(this, event);">' + text.substring(space + 1, end) + '</a>';
 			text = text.substring(0, start) + link + text.substring(end + 1);
 		}
 		ref = start + link.length;
@@ -132,7 +147,7 @@ Torus.util.parseLinks = function (text, wiki) {
 	return text;
 }
 
-Torus.util.textIndex = function(text, find) { //indexOf, but ignore stuff like the href="" attribute of links
+Torus.util.text_index = function(text, find) { //indexOf, but ignore stuff like the href="" attribute of links
 	var ref = 0;
 	var index = 0;
 	while((index = text.indexOf(find, ref)) != -1) {
@@ -155,8 +170,8 @@ Torus.util.timestamp = function(time) {
 	return hours + ':' + minutes + ':' + seconds;
 }
 
-Torus.util.expiryToSeconds = function(expiry) {
-	if(!expiry) {throw new Error('Not enough parameters. (util.expiryToSeconds)');}
+Torus.util.expiry_to_seconds = function(expiry) {
+	if(!expiry) {throw new Error('Not enough parameters. (util.expiry_to_seconds)');}
 	if(expiry == 'infinite' || expiry == 'indefinite') {return 60 * 60 * 24 * 365 * 1000;} //the server recognizes 1000 years as infinite
 	else if(expiry == 'unban' || expiry == 'undo') {return 0;}
 	else {
@@ -177,8 +192,8 @@ Torus.util.expiryToSeconds = function(expiry) {
 	}
 }
 
-Torus.util.secondsToExpiry = function(seconds) {
-	if(!seconds && seconds !== 0) {throw new Error('Not enough parameters. (util.secondsToExpiry)');}
+Torus.util.seconds_to_expiry = function(seconds) {
+	if(!seconds && seconds !== 0) {throw new Error('Not enough parameters. (util.seconds_to_expiry)');}
 	if(seconds == 60 * 60 * 24 * 365 * 1000) {return 'infinite';}
 	else if(seconds >= 60 * 60 * 24 * 365) { var quant = seconds / (60 * 60 * 24 * 365); //year
 		if(quant == 1) {return '1 year';} else {return quant + ' years';}
@@ -201,4 +216,18 @@ Torus.util.secondsToExpiry = function(seconds) {
 	else if(seconds == 1) {return '1 second';} //second
 	else if(seconds == 0) {return 'unban';}
 	else {return seconds + ' seconds';}
+}
+
+Torus.util.int_to_stupid = function(num) { //i still cannot believe they thought this was a good idea
+	var b_stupid = '';
+	for(num; num != 0; num = Math.floor(num / 10)) {b_stupid += String.fromCharCode(num % 10);}
+	var stupid = '';
+	for(var i = b_stupid.length - 1; i >= 0; i--) {stupid += b_stupid.charAt(i);}
+	return stupid;
+}
+
+Torus.util.stupid_to_int = function(stupid) {
+	var num = 0;
+	for(var i = 0; i < stupid.length; i++) {num += stupid.charCodeAt(stupid.length - i - 1) * Math.pow(10, i);}
+	return num;
 }

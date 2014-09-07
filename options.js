@@ -1,78 +1,85 @@
-Torus.options = {
-	version: 1,
-	selected: 'pings',
-	pings: {
-		general: {
-			enabled: true,
-			alert: {
-				type: 'string',
-				value: 'Activity!'
-			},
-			interval: {
-				type: 'number',
-				value: 500
-			},
-			beep: {
-				type: 'boolean',
-				value: true
-			},
-			sound: {
-				type: 'string',
-				value: 'http://images.wikia.com/monchbox/images/0/01/Beep-sound.ogg'
-			}
+Torus.options = new Torus.classes.Chat(-1, 'options');
+//FIXME: global variable
+var img = document.createElement('img');
+img.src = 'http://images2.wikia.nocookie.net/__cb20110812214252/monchbox/images/a/a1/Gear_icon.png';
+img.width = '18';
+Torus.ui.ids['tab--1'].insertBefore(document.createTextNode(String.fromCharCode(160)), Torus.ui.ids['tab--1'].firstChild); //&nbsp;
+Torus.ui.ids['tab--1'].insertBefore(img, Torus.ui.ids['tab--1'].firstChild);
+
+Torus.options = Torus.chats[-1];
+Torus.options.version = 1;
+Torus.options.selected = 'pings';
+Torus.options.pings = {
+	general: {
+		enabled: true,
+		alert: {
+			type: 'string',
+			value: 'Activity!'
 		},
-		global: {
-			case_sensitive: {
-				type: 'text',
-				value: ''
-			},
-			case_insensitive: {
-				type: 'text',
-				value: wgUserName
-			}
+		interval: {
+			type: 'number',
+			value: 500
+		},
+		beep: {
+			type: 'boolean',
+			value: true
+		},
+		sound: {
+			type: 'string',
+			value: 'http://images.wikia.com/monchbox/images/0/01/Beep-sound.ogg'
 		}
 	},
-	messages: {
-		general: {
-			max: {
-				type: 'number',
-				value: 200
-			},
-			rejoins: {
-				type: 'boolean',
-				value: false
-			},
-			timezone: {
-				type: 'number',
-				value: 0
-			}
+	global: {
+		case_sensitive: {
+			type: 'text',
+			value: ''
+		},
+		case_insensitive: {
+			type: 'text',
+			value: wgUserName
+		}
+	}
+};
+Torus.options.messages = {
+	general: {
+		max: {
+			type: 'number',
+			value: 200
+		},
+		rejoins: {
+			type: 'boolean',
+			value: false
+		},
+		timezone: {
+			type: 'number',
+			value: 0
+		}
+	}
+};
+Torus.options.misc = {
+	connection: {
+		default_rooms: {
+			type: 'text',
+			value: ''
+		},
+		local: {
+			type: 'boolean',
+			value: true
 		}
 	},
-	misc: {
-		connection: {
-			default_rooms: {
-				type: 'text',
-				value: ''
-			},
-			local: {
-				type: 'boolean',
-				value: true
-			}
+	user_colors: {
+		enabled: true,
+		hue: {
+			type: 'number',
+			value: 0
 		},
-		user_colors: {
-			enabled: true,
-			hue: {
-				type: 'number',
-				value: 0
-			},
-			sat: {
-				type: 'number',
-				value: .7
-			},
-			val: {
-				type: 'number',
-				value: .6
-			}
+		sat: {
+			type: 'number',
+			value: .7
+		},
+		val: {
+			type: 'number',
+			value: .6
 		}
 	}
 };
@@ -81,7 +88,7 @@ Torus.options.render = function(group) {
 	var sidebar = '';
 	var html = '';
 	for(var i in Torus.options) {
-		if(typeof Torus.options[i] != 'object') {continue;}
+		if(typeof Torus.options[i] != 'object' || i == 'listeners') {continue;}
 
 		sidebar += '<li class="torus-option-group' + (i == group ? ' torus-option-group-selected' : '') + '" onclick="Torus.options.render(\'' + i.toLowerCase() + '\');">' + i.charAt(0).toUpperCase() + i.substring(1) + '</li>';
 		if(i != group) {continue;}
@@ -118,7 +125,7 @@ Torus.options.render = function(group) {
 			html += '</fieldset>';
 		}
 	}
-	Torus.ui.window.window.innerHTML = '<ul id="torus-options-groups">' + sidebar + '</ul><div id="torus-options-window">' + html + '</div>';
+	Torus.ui.ids['window'].innerHTML = '<ul id="torus-options-groups">' + sidebar + '</ul><div id="torus-options-window">' + html + '</div>';
 	if(!group) {Torus.options.save();}
 	else {Torus.options.selected = group;}
 	//Torus.callListeners('options_render', group);
@@ -177,3 +184,9 @@ Torus.options.load = function() {
 		}
 	}
 }
+
+Torus.add_listener('window', 'load', Torus.options.load);
+Torus.add_listener('window', 'unload', Torus.options.save);
+
+Torus.options.add_listener('ui', 'activate', function() {Torus.options.render(Torus.options.selected);});
+Torus.options.add_listener('ui', 'deactivate', Torus.options.save);

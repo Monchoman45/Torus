@@ -9,20 +9,20 @@ Torus.commands = {
 
 			if(room <= 0) {
 				for(var i in Torus.chats) {
-					Torus.close(i);
+					Torus.close(i); //FIXME: Torus.close
 				}
 				return true;
 			}
-			else {Torus.open(room);}
+			else {Torus.open(room);} //FIXME: Torus.open
 		}
 	},
 	part: {
 		help: 'Leave a room. If no room is specified, the current room is left.',
 		func: function(room) {
-			if(!room) {Torus.close(Torus.ui.active, 'closed');}
+			if(!room) {Torus.close(Torus.ui.active, 'closed');} //FIXME: Torus.close
 			else {
 				if(isNaN(room * 1) && !Torus.chats[Torus.data.domains[room]]) {return 'Invalid room ' + room + '.';}
-				else {Torus.close(room, 'closed');}
+				else {Torus.close(room, 'closed');} //FIXME: Torus.close
 			}
 		}
 	},
@@ -37,7 +37,7 @@ Torus.commands = {
 			var user = '';
 			for(var i = 0; i < arguments.length; i++) {user += ' ' + arguments[i];}
 			user = user.substring(1);
-			Torus.io.kick(Torus.ui.active, user);
+			Torus.chats[Torus.ui.active].kick(user);
 		}
 	},
 	ban: {
@@ -46,7 +46,7 @@ Torus.commands = {
 			var user = '';
 			for(var i = 1; i < arguments.length; i++) {user += ' ' + arguments[i];}
 			user = user.substring(1);
-			Torus.io.ban(Torus.ui.active, user, expiry, 'Misbehaving in chat');
+			Torus.chats[Torus.ui.active].ban(user, expiry * 1, 'Misbehaving in chat');
 		}
 	},
 	unban: {
@@ -55,7 +55,7 @@ Torus.commands = {
 			var user = '';
 			for(var i = 0; i < arguments.length; i++) {user += ' ' + arguments[i];}
 			user = user.substring(1);
-			Torus.io.ban(Torus.ui.active, user, 0, 'undo');
+			Torus.chats[Torus.ui.active].ban(user, 0, 'undo');
 		}
 	},
 	mod: '/givemod',
@@ -65,7 +65,7 @@ Torus.commands = {
 			var user = '';
 			for(var i = 0; i < arguments.length; i++) {user += ' ' + arguments[i];}
 			user = user.substring(1);
-			Torus.io.giveMod(Torus.ui.active, user);
+			Torus.chats[Torus.ui.active].mod(user);
 		}
 	},
 	query: '/private',
@@ -76,7 +76,7 @@ Torus.commands = {
 			var users = '';
 			for(var i = 0; i < arguments.length; i++) {users += ' ' + arguments[i];}
 			users = users.substring(1).split(', ');
-			Torus.io.openPrivate(Torus.ui.active, users);
+			Torus.chats[Torus.ui.active].open_private(users);
 		}
 	},
 	away: {
@@ -87,18 +87,18 @@ Torus.commands = {
 			message = message.substring(1);
 			var user = Torus.chats[Torus.ui.active].userlist[wgUserName];
 
-			if(user.statusState == 'away') {
-				if(user.oldState == 'away') {Torus.io.setStatus(Torus.ui.active, 'here', '');}
-				else {Torus.io.setStatus(Torus.ui.active, user.oldState, user.oldMessage);}
+			if(user.status_state == 'away') {
+				if(user.old_state == 'away') {Torus.chats[Torus.ui.active].set_status('here', '');}
+				else {Torus.chats[Torus.ui.active].set_status(user.old_state, user.old_message);}
 			}
-			else {Torus.io.setStatus(Torus.ui.active, 'away', message);}
+			else {Torus.chats[Torus.ui.active].set_status('away', message);}
 		}
 	},
 	back: {
 		help: 'Sets your status as present for the current room.',
 		func: function(message) {
 			if(!message) {message = '';}
-			Torus.io.setStatus(Torus.ui.active, 'here', message);
+			Torus.chats[Torus.ui.active].set_status('here', message);
 		}
 	},
 	status: {
@@ -106,17 +106,17 @@ Torus.commands = {
 		func: function(state) {
 			var message = '';
 			for(var i = 1; i < arguments.length; i++) {message += ' ' + arguments[i];}
-			Torus.io.setStatus(Torus.ui.active, state, message);
+			Torus.chats[Torus.ui.active].set_status(state, message);
 		}
 	},
-	me: {
+	/*me: { //XXX: right now /me is implemented by literally sending /me
 		help: 'Emote yourself.',
 		func: function() {
 			var str = '';
 			for(var i = 0; i < arguments.length; i++) {str += ' ' + arguments[i];}
 			Torus.io.sendMessage(Torus.ui.active, '* ' + wgUserName + str, false);
 		}
-	},
+	},*/
 	db: '/database',
 	database: {
 		help: 'Look up domains and room ids in the database.',
