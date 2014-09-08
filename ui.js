@@ -692,10 +692,10 @@ Torus.ui.ping = function(room) {
 	Torus.call_listeners(new Torus.classes.UIEvent('ping', room));
 }
 
-Torus.ui.fullscreen = function() {
+Torus.ui.fullscreen = function() { //FIXME: some kind of position:fixed thing
 	if(Torus.data.fullscreen) {return;}
 	if(Torus.ui.window.parentNode) {Torus.ui.window.parentNode.removeChild(Torus.ui.window);}
-	while(document.body.firstChild) {document.body.removeChild(document.body.firstChild);} //bad. bad bad bad
+	while(document.body.firstChild) {document.body.removeChild(document.body.firstChild);} //FIXME: bad. bad bad bad
 	document.body.appendChild(Torus.ui.window);
 	Torus.ui.window.style.height = document.getElementsByTagName('html')[0].clientHeight - 25 + 'px';
 	//TODO: change height with resize
@@ -859,7 +859,7 @@ Torus.ui.onload = function() {
 	var css = document.createElement('link');
 	css.id  = 'torus-css';
 	css.rel = 'stylesheet';
-	css.href = 'http://monchbox.wikia.com/index.php?title=MediaWiki:Torus.js/main.css&action=raw&ctype=text/css&t=' + (new Date()).getTime();
+	css.href = 'http://monchbox.wikia.com/wiki/MediaWiki:Torus.js/ui.css?action=raw&ctype=text/css&templates=expand&t=' + (new Date()).getTime();
 	css.type = 'text/css';
 	css.media = 'screen';
 	document.head.appendChild(css);
@@ -958,6 +958,10 @@ Torus.ui.add_room({room: 0, chat: Torus.chats[0]}); //the status room already ex
 
 {{MediaWiki:Torus.js/commands.js}}
 
+{{MediaWiki:Torus.js/menu.js}}
+
 {{MediaWiki:Torus.js/options.js}}
+
+{{MediaWiki:Torus.js/ccui.js}}
 
 Torus.add_listener('window', 'load', Torus.ui.onload);

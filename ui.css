@@ -232,37 +232,6 @@
 #torus-window span.torus-message-ping {
 	color: red;
 }
-#torus-window input.torus-option-boolean {
-	vertical-align: top;
-	margin: 0;
-}
-#torus-options-groups {
-	width: 15%;
-	height: 100%;
-	float: left;
-	margin: 0;
-	margin-right: 1em;
-	border-right: 1px solid #000;
-}
-#torus-window li.torus-option-group {
-	padding: .1em .5em;
-	background-color: #99f;
-	cursor: pointer;
-	font-size: larger;
-}
-#torus-window li.torus-option-group:hover {
-	background-color: #def;
-}
-#torus-window li.torus-option-group-selected,
-#torus-window li.torus-option-group-selected:hover {
-	background-color: #fff;
-}
-#torus-window textarea.torus-option-text {
-	resize: vertical;
-	width: 100%;
-	display: block;
-}
-
 #torus-input {
 	position: absolute;
 	bottom: 0;
@@ -281,3 +250,7 @@
 	height: 100%;
 	resize: none;
 }
+
+{{MediaWiki:Torus.js/options.css}}
+
+{{MediaWiki:Torus.js/ccui.css}}

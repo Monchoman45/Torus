@@ -1,0 +1,42 @@
+#torus-tab--3 {display: none;}
+
+#torus-ext-ccui-domain {
+	float: right;
+}
+#torus-ext-ccui-limit {
+	width: 5em;
+}
+#torus-window .torus-ext-ccui-info {
+	text-align: center;
+}
+#torus-window li.torus-ext-ccui-li-odd {
+	background-color: #def;
+}
+#torus-window div.torus-ext-ccui-table {
+	border: 1px solid #666;
+	border-bottom: 0;
+}
+#torus-window div.torus-ext-ccui-table:last-child {
+	border-bottom: 1px solid #666;
+}
+#torus-window div.torus-ext-ccui-table .torus-ext-ccui-info {
+	background-color: #99f;
+	border-bottom: 1px solid #666;
+}
+#torus-window div.torus-ext-ccui-table div:last-child {
+	height: 150px;
+	overflow-y: scroll;
+	background-color: #fff;
+}
+#torus-window div.torus-ext-ccui-table ul {
+	display: inline-block;
+	width: 33%;
+	min-height: 150px;
+	margin: 0;
+	list-style: none;
+	text-align: center;
+	border-left: 1px solid #666;
+}
+#torus-window div.torus-ext-ccui-table ul:first-child {
+	border-left: 0;
+}

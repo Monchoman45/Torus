@@ -1,12 +1,4 @@
-Torus.options = new Torus.classes.Chat(-1, 'options');
-//FIXME: global variable
-var img = document.createElement('img');
-img.src = 'http://images2.wikia.nocookie.net/__cb20110812214252/monchbox/images/a/a1/Gear_icon.png';
-img.width = '18';
-Torus.ui.ids['tab--1'].insertBefore(document.createTextNode(String.fromCharCode(160)), Torus.ui.ids['tab--1'].firstChild); //&nbsp;
-Torus.ui.ids['tab--1'].insertBefore(img, Torus.ui.ids['tab--1'].firstChild);
-
-Torus.options = Torus.chats[-1];
+Torus.options = new Torus.classes.Chat(-2, 'options');
 Torus.options.version = 1;
 Torus.options.selected = 'pings';
 Torus.options.pings = {
@@ -125,7 +117,9 @@ Torus.options.render = function(group) {
 			html += '</fieldset>';
 		}
 	}
-	Torus.ui.ids['window'].innerHTML = '<ul id="torus-options-groups">' + sidebar + '</ul><div id="torus-options-window">' + html + '</div>';
+	Torus.ui.ids['window'].innerHTML = '<div id="torus-options-window">' + html + '</div>';
+	Torus.ui.ids['sidebar'].innerHTML = sidebar;
+
 	if(!group) {Torus.options.save();}
 	else {Torus.options.selected = group;}
 	//Torus.callListeners('options_render', group);

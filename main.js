@@ -1,7 +1,8 @@
 /************** Torus chat client **************
  * A Wikia chat client that isn't Special:Chat *
  * ------------------------------------------- *
- * Written and maintained by Monchoman45       *
+ *    Written and maintained by Monchoman45    *
+ *    https://github.com/Monchoman45/Torus     *
  ***********************************************/
 
 window.Torus = {
@@ -56,7 +57,6 @@ window.Torus = {
 		}
 	},
 	io: {
-		polling: 0,
 		transports: {},
 	},
 	classes: {},
@@ -72,10 +72,9 @@ window.Torus = {
 		tabindex: 0,
 		tabpos: 0,
 		fullscreen: false
-	}
+	},
+	ext: {}
 }
-
-window.io = {j: []};
 
 //Function for adding an event listener
 //Accepts the event name and the listener function
