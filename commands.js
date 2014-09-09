@@ -2,27 +2,19 @@ Torus.commands = {};
 Torus.commands.join = {
 	help: 'Join a room. Accepts either the id of the room, or the domain name (for example, community will take you to the room for [[w:|community.wikia.com]]). Specifying 0 will part all rooms.',
 	func: function(room) {
-		if(isNaN(room * 1)) {
-			if(!Torus.data.domains[room]) {return 'Unable to look up ' + room + ' in database. Try [[w:c:' + room + ':Special:Torus]].';}
-			else {room = Torus.data.domains[room];}
-		}
+		if(room == '0') {Torus.logout();}
+		if(!Torus.database[room]) {return 'Unable to look up ' + room + ' in database. Try [[w:c:' + room + ':Special:Torus]].';}
 
-		if(room <= 0) {
-			for(var i in Torus.chats) {
-				Torus.close(i); //FIXME: Torus.close
-			}
-			return true;
-		}
-		else {Torus.open(room);} //FIXME: Torus.open
+		(new Torus.classes.Chat(Torus.database[room].room, room)).connect();
 	}
 };
 Torus.commands.part = {
 	help: 'Leave a room. If no room is specified, the current room is left.',
 	func: function(room) {
-		if(!room) {Torus.close(Torus.ui.active.id, 'closed');} //FIXME: Torus.close
+		if(!room) {Torus.ui.active.disconnect('closed');}
 		else {
-			if(isNaN(room * 1) && !Torus.chats[Torus.data.domains[room]]) {return 'Invalid room ' + room + '.';}
-			else {Torus.close(room, 'closed');} //FIXME: Torus.close
+			if(!Torus.chats[room]) {return 'Invalid room ' + room + '.';}
+			else {Torus.chats[room].disconnect('closed');}
 		}
 	}
 };
@@ -123,13 +115,12 @@ Torus.commands.database = {
 	func: function(room) {
 		if(!room) { //print everything
 			var str = '';
-			for(var i in Torus.data.domains) {
-				str += '\n[[w:c:' + i + '|' + i + ']]: ' + Torus.data.domains[i];
+			for(var i in Torus.database) {
+				str += '\n[[w:c:' + i + '|' + i + ']]: ' + Torus.database[i].room;
 			}
 			return str.substring(1);
 		}
-		else if(isNaN(room * 1)) {return '[[w:c:' + room + '|' + room + ']]: ' + Torus.data.domains[room];}
-		else {return '[[w:c:' + Torus.data.ids[room] + '|' + Torus.data.ids[room] + ']]: ' + room;}
+		else {return '[[w:c:' + room + '|' + room + ']]: ' + Torus.database[room].room;}
 	}
 };
 Torus.commands.options = {
@@ -157,7 +148,7 @@ Torus.commands.help = {
 		else {
 			var coms = '';
 			for(var i in Torus.commands) {
-				if(typeof Torus.commands[i] != 'function') {coms += ', ' + i;}
+				if(typeof Torus.commands[i] != 'function' && typeof Torus.commands[i] != 'string') {coms += ', ' + i;}
 			}
 			coms = coms.substring(2);
 			return 'Commands:\n' + coms;

@@ -11,7 +11,8 @@ window.Torus = {
 		room: 0,
 		domain: ''
 	},
-	version: 220, //2.2.0
+	version: 224,
+	pretty_version: '2.2.4',
 	chats: {},
 	listeners: {
 		window: {
@@ -123,23 +124,6 @@ Torus.call_listeners = function(event) {
 	return true;
 }
 
-Torus.open = function(room, key, server, port, session, transport) {
-	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
-	if(room <= 0) {throw new Error('Invalid room ' + room + '. (open)');}
-
-	if(Torus.chats[room] && (Torus.chats[room].connected || Torus.chats[room].connecting)) {throw new Error('Room ' + room + ' is already open. (open)');}
-
-	if(!Torus.chats[room]) {new Torus.classes.Chat(room);}
-
-	Torus.chats[room].connect(key, server, port, session, transport);
-	Torus.alert('Connecting to ' + Torus.chats[room].name + '...');
-}
-
-Torus.reopen = function(room) {
-	Torus.alert('Reconnecting...', room);
-	Torus.chats[room].reconnect();
-}
-
 Torus.logout = function() {
 	for(var i in Torus.chats) {
 		if(i > 0) {
@@ -153,15 +137,16 @@ Torus.logout = function() {
 Torus.alert = function(text, room) {
 	if(!room) {room = Torus.chats[0];}
 
-	var event = new Torus.classes.IOEvent('alert', room);
 	if(text.indexOf('\n') != -1) {
 		var spl = text.split('\n');
 		for(var i = 0; i < spl.length; i++) {
+			var event = new Torus.classes.IOEvent('alert', room);
 			event.text = spl[i];
 			Torus.ui.add_line(event); //FIXME: ui
 		}
 	}
 	else {
+		var event = new Torus.classes.IOEvent('alert', room);
 		event.text = text;
 		Torus.ui.add_line(event); //FIXME: ui
 	}
@@ -193,12 +178,9 @@ window.addEventListener('beforeunload', Torus.unload);
 
 new Torus.classes.Chat(0, 'status');
 
-Torus.data.domains = {
-/*{{MediaWiki:Torus.js/database.json}}*/
+Torus.database = {
+{{MediaWiki:Torus.js/database.json}}
 };
-/*for(var i in Torus.data.domains) {
-	if(!Torus.data.ids[Torus.data.domains]) {Torus.data.ids[Torus.data.domains[i]] = i;}
-}*/
 
 
 

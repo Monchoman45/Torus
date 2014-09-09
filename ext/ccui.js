@@ -1,5 +1,4 @@
 new Torus.classes.Extension('ccui', -3);
-Torus.ext.ccui.ui = true;
 Torus.ext.ccui.text = 'CCUI';
 
 Torus.ext.ccui.render = function() {

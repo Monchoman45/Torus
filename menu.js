@@ -1,11 +1,10 @@
 Torus.ui.menu = {};
 
 Torus.ui.menu.render = function() {
-	//Torus.ui.ids['info'].textContent = 'Torus client version ' + Torus.version + ', operating on `' + Torus.local.domain + '`';
 	var name = document.createElement('div');
 		name.id = 'torus-menu-name';
 		Torus.ui.ids['menu-name'] = name;
-		name.textContent = 'Torus v' + Torus.version;
+		name.textContent = 'Torus v' + Torus.pretty_version;
 	Torus.ui.ids['window'].appendChild(name);
 	var links = document.createElement('div');
 		links.id = 'torus-menu-links';
@@ -33,7 +32,7 @@ Torus.ui.menu.render = function() {
 		extensions.id = 'torus-menu-extensions';
 		Torus.ui.ids['menu-extensions'] = extensions;
 		for(var i in Torus.ext) {
-			if(!Torus.ext[i].ui) {continue;}
+			if(i == 'ui') {continue;}
 			var ext = document.createElement('a');
 				ext.id = 'torus-menu-ext-' + i;
 				Torus.ui.ids['menu-ext-' + i] = ext;
@@ -48,8 +47,8 @@ Torus.ui.menu.render = function() {
 
 Torus.ui.menu.click_extension = function() {Torus.ui.activate(Torus.ext[this.getAttribute('data-id')]);}
 
-Torus.ui.menu.tab_click = function() {Torus.ui.activate(Torus.ui);} //hackiest thing ever
+Torus.ui.menu.tab_click = function() {Torus.ui.activate(Torus.ext.ui);}
 
 //activating the ui extension gives you the menu
-Torus.ui.add_listener('ui', 'activate', Torus.ui.menu.render);
-Torus.ui.add_listener('ui', 'deactivate', Torus.util.null); //FIXME: i'm sure something important is supposed to go here
+Torus.ext.ui.add_listener('ui', 'activate', Torus.ui.menu.render);
+Torus.ext.ui.add_listener('ui', 'deactivate', Torus.util.null); //FIXME: i'm sure something important is supposed to go here

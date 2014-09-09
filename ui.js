@@ -1,9 +1,12 @@
-Torus.ui = new Torus.classes.Extension('ui', -1);
-Torus.ui.window = document.createElement('div');
-Torus.ui.ids = {};
-Torus.ui.active = Torus.chats[0];
-Torus.ui.viewing = [];
-Torus.ui.popup_timeout = 0;
+new Torus.classes.Extension('ui', -1);
+
+Torus.ui = {
+	window: document.createElement('div'),
+	ids: {},
+	active: Torus.chats[0],
+	viewing: [],
+	popup_timeout: 0,
+}
 Torus.listeners.ui = {
 	render: [],
 	activate: [],
@@ -51,16 +54,20 @@ Torus.ui.add_room = function(event) {
 			Torus.options.pings[event.room.name].case_insensitive = {type: 'text', value: ''};
 		}
 
+		for(var i in Torus.logs) {
+			if(!Torus.logs[i][event.room.id]) {Torus.logs[i][event.room.id] = [];}
+		}
+
 		Torus.ui.activate(event.room);
 	}
 }
 
 Torus.ui.remove_room = function(event) {
 	if(event.room == Torus.ui.active) {
-		if(event.room.parent) {Torus.ui.activate(Torus.chats[event.room.parent]);}
+		if(event.room.parent) {Torus.ui.activate(event.room.parent);}
 		else {Torus.ui.activate(Torus.chats[0]);}
 	}
-	if(event.room.viewing) {Torus.ui.show(event.room.id);}
+	if(event.room.viewing) {Torus.ui.show(event.room);}
 
 	Torus.ui.ids['tabs'].removeChild(Torus.ui.ids['tab-' + event.room.id]);
 	delete Torus.ui.ids['tab-' + event.room.id];
@@ -71,10 +78,10 @@ Torus.ui.render = function() {
 	var indexes = [];
 	var active = false;
 	for(var i = 0; i < Torus.ui.viewing.length; i++) {
-		if(Torus.ui.viewing[i] == Torus.ui.active.id) {active = true;}
-		if(Torus.logs.messages[Torus.ui.viewing[i]].length > 0) {
-			rooms.push(Torus.logs.messages[Torus.ui.viewing[i]]);
-			indexes.push(Torus.logs.messages[Torus.ui.viewing[i]].length - 1);
+		if(Torus.ui.viewing[i] == Torus.ui.active) {active = true;}
+		if(Torus.logs.messages[Torus.ui.viewing[i].id].length > 0) {
+			rooms.push(Torus.logs.messages[Torus.ui.viewing[i].id]);
+			indexes.push(Torus.logs.messages[Torus.ui.viewing[i].id].length - 1);
 		}
 	}
 	if(!active && Torus.logs.messages[Torus.ui.active.id].length > 0) {
@@ -114,11 +121,8 @@ Torus.ui.render = function() {
 		}
 	}
 
-	//FIXME: are these listeners important?
-	/*if(Torus.ui.active.id != 0) {Torus.ui.active.call_listeners('render');}
-	for(var i = 0; i < Torus.ui.viewing.length; i++) {
-		if(Torus.ui.viewing[i] > 0) {Torus.chats[Torus.ui.viewing[i]].call_listeners('render');}
-	}*/
+	Torus.ui.ids['window'].scrollTop = Torus.ui.ids['window'].scrollHeight;
+
 	Torus.call_listeners(new Torus.classes.UIEvent('render'));
 }
 
@@ -144,7 +148,7 @@ Torus.ui.activate = function(room) {
 
 	if(room.id > 0) { //chat
 		if(!room.parent) {
-			Torus.ui.ids['info'].textContent = 'Public room';
+			Torus.ui.ids['info'].textContent = 'Public room'; //FIXME: i18n
 			if(room.name) {
 				Torus.ui.ids['info'].textContent += ' of ';
 				var a = document.createElement('a');
@@ -156,21 +160,21 @@ Torus.ui.activate = function(room) {
 			Torus.ui.ids['info'].appendChild(document.createTextNode('. (' + room.id + ')'));
 		}
 		else {
-			Torus.ui.ids['info'].textContent = 'Private room of ';
-			if(Torus.data.ids[room.parent]) {
+			Torus.ui.ids['info'].textContent = 'Private room of '; //FIXME: i18n
+			if(room.parent) {
 				var a = document.createElement('a');
-				a.href = 'http://' + Torus.data.ids[room.parent] + '.wikia.com';
+				a.href = 'http://' + room.parent.name + '.wikia.com';
 				a.addEventListener('click', Torus.ui.click_link);
-				a.textContent = Torus.data.ids[room.parent];
+				a.textContent = room.parent.name;
 				Torus.ui.ids['info'].appendChild(a);
 			}
-			else {Torus.ui.ids['info'].textContent += Torus.data.ids[room.parent];}
-			Torus.ui.ids['info'].appendChild(document.createTextNode(', between ' + room.priv_users.slice(0, room.priv_users.length - 1).join(', ') + ' and ' + room.priv_users[room.priv_users.length - 1] + '. (' + room.id + ')'));
+			else {Torus.ui.ids['info'].textContent += room.parent.name;}
+			Torus.ui.ids['info'].appendChild(document.createTextNode(', between ' + room.priv_users.slice(0, room.priv_users.length - 1).join(', ') + ' and ' + room.priv_users[room.priv_users.length - 1] + '. (' + room.id + ')')); //FIXME: i18n
 		}
 	}
 	else { //extension
 		if(room.id == 0 || room.id == -1) {
-			Torus.ui.ids['info'].textContent = 'Torus v' + Torus.version + ', running on ';
+			Torus.ui.ids['info'].textContent = 'Torus v' + Torus.pretty_version + ', running on '; //FIXME: i18n
 			var a = document.createElement('a');
 				a.href = 'http://' + Torus.local.domain + '.wikia.com/wiki/';
 				a.textContent = Torus.local.domain;
@@ -180,51 +184,44 @@ Torus.ui.activate = function(room) {
 		else {
 			var a = document.createElement('a');
 				a.className = 'torus-fakelink';
-				a.textContent = '------- Back to menu -------';
+				a.textContent = '------- Back to menu -------'; //FIXME: i18n
 				a.addEventListener('click', Torus.ui.menu.tab_click);
 			Torus.ui.ids['info'].appendChild(a);
 		}
 	}
 	if(room.id >= 0) {Torus.ui.render();}
 
-	Torus.ui.ids['window'].scrollTop = Torus.ui.ids['window'].scrollHeight;
 	Torus.call_listeners(new Torus.classes.UIEvent('activate', room));
 }
 
-Torus.ui.show = function(room) { //FIXME: int room
-	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
-	if(room < 0 || !Torus.chats[room]) {throw new Error('Invalid room ' + room + '. (ui.show)');}
+Torus.ui.show = function(room) {
+	if(room.id < 0) {throw new Error('Invalid room ' + room.name + '. (ui.show)');}
 
-	var tabs = Torus.ui.ids['tabs'].children;
-	if(Torus.chats[room].viewing) {
-		Torus.chats[room].viewing = false;
+	if(room.viewing) { //unshow
+		room.viewing = false;
 		for(var i = 0; i < Torus.ui.viewing.length; i++) {
 			if(Torus.ui.viewing[i] == room) {Torus.ui.viewing.splice(i, 1);}
 		}
-		for(var i = 0; i < tabs.length; i++) {
-			if(tabs[i].id == 'torus-tab-' + room) {
-				var classes = tabs[i].className.split(' ');
-				for(var j = 0; j < classes.length; j++) {
-					if(classes[j] == 'torus-tab-viewing') {classes.splice(j, 1); break;}
-				}
-				tabs[i].className = classes.join(' ');
-				break;
-			}
+
+		var tab = Torus.ui.ids['tab-' + room.id];
+		var classes = tab.className.split(' ');
+		for(var i = 0; i < classes.length; i++) {
+			if(classes[i] == 'torus-tab-viewing') {classes.splice(i, 1); break;}
 		}
+		tab.className = classes.join(' ');
+
 		Torus.ui.render();
-		Torus.call_listeners(new Torus.classes.UIEvent('unshow', Torus.chats[room]));
-		return;
+		Torus.call_listeners(new Torus.classes.UIEvent('unshow', room));
 	}
-	Torus.ui.viewing.push(room);
-	Torus.chats[room].viewing = true;
-	for(var i = 0; i < tabs.length; i++) {
-		if(tabs[i].id == 'torus-tab-' + room) {tabs[i].className += ' torus-tab-viewing'; break;}
+	else { //show
+		room.viewing = true;
+		Torus.ui.viewing.push(room);
+
+		Torus.ui.ids['tab-' + room.id].className += ' torus-tab-viewing';
+
+		Torus.ui.render();
+		Torus.call_listeners(new Torus.classes.UIEvent('show', room));
 	}
-
-	Torus.ui.render();
-	Torus.ui.ids['window'].scrollTop = Torus.ui.ids['window'].scrollHeight;
-
-	Torus.call_listeners(new Torus.classes.UIEvent('show', Torus.chats[room]));
 }
 
 Torus.ui.parse_message = function(event) {
@@ -233,7 +230,7 @@ Torus.ui.parse_message = function(event) {
 	while(event.html.indexOf('<') != -1) {event.html = event.html.replace('<', '&lt;');}
 	while(event.html.indexOf('>') != -1) {event.html = event.html.replace('>', '&gt;');}
 
-	if(event.room.parent) {event.html = Torus.util.parse_links(event.html, Torus.chats[event.room.parent].name);}
+	if(event.room.parent) {event.html = Torus.util.parse_links(event.html, event.room.parent.name);}
 	else {event.html = Torus.util.parse_links(event.html, event.room.name);}
 
 	while(event.html.indexOf('\n') != -1) {event.html = event.html.replace('\n', '<br />');}
@@ -260,7 +257,7 @@ Torus.ui.parse_message = function(event) {
 			while(ping.indexOf('>') != -1) {ping = ping.replace('>', '&gt;');}
 			var index = Torus.util.text_index(event.html.toLowerCase(), pings[i]);
 			if(index != -1) {
-				Torus.ui.ping(event.room.id);
+				Torus.ui.ping(event.room);
 				event.html = event.html.substring(0, index) + '<span class="torus-message-ping">' + event.html.substring(index, index + ping.length) + '</span>' + event.html.substring(index + ping.length);
 				break;
 			}
@@ -270,7 +267,7 @@ Torus.ui.parse_message = function(event) {
 
 Torus.ui.add_line = function(event) {
 	if(event.text && !event.html) {
-		if(event.room.parent) {event.html = Torus.util.parse_links(event.text, Torus.chats[event.room.parent].name);}
+		if(event.room.parent) {event.html = Torus.util.parse_links(event.text, event.room.parent.name);}
 		else {event.html = Torus.util.parse_links(event.text, event.room.name);}
 	}
 
@@ -346,7 +343,7 @@ Torus.ui.update_user = function(event) {
 	if(!li) { //TODO: sort staff at top, then mods, then normal users
 		var li = document.createElement('li');
 		li.setAttribute('data-user', event.user);
-		li.addEventListener('mouseover', function(event) {Torus.ui.render_popup(this.getAttribute('data-user'), Torus.ui.active.id);});
+		li.addEventListener('mouseover', function(event) {Torus.ui.render_popup(this.getAttribute('data-user'), Torus.ui.active);}); //FIXME: hardcoded function
 		var sidebar = Torus.ui.ids['sidebar'];
 		var added = false;
 		for(var i = 0; i < sidebar.children.length; i++) {
@@ -403,12 +400,12 @@ Torus.ui.remove_user = function(event) {
 	}
 }
 
-Torus.ui.render_popup = function(name, room, coords) { //FIXME: int room
-	var target = Torus.chats[room].userlist[name];
-	var user = Torus.chats[room].userlist[wgUserName];
+Torus.ui.render_popup = function(name, room, coords) {
+	var target = room.userlist[name];
+	var user = room.userlist[wgUserName];
 
-	if(Torus.data.ids[room]) {var domain = Torus.data.ids[room];}
-	else if(Torus.data.ids[Torus.chats[room].parent]) {var domain = Torus.data.ids[Torus.chats[room].parent];}
+	if(Torus.database[room.name]) {var domain = room.name;}
+	else if(Torus.database[room.parent.name]) {var domain = room.parent.name;}
 	else {var domain = '';} //anything false is fine
 
 	while(Torus.ui.ids['popup'].firstChild) {Torus.ui.ids['popup'].removeChild(Torus.ui.ids['popup'].firstChild);}
@@ -503,7 +500,7 @@ Torus.ui.render_popup = function(name, room, coords) { //FIXME: int room
 	actions.id = 'torus-popup-actions';
 		var priv = document.createElement('a');
 		priv.className = 'torus-popup-action';
-		priv.addEventListener('click', function() {Torus.chats[room].open_private([name]);}); //FIXME: closure scope
+		priv.addEventListener('click', function() {room.open_private([name]);}); //FIXME: closure scope
 		priv.textContent = 'Private message'; //FIXME: i18n
 		actions.appendChild(priv);
 
@@ -536,7 +533,7 @@ Torus.ui.render_popup = function(name, room, coords) { //FIXME: int room
 				yes.id = 'torus-popup-modconfirm-yes';
 				yes.type = 'button';
 				yes.value = 'Yes'; //FIXME: i18n
-				yes.addEventListener('click', function() {Torus.chats[room].mod(name);}); //FIXME: closure scope
+				yes.addEventListener('click', function() {room.mod(name);}); //FIXME: closure scope
 				confirm.appendChild(yes);
 
 				confirm.appendChild(document.createTextNode(' Are you sure? ')); //FIXME: i18n
@@ -562,7 +559,7 @@ Torus.ui.render_popup = function(name, room, coords) { //FIXME: int room
 		if(user.staff || user.givemod || (user.mod && !target.givemod && !target.staff)) {
 			var kick = document.createElement('a');
 			kick.className = 'torus-popup-action';
-			kick.addEventListener('click', function() {Torus.chats[room].kick(name);}); //FIXME: closure scope
+			kick.addEventListener('click', function() {room.kick(name);}); //FIXME: closure scope
 			kick.textContent = 'Kick'; //FIXME: i18n
 			actions.appendChild(kick);
 
@@ -584,8 +581,8 @@ Torus.ui.render_popup = function(name, room, coords) { //FIXME: int room
 					expiry.placeholder = '1 day'; //FIXME: i18n
 					expiry.addEventListener('keyup', function(event) { //FIXME: closure scope
 						if(event.keyCode == 13) {
-							if(this.value) {Torus.chats[room].ban(name, Torus.util.expiry_to_seconds(this.value), this.parentNode.nextSibling.lastChild.value);}
-							else {Torus.chats[room].ban(name, 60 * 60 * 24, this.parentNode.nextSibling.lastChild.value);}
+							if(this.value) {room.ban(name, Torus.util.expiry_to_seconds(this.value), this.parentNode.nextSibling.lastChild.value);}
+							else {room.ban(name, 60 * 60 * 24, this.parentNode.nextSibling.lastChild.value);}
 						}
 					});
 					div.appendChild(expiry);
@@ -604,8 +601,8 @@ Torus.ui.render_popup = function(name, room, coords) { //FIXME: int room
 					reason.addEventListener('keyup', function(event) { //FIXME: closure scope
 						if(event.keyCode == 13) {
 							var expiry = this.parentNode.previousSibling.lastChild.value;
-							if(expiry) {Torus.chats[room].ban(name, Torus.util.expiry_to_seconds(expiry), this.value);}
-							else {Torus.chats[room].ban(name, 60 * 60 * 24, this.value);}
+							if(expiry) {room.ban(name, Torus.util.expiry_to_seconds(expiry), this.value);}
+							else {room.ban(name, 60 * 60 * 24, this.value);}
 						}
 					});
 					div.appendChild(reason);
@@ -617,8 +614,8 @@ Torus.ui.render_popup = function(name, room, coords) { //FIXME: int room
 					submit.value = 'Ban'; //FIXME: i18n
 					submit.addEventListener('click', function(event) { //FIXME: closure scope
 						var expiry = this.parentNode.previousSibling.previousSibling.lastChild.value;
-						if(expiry) {Torus.chats[room].ban(name, Torus.util.expiry_to_seconds(expiry), this.parentNode.previousSibling.lastChild.value);}
-						else {Torus.chats[room].ban(name, 60 * 60 * 24, this.parentNode.previousSibling.previousSibling.lastChild.value);}
+						if(expiry) {room.ban(name, Torus.util.expiry_to_seconds(expiry), this.parentNode.previousSibling.lastChild.value);}
+						else {room.ban(name, 60 * 60 * 24, this.parentNode.previousSibling.previousSibling.lastChild.value);}
 					});
 				modal.appendChild(div);
 			ban.appendChild(modal);
@@ -668,9 +665,7 @@ Torus.ui.unrender_popup = function() {
 	Torus.call_listeners(new Torus.classes.UIEvent('unrender_popup'));
 }
 
-Torus.ui.ping = function(room) { //FIXME: int room
-	if(isNaN(room * 1)) {room = Torus.data.domains[room];}
-
+Torus.ui.ping = function(room) {
 	if(Torus.options.pings.general.enabled && Torus.ui.window.parentNode && Torus.data.pinginterval == 0) {
 		Torus.data.titleflash = document.title;
 		document.title = Torus.options.pings.general.alert.value;
@@ -684,7 +679,7 @@ Torus.ui.ping = function(room) { //FIXME: int room
 			beep.play();
 		}
 	}
-	Torus.call_listeners(new Torus.classes.UIEvent('ping', Torus.chats[room]));
+	Torus.call_listeners(new Torus.classes.UIEvent('ping', room));
 }
 
 Torus.ui.fullscreen = function() { //FIXME: some kind of position:fixed thing
@@ -723,10 +718,12 @@ Torus.ui.initial = function(event) {
 	}
 	//userlist is already taken care of because Chat.event_updateUser calls Chat.update_user which ui.update_user listens to
 	if(event.room == Torus.ui.active) {Torus.ui.render();}
+
+	if(event.room.parent) {Torus.ui.ping(event.room);}
 }
 
 Torus.ui.input = function(event) {
-	if(event.keyCode == 13 && !event.shiftKey) {
+	if(event.keyCode == 13 && !event.shiftKey) { //enter
 		event.preventDefault();
 		if(Torus.data.history[1] != this.value) {
 			Torus.data.history[0] = this.value;
@@ -734,7 +731,7 @@ Torus.ui.input = function(event) {
 		}
 		Torus.data.histindex = 0;
 
-		if(Torus.ui.active.id > 0) {
+		if(Torus.ui.active.id >= 0) {
 			while(this.value.charAt(0) == '/') {
 				if(this.value.indexOf('\n') != -1) {
 					var result = Torus.commands.eval(this.value.substring(1, this.value.indexOf('\n')));
@@ -754,7 +751,7 @@ Torus.ui.input = function(event) {
 			this.value = '';
 		}
 	}
-	else if(event.keyCode == 9 && Torus.ui.active.id > 0) {
+	else if(event.keyCode == 9 && Torus.ui.active.id > 0) { //tab
 		event.preventDefault();
 		if(!Torus.data.tabtext) {
 			str = this.value;
@@ -776,15 +773,15 @@ Torus.ui.input = function(event) {
 		if(Torus.data.tabpos == 0) {this.value = user + (Torus.data.tabindex == 0 ? '' : ': ');}
 		else {this.value = this.value.substring(0, Torus.data.tabpos) + user;}
 	}
-	else if(event.keyCode == 38 && Torus.data.histindex + 1 < Torus.data.history.length && Torus.ui.active.id > 0) {
+	else if(event.keyCode == 38 && Torus.data.histindex + 1 < Torus.data.history.length && Torus.ui.active.id > 0) { //up
 		Torus.data.histindex++;
 		this.value = Torus.data.history[Torus.data.histindex];
 	}
-	else if(event.keyCode == 40 && Torus.data.histindex > 0 && Torus.ui.active.id > 0) {
+	else if(event.keyCode == 40 && Torus.data.histindex > 0 && Torus.ui.active.id > 0) { //down
 		Torus.data.histindex--;
 		this.value = Torus.data.history[Torus.data.histindex];
 	}
-	else if(event.keyCode != 39 && event.keyCode != 41 && Torus.ui.active.id > 0) {
+	else if(event.keyCode != 39 && event.keyCode != 41 && Torus.ui.active.id > 0) { //anything other than left or right
 		Torus.data.tabtext = '';
 		Torus.data.tabindex = 0;
 		Torus.data.tabpos = 0;
@@ -799,39 +796,44 @@ Torus.ui.click_link = function(event) {
 
 Torus.ui.tab_click = function(event) {
 	event.preventDefault();
+	var room = Torus.chats[this.getAttribute('data-id')];
 	if(event.shiftKey) {
 		document.getSelection().removeAllRanges();
-		if(Torus.ui.active.id != this.getAttribute('data-id')) {Torus.ui.show(this.getAttribute('data-id'));}
+		if(Torus.ui.active.name != room) {Torus.ui.show(room);}
 	}
-	else {Torus.ui.activate(Torus.chats[this.getAttribute('data-id') * 1]);}
+	else {Torus.ui.activate(room);}
 }
 
 Torus.ui.onload = function() {
 	Torus.logs.messages[0] = [];
 	Torus.ui.activate(Torus.chats[0]);
-	Torus.ui.show(0);
+	Torus.ui.show(Torus.chats[0]);
 
 	var domain = window.location.hostname.substring(0, document.location.hostname.indexOf('.wikia.com'));
 	if(domain.indexOf('preview.') == 0) {domain = domain.substring(8);}
+	if(!domain) {domain = 'localhost';}
 	Torus.local.domain = domain;
-	if(Torus.data.domains[domain]) {Torus.local.room = Torus.data.domains[domain];}
+	if(Torus.database[domain]) {Torus.local.room = Torus.database[domain].room;}
 	else {
 		Torus.io.spider(function(data) {
 			if(!data) {
 				//FIXME: if we get here, can we even fetch keys to connect to any chat?
-				Torus.alert('This wiki doesn\'t have chat enabled. The local room has been set to Community Central.');
-				Torus.local.room = Torus.data.domains['community'];
+				Torus.alert('This wiki doesn\'t have chat enabled. The local room has been set to Community Central.'); //FIXME: i18n
+				Torus.local.room = Torus.database['community'].room;
 				Torus.local.domain = 'community';
 			}
+			else if(data.chatkey.key === false) {Torus.alert('You don\'t appear to be logged in - you must have an account to use chat on Wikia. Please [[Special:UserSignup|register]] or [[Special:UserLogin|log in]].');} //FIXME: i18n
 			else {
-				if(Torus.data.domains) {
-					Torus.data.domains[domain] = data.roomId;
-					Torus.data.ids[data.roomId] = domain;
-				}
+				Torus.database[domain] = {
+					domain: data.nodeHostname,
+					port: data.nodePort,
+					server: data.nodeInstance,
+					room: data.roomId,
+					key: data.chatkey //FIXME: should we include the key?
+				};
 				Torus.local.room = data.roomId;
 			}
-			if(data.chatkey.key === false) {Torus.alert('You don\'t appear to be logged in - you must have an account to use chat on Wikia. Please [[Special:UserSignup|register]] or [[Special:UserLogin|log in]].');}
-			else if(wgCanonicalNamespace == 'Special' && wgTitle == 'Torus' && Torus.options.misc.connection.local.value) {Torus.open(Torus.local.room, data.chatkey, data.nodeInstance, data.nodePort);} //FIXME: Torus.open
+			if(wgCanonicalNamespace == 'Special' && wgTitle == 'Torus' && Torus.options.misc.connection.local.value) {(new Torus.classes.Chat(Torus.local.room, Torus.local.domain)).connect();}
 		});
 	}
 
@@ -851,13 +853,11 @@ Torus.ui.onload = function() {
 		document.getElementById(body).innerHTML = (document.getElementById('AdminDashboardHeader') ? '<div class="AdminDashboardGeneralHeader AdminDashboardArticleHeader"><h1>Torus</h1></div>' : '');
 		document.getElementById(body).appendChild(Torus.ui.window);
 
-		if(Torus.local.room && Torus.options.misc.connection.local.value) {Torus.open(Torus.local.room);}
+		if(Torus.local.room && Torus.options.misc.connection.local.value) {(new Torus.classes.Chat(Torus.local.room, Torus.local.domain)).connect();}
 		if(Torus.options.misc.connection.default_rooms.value) {
 			var rooms = Torus.options.misc.connection.default_rooms.value.split('\n');
 			for(var i = 0; i < rooms.length; i++) {
-				if(isNaN(rooms[i] * 1)) {var room = Torus.data.domains[rooms[i]];}
-				else {var room = rooms[i];}
-				if(!Torus.chats[room]) {Torus.open(rooms[i]);} //could be Torus.local.room //FIXME: Torus.open
+				if(!Torus.chats[rooms[i]] && Torus.database[rooms[i]]) {(new Torus.classes.Chat(Torus.database[rooms[i]].room, rooms[i])).connect();} //could be Torus.local.room
 			}
 		}
 	}
