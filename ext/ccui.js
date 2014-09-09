@@ -1,4 +1,6 @@
-Torus.ext.ccui = new Torus.classes.Chat(-3, 'ccui');
+new Torus.classes.Extension('ccui', -3);
+Torus.ext.ccui.ui = true;
+Torus.ext.ccui.text = 'CCUI';
 
 Torus.ext.ccui.render = function() {
 	var top = document.createElement('div');
@@ -6,7 +8,7 @@ Torus.ext.ccui.render = function() {
 			info.id = 'torus-ext-ccui-domain';
 			Torus.ui.ids['ext-ccui-domain'] = info;
 			info.className = 'torus-ext-ccui-info';
-			info.textContent = 'Current domain: ' + Torus.local + '. '; //FIXME: Torus.local
+			//info.textContent = 'Current domain: ' + Torus.local.domain + '. ';
 			var log = document.createElement('a');
 				log.href = '/wiki/Special:Log/chatconnect';
 				log.title = 'Special:Log/chatconnect';
@@ -17,7 +19,7 @@ Torus.ext.ccui.render = function() {
 			label.setAttribute('for', 'torus-ext-ccui-input');
 			label.textContent = 'User or IP:';
 		top.appendChild(label);
-		top.appendChild(document.createTextNode(String.fromCharCode(160))); //&nbsp;
+		top.appendChild(document.createTextNode(' '));
 		var input = document.createElement('input');
 			input.id = 'torus-ext-ccui-input';
 			Torus.ui.ids['ext-ccui-input'] = input;
@@ -31,23 +33,30 @@ Torus.ext.ccui.render = function() {
 			button.value = 'Find';
 			button.addEventListener('click', Torus.ext.ccui.button_click);
 		top.appendChild(button);
-		top.appendChild(document.createTextNode(String.fromCharCode(160))); //&nbsp;
+		top.appendChild(document.createTextNode(' '));
 		var label = document.createElement('label');
 			label.setAttribute('for', 'torus-ext-ccui-limit');
 			label.textContent = 'Search last';
 		top.appendChild(label);
-		top.appendChild(document.createTextNode(String.fromCharCode(160))); //&nbsp;
+		top.appendChild(document.createTextNode(' '));
 		var limit = document.createElement('input');
 			limit.id = 'torus-ext-ccui-limit';
 			Torus.ui.ids['ext-ccui-limit'] = limit;
 			limit.type = 'number';
-			limit.value = '5000';
+			limit.value = '500';
 		top.appendChild(limit);
-		top.appendChild(document.createTextNode(String.fromCharCode(160))); //&nbsp;
+		top.appendChild(document.createTextNode(' '));
 		var label = document.createElement('label');
 			label.setAttribute('for', 'torus-ext-ccui-limit');
 			label.textContent = 'connections';
 		top.appendChild(label);
+		top.appendChild(document.createTextNode(' '));
+		var wait = document.createElement('img');
+			wait.id = 'torus-ext-ccui-wait';
+			Torus.ui.ids['ext-ccui-wait'] = wait;
+			wait.src = 'http://slot1.images.wikia.nocookie.net/__cb1410215834/common/skins/common/images/ajax.gif';
+			wait.style.display = 'none';
+		top.appendChild(wait);
 	Torus.ui.ids['window'].appendChild(top);
 
 	var tables = ['ips', 'exact', 'close', 'far'];
@@ -92,16 +101,16 @@ Torus.ext.ccui.render = function() {
 }
 
 Torus.ext.ccui.fill = function(user, limit) {
-	if(Torus.ui.active != -3) {return;}
+	if(Torus.ui.active != Torus.ext.ccui) {return;}
 
-	//FIXME: some kind of wait gif
+	Torus.ui.ids['ext-ccui-wait'].style.display = 'inline';
+	Torus.ext.ccui.clear();
 
 	if(Torus.util.ip_to_int(user) == 0) {var func = Torus.ext.ccui.check_user;} //is a username
 	else {var func = Torus.ext.ccui.check_ip;} //is an IP
 
 	func(user, limit, function(matches) {
-		if(Torus.ui.active != -3) {return;}
-		Torus.ext.ccui.clear();
+		if(Torus.ui.active != Torus.ext.ccui) {return;}
 
 		for(var i in matches) {
 			Torus.ui.ids['ext-ccui-' + i + '-num'].textContent = matches[i].length;
@@ -109,40 +118,45 @@ Torus.ext.ccui.fill = function(user, limit) {
 			var even = true;
 			for(var j = 0; j < matches[i].length; j++) {
 				var time = document.createElement('li');
-				time.textContent = matches[i][j].timestamp;
-				time.className = 'torus-ext-ccui-timestamp';
-				if(even) {time.className += ' torus-ext-ccui-li-even';}
-				else {time.className += ' torus-ext-ccui-li-odd';}
+					time.textContent = matches[i][j].timestamp;
+					time.className = 'torus-ext-ccui-timestamp';
+					if(even) {time.className += ' torus-ext-ccui-li-even';}
+					else {time.className += ' torus-ext-ccui-li-odd';}
 				Torus.ui.ids['ext-ccui-' + i + '-time'].appendChild(time);
 
 				var user = document.createElement('li');
-				user.textContent = matches[i][j].user;
-				user.className = 'torus-ext-ccui-user';
-				if(even) {user.className += ' torus-ext-ccui-li-even';}
-				else {user.className += ' torus-ext-ccui-li-odd';}
+					user.textContent = matches[i][j].user;
+					user.className = 'torus-ext-ccui-user';
+					if(even) {user.className += ' torus-ext-ccui-li-even';}
+					else {user.className += ' torus-ext-ccui-li-odd';}
 				Torus.ui.ids['ext-ccui-' + i + '-users'].appendChild(user);
 
 				var ip = document.createElement('li');
-				ip.textContent = matches[i][j].ip;
-				ip.className = 'torus-ext-ccui-ip';
-				if(even) {ip.className += ' torus-ext-ccui-li-even';}
-				else {ip.className += ' torus-ext-ccui-li-odd';}
+					ip.textContent = matches[i][j].ip;
+					ip.className = 'torus-ext-ccui-ip';
+					if(even) {ip.className += ' torus-ext-ccui-li-even';}
+					else {ip.className += ' torus-ext-ccui-li-odd';}
 				Torus.ui.ids['ext-ccui-' + i + '-ips'].appendChild(ip);
 
 				if(even) {even = false;}
 				else {even = true;}
 			}
 		}
+
+		Torus.ui.ids['ext-ccui-wait'].style.display = 'none';
 	});
 }
 
 Torus.ext.ccui.clear = function() {
-	if(Torus.ui.active != -3) {return;}
+	if(Torus.ui.active != Torus.ext.ccui) {return;}
 
 	var ul = Torus.ui.ids['window'].getElementsByTagName('ul');
-	for(var i = 0; i < ul.length; i++) {
-		while(ul[i].children.length != 0) {ul[i].removeChild(ul[i].firstChild);}
-	}
+	for(var i = 0; i < ul.length; i++) {Torus.util.empty(ul[i]);}
+
+	Torus.ui.ids['ext-ccui-ips-num'].textContent = '0';
+	Torus.ui.ids['ext-ccui-exact-num'].textContent = '0';
+	Torus.ui.ids['ext-ccui-close-num'].textContent = '0';
+	Torus.ui.ids['ext-ccui-far-num'].textContent = '0';
 }
 
 Torus.ext.ccui.check_user = function(user, limit, callback) {
@@ -235,11 +249,11 @@ Torus.ext.ccui.fetch = function(limit, callback) {
 }
 
 Torus.ext.ccui.button_click = function(event) {
-	if(Torus.ui.ids['ext-ccui-input'].value) {Torus.ext.ccui.fill(Torus.ui.ids['ext-ccui-input'].value, Torus.ui.ids['ext-ccui-limit']);}
+	if(Torus.ui.ids['ext-ccui-input'].value) {Torus.ext.ccui.fill(Torus.ui.ids['ext-ccui-input'].value, Torus.ui.ids['ext-ccui-limit'].value);}
 }
 
 Torus.ext.ccui.input_keyup = function(event) {
-	if(event.keyCode == 13 && this.value) {Torus.ext.ccui.fill(this.value, Torus.ui.ids['ext-ccui-limit']);}
+	if(event.keyCode == 13 && this.value) {Torus.ext.ccui.fill(this.value, Torus.ui.ids['ext-ccui-limit'].value);}
 }
 
 //parses dates of the form HH:mm, Month D, YYYY
@@ -330,4 +344,4 @@ Torus.util.match_ip16 = function(ip1, ip2) {
 }
 
 Torus.ext.ccui.add_listener('ui', 'activate', Torus.ext.ccui.render);
-Torus.ext.ccui.add_listener('ui', 'deactivate', Torus.util.debug);
+Torus.ext.ccui.add_listener('ui', 'deactivate', Torus.util.null); //FIXME: i'm sure something important is supposed to go here

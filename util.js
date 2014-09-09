@@ -5,6 +5,7 @@ Torus.util = {
 Torus.util.xFF[0] = 255; //don't ask
 
 Torus.util.debug = function() {console.log.apply(console, arguments);}
+Torus.util.null = function() {}
 
 Torus.util.compare_strings = function(str1, str2) {
 	for(var i = 0; i < str1.length && i < str2.length; i++) {
@@ -239,4 +240,24 @@ Torus.util.stupid_to_int = function(stupid) {
 	var num = 0;
 	for(var i = 0; i < stupid.length; i++) {num += stupid.charCodeAt(stupid.length - i - 1) * Math.pow(10, i);}
 	return num;
+}
+
+Torus.util.load_js = function(url) {
+	var js = document.createElement('script');
+		js.className = 'torus-js';
+		js.src = url;
+		js.type = 'text/javascript';
+	document.head.appendChild(js);
+	return js;
+}
+
+Torus.util.load_css = function(url) {
+	var css = document.createElement('link');
+		css.className = 'torus-css';
+		css.href = url;
+		css.rel = 'stylesheet';
+		css.type = 'text/css';
+		css.media = 'screen';
+	document.head.appendChild(css);
+	return css;
 }

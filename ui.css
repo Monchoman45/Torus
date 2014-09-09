@@ -21,7 +21,7 @@
 #torus-tabs span.torus-tab {
 	position: relative;
 	top: .4em;
-	margin: .3em;
+	margin: 0 .3em;
 	padding: .1em .3em;
 	border-radius: .4em;
 	background-color: #99f;
@@ -47,13 +47,10 @@
 #torus-tabs span.torus-tab-close:hover {
 	color: red;
 }
-#torus-tab-0,
-#torus-tab--1 {
-	text-transform: capitalize;
-}
-#torus-tabs #torus-tab--1  { /*#id #id is dumb but without this #torus-tabs span.torus-tab overrides this*/
-	float: right;
-	top: 0;
+#torus-tabs #torus-tab--1 { /*#id #id is dumb but without this #torus-tabs span.torus-tab overrides this*/
+	position: absolute;
+	top: .2em;
+	right: 0;
 }
 #torus-tab--1 img {
 	vertical-align: top;
@@ -251,6 +248,12 @@
 	resize: none;
 }
 
+.torus-fakelink {
+	cursor: pointer;
+}
+
+{{MediaWiki:Torus.js/menu.css}}
+
 {{MediaWiki:Torus.js/options.css}}
 
-{{MediaWiki:Torus.js/ccui.css}}
+{{MediaWiki:Torus.js/ext/ccui.css}}

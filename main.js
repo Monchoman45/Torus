@@ -7,7 +7,10 @@
 
 window.Torus = {
 	init: false,
-	local: 0,
+	local: {
+		room: 0,
+		domain: ''
+	},
 	version: 220, //2.2.0
 	chats: {},
 	listeners: {
@@ -54,6 +57,9 @@ window.Torus = {
 			open_private: [],
 			force_reconnect: [],
 			force_disconnect: []
+		},
+		ext: {
+			'new': [],
 		}
 	},
 	io: {
@@ -73,13 +79,15 @@ window.Torus = {
 		tabpos: 0,
 		fullscreen: false
 	},
-	ext: {}
 }
 
 //Function for adding an event listener
 //Accepts the event name and the listener function
 Torus.add_listener = function(type, event, func) {
-	if(!this.listeners[type]) {throw new Error('Event type `' + type + '` doesn\'t exist');}
+	if(!this.listeners[type]) { //FIXME: the error is probably better but it causes problems with ui events
+		//throw new Error('Event type `' + type + '` doesn\'t exist');
+		this.listeners[type] = {};
+	}
 
 	if(!this.listeners[type][event]) {this.listeners[type][event] = [];}
 	this.listeners[type][event].push(func);
@@ -110,7 +118,7 @@ Torus.call_listeners = function(event) {
 		}
 	}
 
-	if(event.room && Torus.chats[event.room] && !(this instanceof Torus.classes.Chat)) {Torus.chats[event.room].call_listeners(event);}
+	if(event.room && !(this instanceof Torus.classes.Chat) && !(this instanceof Torus.classes.Extension)) {event.room.call_listeners(event);}
 
 	return true;
 }
@@ -143,7 +151,7 @@ Torus.logout = function() {
 }
 
 Torus.alert = function(text, room) {
-	if(!room) {room = 0;}
+	if(!room) {room = Torus.chats[0];}
 
 	var event = new Torus.classes.IOEvent('alert', room);
 	if(text.indexOf('\n') != -1) {
@@ -175,7 +183,11 @@ window.addEventListener('beforeunload', Torus.unload);
 
 {{MediaWiki:Torus.js/io.js}}
 
-{{MediaWiki:Torus.js/classes.js}}
+{{MediaWiki:Torus.js/chat.js}}
+
+{{MediaWiki:Torus.js/events.js}}
+
+{{MediaWiki:Torus.js/ext.js}}
 
 {{MediaWiki:Torus.js/util.js}}
 

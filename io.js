@@ -99,9 +99,9 @@ Torus.io.transports.websocket = function(room, key, server, port, session) {
 				Torus.chats[room].connecting = false;
 				Torus.chats[room].connected = true;
 				Torus.chats[room].send_command('initquery');
-				Torus.alert('Connected.', room);
+				Torus.alert('Connected.', Torus.chat[room]);
 				Torus.io.getBlockedPrivate();
-				Torus.call_listeners(new Torus.classes.IOEvent('open', room));
+				Torus.call_listeners(new Torus.classes.IOEvent('open', Torus.chats[room]));
 				break;
 			case '2::': //heartbeat
 				this.send('2::');
@@ -186,9 +186,9 @@ Torus.io.transports.polling = function(room, key, server, port, session) {
 									Torus.chats[room].connecting = false;
 									Torus.chats[room].connected = true;
 									Torus.chats[room].send_command('initquery');
-									Torus.alert('Connected.', room);
+									Torus.alert('Connected.', Torus.chats[room]);
 									Torus.io.getBlockedPrivate();
-									Torus.call_listeners(new Torus.classes.ChatEvent('open', room));
+									Torus.call_listeners(new Torus.classes.ChatEvent('open', Torus.chats[room]));
 									break;
 								case 1: //disconnect
 									Torus.chats[room].disconnect('Server closed the connection');

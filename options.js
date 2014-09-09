@@ -1,4 +1,7 @@
-Torus.options = new Torus.classes.Chat(-2, 'options');
+Torus.options = new Torus.classes.Extension('options', -2);
+Torus.ext.options.ui = true;
+Torus.ext.options.text = 'Options';
+
 Torus.options.version = 1;
 Torus.options.selected = 'pings';
 Torus.options.pings = {
