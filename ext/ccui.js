@@ -63,7 +63,8 @@ Torus.ext.ccui.render = function() {
 			wait.id = 'torus-ext-ccui-wait';
 			Torus.ui.ids['ext-ccui-wait'] = wait;
 			wait.src = 'http://slot1.images.wikia.nocookie.net/__cb1410215834/common/skins/common/images/ajax.gif';
-			wait.style.display = 'none';
+			if(Torus.ext.ccui.fetching) {wait.style.display = 'inline';}
+			else {wait.style.display = 'none';}
 		top.appendChild(wait);
 	Torus.ui.ids['window'].appendChild(top);
 
