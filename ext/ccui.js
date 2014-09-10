@@ -1,7 +1,13 @@
 new Torus.classes.Extension('ccui', -3);
 Torus.ext.ccui.text = 'CCUI';
 
-Torus.ext.ccui.checking = false;
+Torus.ext.ccui.fetching = false;
+Torus.ext.ccui.dataset = {
+	batch: [],
+	raw: null,
+	query: '',
+	matches: null,
+};
 
 Torus.ext.ccui.render = function() {
 	var top = document.createElement('div');
@@ -14,6 +20,7 @@ Torus.ext.ccui.render = function() {
 				log.href = '/wiki/Special:Log/chatconnect';
 				log.title = 'Special:Log/chatconnect';
 				log.textContent = 'S:L/chatconnect';
+				log.addEventListener('click', Torus.ui.click_link);
 			info.appendChild(log);
 		top.appendChild(info);
 		var label = document.createElement('label');
@@ -99,67 +106,105 @@ Torus.ext.ccui.render = function() {
 	Torus.ui.ids['ext-ccui-exact-info'].firstChild.textContent = 'Exact matches: ';
 	Torus.ui.ids['ext-ccui-close-info'].firstChild.textContent = '/24 matches: ';
 	Torus.ui.ids['ext-ccui-far-info'].firstChild.textContent = '/16 matches: ';
+
+	Torus.ext.ccui.fill();
 }
 
-Torus.ext.ccui.fill = function(user, limit) {
-	if(Torus.ui.active != Torus.ext.ccui || Torus.ext.ccui.checking) {return;}
+Torus.ext.ccui.query = function(query, limit) {
+	Torus.ext.ccui.dataset.query = query;
+
+	if(!Torus.ext.ccui.dataset.raw) { //FIXME: always true for now
+		Torus.ext.ccui.fetch(query, limit);
+		Torus.ext.ccui.dataset.query = query;
+		//TODO: and stuff
+	}
+	else {
+		//TODO: do things
+	}
+}
+
+//get a new raw data set
+Torus.ext.ccui.fetch = function(user, limit) {
+	if(Torus.ext.ccui.fetching) {return;}
 
 	Torus.ui.ids['ext-ccui-wait'].style.display = 'inline';
 	Torus.ext.ccui.clear();
-	Torus.ext.ccui.checking = true;
+	Torus.ext.ccui.fetching = true;
+	Torus.ext.ccui.dataset.batch = [user];
 
 	if(Torus.util.ip_to_int(user) == 0) {var func = Torus.ext.ccui.check_user;} //is a username
 	else {var func = Torus.ext.ccui.check_ip;} //is an IP
 
 	func(user, limit, function(matches) {
-		if(Torus.ui.active != Torus.ext.ccui) {return;}
+		Torus.ext.ccui.dataset.matches = matches;
 
-		for(var i in matches) {
-			Torus.ui.ids['ext-ccui-' + i + '-num'].textContent = matches[i].length;
-
-			var even = true;
-			for(var j = 0; j < matches[i].length; j++) {
-				var time = document.createElement('li');
-					time.textContent = Torus.util.print_mwdate(matches[i][j].timestamp);
-					time.className = 'torus-ext-ccui-timestamp';
-					if(even) {time.className += ' torus-ext-ccui-li-even';}
-					else {time.className += ' torus-ext-ccui-li-odd';}
-				Torus.ui.ids['ext-ccui-' + i + '-time'].appendChild(time);
-
-				var user = document.createElement('li');
-					user.textContent = matches[i][j].user;
-					user.className = 'torus-ext-ccui-user';
-					if(even) {user.className += ' torus-ext-ccui-li-even';}
-					else {user.className += ' torus-ext-ccui-li-odd';}
-				Torus.ui.ids['ext-ccui-' + i + '-users'].appendChild(user);
-
-				var ip = document.createElement('li');
-					ip.textContent = matches[i][j].ip;
-					ip.className = 'torus-ext-ccui-ip';
-					if(even) {ip.className += ' torus-ext-ccui-li-even';}
-					else {ip.className += ' torus-ext-ccui-li-odd';}
-				Torus.ui.ids['ext-ccui-' + i + '-ips'].appendChild(ip);
-
-				if(even) {even = false;}
-				else {even = true;}
-			}
-		}
+		Torus.ext.ccui.fill();
 
 		Torus.ui.ids['ext-ccui-wait'].style.display = 'none';
-		Torus.ext.ccui.checking = false;
+		Torus.ext.ccui.fetching = false;
 	});
 }
 
-Torus.ext.ccui.clear = function() {
+Torus.ext.ccui.fill = function() {
 	if(Torus.ui.active != Torus.ext.ccui) {return;}
 
-	var ul = Torus.ui.ids['window'].getElementsByTagName('ul');
-	for(var i = 0; i < ul.length; i++) {Torus.util.empty(ul[i]);}
+	var query = Torus.ext.ccui.dataset.query
+	Torus.ui.ids['ext-ccui-input'].value = query;
 
-	Torus.ui.ids['ext-ccui-ips-num'].textContent = '0';
-	Torus.ui.ids['ext-ccui-exact-num'].textContent = '0';
-	Torus.ui.ids['ext-ccui-close-num'].textContent = '0';
-	Torus.ui.ids['ext-ccui-far-num'].textContent = '0';
+	if(query && Torus.util.ip_to_int(query) != 0) {Torus.ui.ids['ext-ccui-ips'].style.display = 'none';}
+	else {Torus.ui.ids['ext-ccui-ips'].style.display = '';}
+
+	var matches = Torus.ext.ccui.dataset.matches;
+	if(!matches) {return;}
+
+	for(var i in matches) {
+		Torus.ui.ids['ext-ccui-' + i + '-num'].textContent = matches[i].length;
+
+		var even = true;
+		for(var j = 0; j < matches[i].length; j++) {
+			var time = document.createElement('li');
+				time.textContent = Torus.util.print_mwdate(matches[i][j].timestamp);
+				time.className = 'torus-ext-ccui-timestamp';
+				if(even) {time.className += ' torus-ext-ccui-li-even';}
+				else {time.className += ' torus-ext-ccui-li-odd';}
+			Torus.ui.ids['ext-ccui-' + i + '-time'].appendChild(time);
+
+			var user = document.createElement('li');
+				user.textContent = matches[i][j].user;
+				user.className = 'torus-ext-ccui-user';
+				if(even) {user.className += ' torus-ext-ccui-li-even';}
+				else {user.className += ' torus-ext-ccui-li-odd';}
+			Torus.ui.ids['ext-ccui-' + i + '-users'].appendChild(user);
+
+			var ip = document.createElement('li');
+				ip.textContent = matches[i][j].ip;
+				ip.className = 'torus-ext-ccui-ip';
+				if(even) {ip.className += ' torus-ext-ccui-li-even';}
+				else {ip.className += ' torus-ext-ccui-li-odd';}
+			Torus.ui.ids['ext-ccui-' + i + '-ips'].appendChild(ip);
+
+			if(even) {even = false;}
+			else {even = true;}
+		}
+	}
+}
+
+Torus.ext.ccui.clear = function() {
+	Torus.ext.ccui.dataset.batch = [];
+	Torus.ext.ccui.dataset.raw = null;
+	Torus.ext.ccui.dataset.query = '';
+	Torus.ext.ccui.dataset.matches = null;
+
+	if(!Torus.ui || Torus.ui.active != Torus.ext.ccui) {return;}
+
+	var tables = ['ips', 'exact', 'close', 'far'];
+	for(var i = 0; i < tables.length; i++) {
+		Torus.util.empty(Torus.ui.ids['ext-ccui-' + tables[i] + '-time']);
+		Torus.util.empty(Torus.ui.ids['ext-ccui-' + tables[i] + '-users']);
+		Torus.util.empty(Torus.ui.ids['ext-ccui-' + tables[i] + '-ips']);
+		Torus.ui.ids['ext-ccui-' + tables[i] + '-num'].textContent = '0';
+	}
+
 }
 
 Torus.ext.ccui.check_user = function(user, limit, callback) {
@@ -201,7 +246,7 @@ Torus.ext.ccui.check_user = function(user, limit, callback) {
 }
 
 Torus.ext.ccui.check_ip = function(ip, limit, callback) {
-	Torus.ext.ccui.fetch('', limit, function(data) {
+	Torus.ext.ccui.ajax('', limit, function(data) {
 		if(typeof callback != 'function') {return;}
 		if(typeof ip == 'number') {ip = Torus.util.int_to_ip(ip);}
 
@@ -320,7 +365,7 @@ Torus.ext.ccui.compare_users = function(users, limit, callback) {
 	});
 }
 
-Torus.ext.ccui.fetch = function(user, limit, callback) {
+Torus.ext.ccui.ajax = function(user, limit, callback) {
 	if(!user) {user = '';} //rather than &user=undefined or &user=false or something
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET', '/wiki/Special:Log/chatconnect?user=' + user + '&limit=' + limit + '&useskin=monobook', true);
@@ -350,7 +395,7 @@ Torus.ext.ccui.batch = function(users, limit, callback) { //suddenly B3 function
 	var group = {};
 	var waiting = users.length;
 	for(var i = 0; i < users.length; i++) {
-		Torus.ext.ccui.fetch(users[i], limit, function(data, user) {
+		Torus.ext.ccui.ajax(users[i], limit, function(data, user) {
 			group[user] = data;
 			waiting--;
 			if(waiting == 0 && typeof callback == 'function') {callback.call(Torus, group);}
@@ -360,11 +405,11 @@ Torus.ext.ccui.batch = function(users, limit, callback) { //suddenly B3 function
 }
 
 Torus.ext.ccui.button_click = function(event) {
-	if(Torus.ui.ids['ext-ccui-input'].value) {Torus.ext.ccui.fill(Torus.ui.ids['ext-ccui-input'].value, Torus.ui.ids['ext-ccui-limit'].value);}
+	if(Torus.ui.ids['ext-ccui-input'].value) {Torus.ext.ccui.query(Torus.ui.ids['ext-ccui-input'].value, Torus.ui.ids['ext-ccui-limit'].value);}
 }
 
 Torus.ext.ccui.input_keyup = function(event) {
-	if(event.keyCode == 13 && this.value) {Torus.ext.ccui.fill(this.value, Torus.ui.ids['ext-ccui-limit'].value);}
+	if(event.keyCode == 13 && this.value) {Torus.ext.ccui.query(this.value, Torus.ui.ids['ext-ccui-limit'].value);}
 }
 
 //parses dates of the form HH:mm, Month D, YYYY
@@ -458,30 +503,18 @@ Torus.util.match_ip = function(ip1, ip2, block) {
 
 //check if two ips are in the same /24 block
 Torus.util.match_ip24 = function(ip1, ip2) {
-	//FIXME: we could just convert them to ints and not care
-	if(typeof ip1 == 'string') {
-		if(typeof ip2 == 'number') {ip2 = Torus.util.int_to_ip(ip2);}
-		return ip1.substring(0, ip1.lastIndexOf('.') + 1) == ip2.substring(0, ip2.lastIndexOf('.') + 1);
-	}
-	else if(typeof ip1 == 'number') {
-		if(typeof ip2 == 'string') {ip2 = Torus.util.ip_to_int(ip2);}
-		return (ip1 & 0xffffff00) == (ip2 & 0xffffff00);
-	}
-	else {throw new Error('Bad call to util.match_ip24');}
+	if(typeof ip1 == 'string') {ip1 = Torus.util.ip_to_int(ip1);}
+	if(typeof ip2 == 'string') {ip2 = Torus.util.ip_to_int(ip2);}
+
+	return (ip1 & 0xffffff00) == (ip2 & 0xffffff00);
 }
 
 //check if two ips are in the same /16 block
 Torus.util.match_ip16 = function(ip1, ip2) {
-	//FIXME: we could just convert them to ints and not care
-	if(typeof ip1 == 'string') {
-		if(typeof ip2 == 'number') {ip2 = Torus.util.int_to_ip(ip2);}
-		return ip1.substring(0, ip1.indexOf('.', ip1.indexOf('.') + 1) + 1) == ip2.substring(0, ip2.indexOf('.', ip2.indexOf('.') + 1) + 1);
-	}
-	else if(typeof ip1 == 'number') {
-		if(typeof ip2 == 'string') {ip2 = Torus.util.ip_to_int(ip2);}
-		return (ip1 & 0xffff0000) == (ip2 & 0xffff0000);
-	}
-	else {throw new Error('Bad call to util.match_ip24');}
+	if(typeof ip1 == 'string') {ip1 = Torus.util.ip_to_int(ip1);}
+	if(typeof ip2 == 'string') {ip2 = Torus.util.ip_to_int(ip2);}
+
+	return (ip1 & 0xffff0000) == (ip2 & 0xffff0000);
 }
 
 Torus.ext.ccui.add_listener('ui', 'activate', Torus.ext.ccui.render);
