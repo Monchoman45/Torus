@@ -13,16 +13,15 @@ import os
 import http.client
 from urllib.parse import quote
 import json
+from getpass import getpass
 
 if len(sys.argv) < 4:
-	print('Usage: push.py domain username password [summary]')
+	print('Usage: push.py domain summary file1 file2 file3 ...\nOr: push.py domain summary *')
 	sys.exit(1)
-elif len(sys.argv) < 5:
-	sys.argv.append('') #fun
 
 print('Collecting files...')
 files = {}
-dirs = [os.listdir()]
+dirs = [sys.argv[3:]]
 dirnames = ['']
 while len(dirs):
 	dir = dirs[0]
@@ -42,26 +41,35 @@ while len(dirs):
 print('Connecting...')
 sock = http.client.HTTPConnection(sys.argv[1], timeout=300)
 
-print('Logging in as ' + sys.argv[2] + '...')
-user = quote(sys.argv[2])
-password = quote(sys.argv[3])
-sock.request(
-	'POST',
-	'/api.php',
-	'action=login&lgname=' + user + '&lgpassword=' + password + '&format=json',
-	{'Connection': 'Keep alive', 'Content-Type': 'application/x-www-form-urlencoded'}
-)
-response = sock.getresponse()
-session = response.getheader('Set-Cookie')
-session = session[:session.find(';') + 1]
-token = quote(json.loads(response.read().decode('utf-8'))['login']['token'])
-sock.request(
-	'POST',
-	'/api.php',
-	'action=login&lgname=' + user +'&lgpassword=' + password + '&lgtoken=' + token + '&format=json',
-	{'Connection': 'Keep alive', 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': session}
-)
-sock.getresponse().read()
+session = '';
+while not session:
+	user = quote(input('Username: '))
+	password = quote(getpass('Password: '))
+	sock.request(
+		'POST',
+		'/api.php',
+		'action=login&lgname=' + user + '&lgpassword=' + password + '&format=json',
+		{'Connection': 'Keep alive', 'Content-Type': 'application/x-www-form-urlencoded'}
+	)
+	response = sock.getresponse()
+	session = response.getheader('Set-Cookie')
+	session = session[:session.find(';') + 1]
+	token = quote(json.loads(response.read().decode('utf-8'))['login']['token'])
+	sock.request(
+		'POST',
+		'/api.php',
+		'action=login&lgname=' + user +'&lgpassword=' + password + '&lgtoken=' + token + '&format=json',
+		{'Connection': 'Keep alive', 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': session}
+	)
+	result = json.loads(sock.getresponse().read().decode('utf-8'))['login']['result']
+	if result == 'WrongPass':
+		print('Wrong password')
+		session = ''
+	elif result == 'NotExists':
+		print('Wrong account')
+		session = ''
+	elif result == 'Success': break
+	else: print('DEBUG: ' + result)
 
 print('Fetching tokens...')
 sock.request(
@@ -73,17 +81,19 @@ sock.request(
 pages = json.loads(sock.getresponse().read().decode('utf-8'))['query']['pages']
 
 for page in pages:
-	print('Publishing: ' + pages[page]['title'] + ' ... ', end='')
+	print('Publishing: ' + pages[page]['title'] + ' ... ', end='\r')
 	sock.request(
 		'POST',
 		'/api.php',
-		'action=edit&title=' + pages[page]['title'] + '&text=' + quote(files[pages[page]['title']]) + '&summary=' + quote(sys.argv[4]) + '&token=' + quote(pages[page]['edittoken']) + '&format=json',
+		'action=edit&title=' + pages[page]['title'] + '&text=' + quote(files[pages[page]['title']]) + '&summary=' + quote(sys.argv[2]) + '&token=' + quote(pages[page]['edittoken']) + '&format=json',
 		{'Content-Type': 'application/x-www-form-urlencoded', 'Connection': 'Keep alive', 'Cookie': session}
 	)
 	response = json.loads(sock.getresponse().read().decode('utf-8'))
-	if 'edit' in response: print(response['edit']['result'])
+	print('Publishing: ' + pages[page]['title'] + ' ... ', end='')
+	if 'edit' in response:  print(response['edit']['result'])
 	else: print('Error ' + response['error']['code'] + ': ' + response['error']['info'])
 
 print('Logging out...')
 sock.request('GET', '/api.php?action=logout', '', {'Cookie': session})
+sock.getresponse().read()
 sock.close()
