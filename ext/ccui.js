@@ -1,6 +1,8 @@
 new Torus.classes.Extension('ccui', -3);
 Torus.ext.ccui.text = 'CCUI';
 
+Torus.ext.ccui.checking = false;
+
 Torus.ext.ccui.render = function() {
 	var top = document.createElement('div');
 		var info = document.createElement('div');
@@ -100,10 +102,11 @@ Torus.ext.ccui.render = function() {
 }
 
 Torus.ext.ccui.fill = function(user, limit) {
-	if(Torus.ui.active != Torus.ext.ccui) {return;}
+	if(Torus.ui.active != Torus.ext.ccui || Torus.ext.ccui.checking) {return;}
 
 	Torus.ui.ids['ext-ccui-wait'].style.display = 'inline';
 	Torus.ext.ccui.clear();
+	Torus.ext.ccui.checking = true;
 
 	if(Torus.util.ip_to_int(user) == 0) {var func = Torus.ext.ccui.check_user;} //is a username
 	else {var func = Torus.ext.ccui.check_ip;} //is an IP
@@ -117,7 +120,7 @@ Torus.ext.ccui.fill = function(user, limit) {
 			var even = true;
 			for(var j = 0; j < matches[i].length; j++) {
 				var time = document.createElement('li');
-					time.textContent = matches[i][j].timestamp;
+					time.textContent = Torus.util.print_mwdate(matches[i][j].timestamp);
 					time.className = 'torus-ext-ccui-timestamp';
 					if(even) {time.className += ' torus-ext-ccui-li-even';}
 					else {time.className += ' torus-ext-ccui-li-odd';}
@@ -143,6 +146,7 @@ Torus.ext.ccui.fill = function(user, limit) {
 		}
 
 		Torus.ui.ids['ext-ccui-wait'].style.display = 'none';
+		Torus.ext.ccui.checking = false;
 	});
 }
 
@@ -159,7 +163,7 @@ Torus.ext.ccui.clear = function() {
 }
 
 Torus.ext.ccui.check_user = function(user, limit, callback) {
-	Torus.ext.ccui.fetch(limit, function(data) {
+	Torus.ext.ccui.batch(['', user], limit, function(data) {
 		if(typeof callback != 'function') {return;}
 
 		var matches = {
@@ -170,29 +174,26 @@ Torus.ext.ccui.check_user = function(user, limit, callback) {
 		};
 
 		//first, get all the ips `user` has connected from
-		for(var i = 0; i < data.length; i++) {
-			if(data[i].user != user) {continue;}
-
+		for(var i = 0; i < data[user].length; i++) {
 			//don't add duplicates - these come to us sorted newest first, and we want the newest entries anyway
 			var add = true;
 			for(var j = 0; j < matches.ips.length; j++) {
-				if(data[i].ip == matches.ips[j].ip) {add = false; break;}
+				if(data[user][i].ip == matches.ips[j].ip) {add = false; break;}
 			}
-			if(add) {matches.ips.push(data[i]);}
+			if(add) {matches.ips.push(data[user][i]);}
 		}
 
 		//now figure out what they match
-		for(var i = 0; i < data.length; i++) {
-			if(data[i].user == user) {continue;}
+		for(var i = 0; i < data[''].length; i++) {
+			if(data[''][i].user == user) {continue;}
 
-			//FIXME: this is ugly as hell
-			var best = 3;
+			var best = '';
 			for(var j = 0; j < matches.ips.length; j++) {
-				if(data[i].ip == matches.ips[j].ip) {best = 0; break;}
-				else if(Torus.util.match_ip24(data[i].ip, matches.ips[j].ip) && best > 1) {best = 1;}
-				else if(Torus.util.match_ip16(data[i].ip, matches.ips[j].ip) && best > 2) {best = 2;}
+				if(data[''][i].ip == matches.ips[j].ip) {best = 'exact'; break;}
+				else if(Torus.util.match_ip24(data[''][i].ip, matches.ips[j].ip)) {best = 'close';}
+				else if(Torus.util.match_ip16(data[''][i].ip, matches.ips[j].ip) && best == '') {best = 'far';}
 			}
-			if(best < 3) {matches[['exact', 'close', 'far'][best]].push(data[i]);}
+			if(best) {matches[best].push(data[''][i]);}
 		}
 
 		callback.call(Torus, matches);
@@ -200,7 +201,7 @@ Torus.ext.ccui.check_user = function(user, limit, callback) {
 }
 
 Torus.ext.ccui.check_ip = function(ip, limit, callback) {
-	Torus.ext.ccui.fetch(limit, function(data) {
+	Torus.ext.ccui.fetch('', limit, function(data) {
 		if(typeof callback != 'function') {return;}
 		if(typeof ip == 'number') {ip = Torus.util.int_to_ip(ip);}
 
@@ -222,9 +223,107 @@ Torus.ext.ccui.check_ip = function(ip, limit, callback) {
 	});
 }
 
-Torus.ext.ccui.fetch = function(limit, callback) {
+Torus.ext.ccui.compare_users = function(users, limit, callback) {
+	Torus.ext.ccui.batch(users, limit, function(data) {
+		if(typeof callback != 'function') {return;}
+
+		var matches = {
+			ips: {},
+			users: {}
+		};
+
+		for(var user in data) {
+			matches.users[user] = {
+				ips: [],
+				exact: [],
+				close: [],
+				far: []
+			};
+			for(var j = 0; j < data[user].length; j++) {
+				var entry = data[user][j];
+
+				//don't add duplicates - these come to us sorted newest first, and we want the newest entries anyway
+				var add = true;
+				for(var k = 0; k < matches.users[user].ips.length; k++) { //yo dawg, i herd u leik for loops
+					if(entry.ip == matches.users[user].ips[k].ip) {add = false; break;}
+				}
+				if(add) {matches.users[user].ips.push(entry);}
+
+				if(!matches.ips[entry.ip]) {
+					matches.ips[entry.ip] = {
+						ips: [], //not that we ever use this
+						exact: [],
+						close: [],
+						far: []
+					};
+				}
+			}
+		}
+
+		//now we have everyone's IPs
+		//fill matches.ips first
+		for(var ip in matches.ips) {
+			for(var user in data) {
+				for(var j = 0; j < data[user].length; j++) {
+					var entry = data[user][j];
+					if(ip == entry.ip) {matches.ips[ip].exact.push(entry);}
+					else if(Torus.util.match_ip24(ip, entry.ip)) {matches.ips[ip].close.push(entry);}
+					else if(Torus.util.match_ip16(ip, entry.ip)) {matches.ips[ip].far.push(entry);}
+				}
+			}
+		}
+
+		//now we know every match for every ip
+		//we can do the merge half of merge sort to fill the user matches in sorted order now
+		for(var i in matches.users) {
+			var ips = [];
+			var pointers = [];
+			for(var j = 0; j < matches.users[i].ips.length; j++) {
+				ips.push(matches.ips[matches.users[i].ips[j].ip]);
+				pointers.push(0);
+			}
+			if(ips.length == 0) {continue;} //this will probably never happen but if it did it would probably be bad
+			var empty = 0;
+
+			var arrs = ['exact', 'close', 'far'];
+			for(var j = 0; j < arrs.length; j++) {
+				while(empty < ips.length) {
+					var max_i = 0;
+					var max_time = 0;
+					for(var k = 0; k < ips.length; k++) {
+						if(pointers[k] == ips[k][arrs[j]].length) {continue;}
+						var t = ips[k][arrs[j]][pointers[k]].timestamp.getTime();
+						if(t > max_time) {
+							max_i = k;
+							max_time = t;
+						}
+					}
+					if(max_time == 0) {break;} //everything is empty
+
+					var max = ips[max_i][arrs[j]][pointers[max_i]];
+					if( //filter duplicates:
+						max.user != i //this is an entry from the user we're looking at, it doesn't count
+						&& matches.users[i].exact.indexOf(max) == -1 //we add these closest first
+						&& matches.users[i].close.indexOf(max) == -1 //so if it hits any of these,
+						&& matches.users[i].far.indexOf(max) == -1 //we've already added it in a closer list
+					) {matches.users[i][arrs[j]].push(max);}
+
+					pointers[max_i]++;
+					if(pointers[max_i] == ips[max_i].length) {empty++;}
+				}
+				empty = 0;
+				for(var k = 0; k < ips.length; k++) {pointers[k] = 0;}
+			}
+		}
+
+		callback.call(Torus, matches);
+	});
+}
+
+Torus.ext.ccui.fetch = function(user, limit, callback) {
+	if(!user) {user = '';} //rather than &user=undefined or &user=false or something
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '/wiki/Special:Log/chatconnect?limit=' + limit + '&useskin=monobook', true);
+	xhr.open('GET', '/wiki/Special:Log/chatconnect?user=' + user + '&limit=' + limit + '&useskin=monobook', true);
 	xhr.responseType = 'document';
 	xhr.onreadystatechange = function() {
 		if(this.readyState == 4) {
@@ -234,17 +333,30 @@ Torus.ext.ccui.fetch = function(limit, callback) {
 				var data = [];
 				for(var i = 0; i < li.length; i++) {
 					data.push({
-						//timestamp: Torus.util.parse_date(li[i].firstChild.textContent.trim()),
-						timestamp: li[i].firstChild.textContent.trim(),
+						timestamp: Torus.util.parse_mwdate(li[i].firstChild.textContent.trim()),
+						//timestamp: li[i].firstChild.textContent.trim(),
 						user: li[i].getElementsByTagName('a')[0].textContent,
 						ip: li[i].lastChild.textContent.trim().substring(li[i].lastChild.textContent.trim().lastIndexOf(' ') + 1),
 					});
 				}
-				callback.call(Torus, data);
+				callback.call(Torus, data, user);
 			}
 		}
 	}
 	xhr.send();
+}
+
+Torus.ext.ccui.batch = function(users, limit, callback) { //suddenly B3 functions are useful
+	var group = {};
+	var waiting = users.length;
+	for(var i = 0; i < users.length; i++) {
+		Torus.ext.ccui.fetch(users[i], limit, function(data, user) {
+			group[user] = data;
+			waiting--;
+			if(waiting == 0 && typeof callback == 'function') {callback.call(Torus, group);}
+		});
+	}
+	return group;
 }
 
 Torus.ext.ccui.button_click = function(event) {
@@ -258,7 +370,7 @@ Torus.ext.ccui.input_keyup = function(event) {
 //parses dates of the form HH:mm, Month D, YYYY
 //eg 22:46, September 7, 2014
 //MW dumps these out on log pages
-Torus.util.parse_date = function(date) {
+Torus.util.parse_mwdate = function(date) {
 	var spl = date.split(',');
 	for(var i = 0; i < spl.length; i++) {spl[i] = spl[i].trim().toLowerCase();}
 
@@ -283,7 +395,35 @@ Torus.util.parse_date = function(date) {
 
 	var year = spl[2] * 1;
 
-	return new Date(year, month, day, hours, minutes);
+	return new Date(Date.UTC(year, month, day, hours, minutes));
+}
+
+//inverse of util.parse_mwdate
+Torus.util.print_mwdate = function(date) {
+	var hours = date.getUTCHours();
+	if(hours < 10) {hours = '0' + hours;}
+	var minutes = date.getUTCMinutes();
+	if(minutes < 10) {minutes = '0' + minutes;}
+
+	switch(date.getUTCMonth()) {
+		case 0: var month = 'January'; break;
+		case 1: var month = 'February'; break;
+		case 2: var month = 'March'; break;
+		case 3: var month = 'April'; break;
+		case 4: var month = 'May'; break;
+		case 5: var month = 'June'; break;
+		case 6: var month = 'July'; break;
+		case 7: var month = 'August'; break;
+		case 8: var month = 'September'; break;
+		case 9: var month = 'October'; break;
+		case 10: var month = 'November'; break;
+		case 11: var month = 'December'; break;
+	}
+	var day = date.getUTCDate();
+
+	var year = date.getUTCFullYear();
+
+	return hours + ':' + minutes + ', ' + month + ' ' + day + ', ' + year;
 }
 
 Torus.util.ip_to_int = function(ip) {
@@ -318,6 +458,7 @@ Torus.util.match_ip = function(ip1, ip2, block) {
 
 //check if two ips are in the same /24 block
 Torus.util.match_ip24 = function(ip1, ip2) {
+	//FIXME: we could just convert them to ints and not care
 	if(typeof ip1 == 'string') {
 		if(typeof ip2 == 'number') {ip2 = Torus.util.int_to_ip(ip2);}
 		return ip1.substring(0, ip1.lastIndexOf('.') + 1) == ip2.substring(0, ip2.lastIndexOf('.') + 1);
@@ -331,6 +472,7 @@ Torus.util.match_ip24 = function(ip1, ip2) {
 
 //check if two ips are in the same /16 block
 Torus.util.match_ip16 = function(ip1, ip2) {
+	//FIXME: we could just convert them to ints and not care
 	if(typeof ip1 == 'string') {
 		if(typeof ip2 == 'number') {ip2 = Torus.util.int_to_ip(ip2);}
 		return ip1.substring(0, ip1.indexOf('.', ip1.indexOf('.') + 1) + 1) == ip2.substring(0, ip2.indexOf('.', ip2.indexOf('.') + 1) + 1);

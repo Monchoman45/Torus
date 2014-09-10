@@ -16,7 +16,7 @@ Torus.ui.menu.render = function() {
 		links.appendChild(github);
 		links.appendChild(document.createTextNode(' | '));
 		var report = document.createElement('a');
-			report.href = 'https://github.com/Monchoman45/Torus/issues';
+			report.href = 'https://github.com/Monchoman45/Torus/issues/new';
 			report.textContent = 'report a bug';
 			report.addEventListener('click', Torus.ui.click_link);
 		links.appendChild(report);

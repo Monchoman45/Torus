@@ -292,7 +292,12 @@ Torus.classes.Chat.prototype['event_chat:add'] = function(data) {
 			case 'chat-err-connected-from-another-browser':
 				//TODO: make this its own event
 				event.event = 'alert';
-				event.text = 'You are connected to ' + this.name + ' from another window.';
+				event.text = 'You are connected to ' + this.name + ' from another window.'; //FIXME: i18n
+				break;
+			case 'chat-kick-cant-kick-moderator':
+				//TODO: figure out who we tried to kick
+				event.event = 'alert';
+				event.text = 'Can\'t kick moderators.'; //FIXME: i18n
 				break;
 			default:
 				console.log(event);
