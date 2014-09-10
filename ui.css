@@ -74,7 +74,7 @@
 #torus-sidebar li.torus-user {
 	padding-left: 1.5em;
 }
-#torus-sidebar li.torus-user-away {
+#torus-sidebar span.torus-user-away {
 	color: #666;
 	font-style: italic;
 }
@@ -85,7 +85,6 @@
 #torus-sidebar img.torus-user-icon-staff,
 #torus-sidebar img.torus-user-icon-mod {
 	height: 1em;
-	vertical-align: top;
 	margin-top: .1em;
 }
 #torus-sidebar img.torus-user-icon-staff {

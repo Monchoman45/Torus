@@ -1,4 +1,4 @@
-new Torus.classes.Extension('ccui', -3);
+new Torus.classes.Extension('ccui', -11);
 Torus.ext.ccui.text = 'CCUI';
 
 Torus.ext.ccui.fetching = false;
@@ -269,6 +269,11 @@ Torus.ext.ccui.check_ip = function(ip, limit, callback) {
 	});
 }
 
+//XXX: time complexity of this is O(u*(i/2)*e + i*e + e)
+//XXX: where u is # of users, i is # of unique ips, and e is total # of entries in the data set
+//XXX: generally speaking, u is probably the smallest, then i is a little bigger (u*3 or 4), and e tops out at u*limit which is a lot
+//XXX: so protip: you can check a lot of users against each other really fast if you use a low `limit` value
+//XXX: remember that you get up to `limit` entries for each user you ask for, so you probably don't need a high `limit` value anyway
 Torus.ext.ccui.compare_users = function(users, limit, callback) {
 	Torus.ext.ccui.batch(users, limit, function(data) {
 		if(typeof callback != 'function') {return;}
@@ -285,13 +290,13 @@ Torus.ext.ccui.compare_users = function(users, limit, callback) {
 				close: [],
 				far: []
 			};
-			for(var j = 0; j < data[user].length; j++) {
-				var entry = data[user][j];
+			for(var i = 0; i < data[user].length; i++) {
+				var entry = data[user][i];
 
 				//don't add duplicates - these come to us sorted newest first, and we want the newest entries anyway
 				var add = true;
-				for(var k = 0; k < matches.users[user].ips.length; k++) { //yo dawg, i herd u leik for loops
-					if(entry.ip == matches.users[user].ips[k].ip) {add = false; break;}
+				for(var j = 0; j < matches.users[user].ips.length; j++) { //yo dawg, i herd u leik for loops
+					if(entry.ip == matches.users[user].ips[j].ip) {add = false; break;}
 				}
 				if(add) {matches.users[user].ips.push(entry);}
 
@@ -308,10 +313,13 @@ Torus.ext.ccui.compare_users = function(users, limit, callback) {
 
 		//now we have everyone's IPs
 		//fill matches.ips first
+		//FIXME: this is O(i*e) but we can do it in O(i^2 + (i/2)*e) if we store exact matches for each IP in the loop above,
+		//FIXME: then merge together every exact list from every ip we are in the same /24 or /16 block as
+		//FIXME: note that this is more efficient because e is generally a large number, while u and i are small (in fact, i^2 is probably less than e)
 		for(var ip in matches.ips) {
 			for(var user in data) {
-				for(var j = 0; j < data[user].length; j++) {
-					var entry = data[user][j];
+				for(var i = 0; i < data[user].length; i++) {
+					var entry = data[user][i];
 					if(ip == entry.ip) {matches.ips[ip].exact.push(entry);}
 					else if(Torus.util.match_ip24(ip, entry.ip)) {matches.ips[ip].close.push(entry);}
 					else if(Torus.util.match_ip16(ip, entry.ip)) {matches.ips[ip].far.push(entry);}
@@ -521,5 +529,7 @@ Torus.util.match_ip16 = function(ip1, ip2) {
 	return (ip1 & 0xffff0000) == (ip2 & 0xffff0000);
 }
 
-Torus.ext.ccui.add_listener('ui', 'activate', Torus.ext.ccui.render);
-Torus.ext.ccui.add_listener('ui', 'deactivate', Torus.util.null); //FIXME: i'm sure something important is supposed to go here
+if(Torus.ui) {
+	Torus.ext.ccui.add_listener('ui', 'activate', Torus.ext.ccui.render);
+	Torus.ext.ccui.add_listener('ui', 'deactivate', Torus.util.null); //FIXME: i'm sure something important is supposed to go here
+}
