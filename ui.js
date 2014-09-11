@@ -153,8 +153,8 @@ Torus.ui.activate = function(room) {
 				Torus.ui.ids['info'].textContent += ' of ';
 				var a = document.createElement('a');
 				a.href = 'http://' + room.name + '.wikia.com';
-				a.addEventListener('click', Torus.ui.click_link);
 				a.textContent = room.name;
+				a.addEventListener('click', Torus.ui.click_link);
 				Torus.ui.ids['info'].appendChild(a);
 			}
 			Torus.ui.ids['info'].appendChild(document.createTextNode('. (' + room.id + ')'));
@@ -164,8 +164,8 @@ Torus.ui.activate = function(room) {
 			if(room.parent) {
 				var a = document.createElement('a');
 				a.href = 'http://' + room.parent.name + '.wikia.com';
-				a.addEventListener('click', Torus.ui.click_link);
 				a.textContent = room.parent.name;
+				a.addEventListener('click', Torus.ui.click_link);
 				Torus.ui.ids['info'].appendChild(a);
 			}
 			else {Torus.ui.ids['info'].textContent += room.parent.name;}
@@ -284,46 +284,142 @@ Torus.ui.add_line = function(event) {
 	}
 }
 
-Torus.ui.render_line = function(message) { //FIXME: innerHTML +=
+Torus.ui.render_line = function(message) {
 	if(message.type != 'io') {throw new Error('Event type must be `io`. (ui.render_line)');}
 	var line = document.createElement('div');
-	line.className = 'torus-message torus-room-' + message.room.id;
-	if(message.room != Torus.ui.active) {line.className += ' torus-message-inactive';}
-	line.innerHTML = '<span class="torus-message-timestamp">[' + Torus.util.timestamp(message.time) + ']</span> <span class="torus-message-room">(' + message.room.name + ')</span> ';
-	switch(message.event) {
-		case 'message':
-			line.innerHTML += '&lt;<span class="torus-message-usercolor" style="color:' + Torus.util.color_hash(message.user) + ';">' + message.user + '</span>&gt; ' + message.html;
-			break;
-		case 'me':
-			line.innerHTML += '* <span class="torus-message-usercolor" style="color:' + Torus.util.color_hash(message.user) + ';">' + message.user + '</span> ' + message.html;
-			break;
-		case 'alert':
-			line.innerHTML += '== ' + message.html;
-			break;
-		case 'join':
-		case 'rejoin':
-		case 'ghost':
-			line.innerHTML += '== <span class="torus-message-usercolor" style="color:' + Torus.util.color_hash(message.user) + ';">' + message.user + '</span> ' + message.event + 'ed ' + message.room.name;
-			break;
-		case 'part':
-			line.innerHTML += '== <span class="torus-message-usercolor" style="color:' + Torus.util.color_hash(message.user) + ';">' + message.user + '</span> left ' + message.room.name;
-			break;
-		case 'logout':
-			line.innerHTML += '== <span class="torus-message-usercolor" style="color:' + Torus.util.color_hash(message.user) + ';">' + message.user + '</span> logged out';
-			break;
-		case 'mod':
-			line.innerHTML += '== <span class="torus-usercolor" style="color:' + Torus.util.color_hash(message.performer) + '">' + message.performer + '</span> promoted <span class="torus-usercolor" style="color:' + Torus.util.color_hash(message.target) + '">' + message.target + '</span> to chatmod';
-			break;
-		case 'kick':
-		case 'ban':
-		case 'unban':
-			if(message.event != 'kick') {var tense = 'ned';} //curse you, english language
-			else {var tense = 'ed'}
-			line.innerHTML += '== <span class="torus-message-usercolor" style="color:' + Torus.util.color_hash(message.performer) + ';">' + message.performer + '</span> ' + message.event + tense + ' <a href="/wiki/User:' + message.target + '" class="torus-message-usercolor" style="color:' + Torus.util.color_hash(message.target) + ';">' + message.target + '</a> (<a href="/wiki/User_talk:' + message.target + '">t</a>|<a href="/wiki/Special:Contributions/' + message.target + '">c</a>|<a href="/wiki/Special:Log/chatban?user=User:' + message.target + '">log</a>|<a href="/wiki/Special:Log/chatconnect?user=' + message.target + '">ccon</a>) from ' + message.room.name;
-			if(message.event == 'ban') {line.innerHTML += ' for ' + message.expiry;}
-			break;
-		default: throw new Error('Message type ' + message.event + ' is not rendered. (ui.render_line)');
-	}
+		line.className = 'torus-message torus-room-' + message.room.id;
+		if(message.room != Torus.ui.active) {line.classList.add('torus-message-inactive');}
+		var time = document.createElement('span');
+			time.className = 'torus-message-timestamp';
+			time.textContent = '[' + Torus.util.timestamp(message.time) + ']';
+		line.appendChild(time);
+		line.appendChild(document.createTextNode(' '));
+		var room = document.createElement('span');
+			room.className = 'torus-message-room';
+			room.textContent = '(' + message.room.name + ')';
+		line.appendChild(room);
+		line.appendChild(document.createTextNode(' '));
+
+		switch(message.event) {
+			case 'me':
+			case 'message':
+				if(message.event == 'me') {line.appendChild(document.createTextNode('<'));}
+				else {line.appendChild(document.createTextNode('* '));}
+				var user = document.createElement('span');
+					user.className = 'torus-message-usercolor';
+					user.style.color = Torus.util.color_hash(message.user);
+					user.textContent = message.user;
+				line.appendChild(user);
+				if(message.event == 'me') {line.appendChild(document.createTextNode('> '));}
+				line.innerHTML += message.html; //FIXME: innerHTML +=
+				break;
+			case 'alert':
+				line.appendChild(document.createTextNode('== '));
+				line.innerHTML += message.html; //FIXME: innerHTML +=
+				break;
+			case 'join':
+			case 'rejoin':
+			case 'ghost':
+				//FIXME: i18n - this shows up as "user joined room"
+				//FIXME: and ghost is only here because message.event + 'ed' is the correct tense
+				line.appendChild(document.createTextNode('== '));
+				var user = document.createElement('span');
+					user.className = 'torus-message-usercolor';
+					user.style.color = Torus.util.color_hash(message.user);
+					user.textContent = message.user;
+				line.appendChild(user);
+				line.appendChild(document.createTextNode(' ' + message.event + 'ed ' + message.room.name));
+				break;
+			case 'part':
+				//FIXME: i18n
+				line.appendChild(document.createTextNode('== '));
+				var user = document.createElement('span');
+					user.className = 'torus-message-usercolor';
+					user.style.color = Torus.util.color_hash(message.user);
+					user.textContent = message.user;
+				line.appendChild(user);
+				line.appendChild(document.createTextNode(' left ' + message.room.name));
+				break;
+			case 'logout':
+				//FIXME: i18n
+				line.appendChild(document.createTextNode('== '));
+				var user = document.createElement('span');
+					user.className = 'torus-message-usercolor';
+					user.style.color = Torus.util.color_hash(message.user);
+					user.textContent = message.user;
+				line.appendChild(user);
+				line.appendChild(document.createTextNode(' logged out'));
+				break;
+			case 'mod':
+				//FIXME: i18n
+				line.appendChild(document.createTextNode('== '));
+				var performer = document.createElement('span');
+					performer.className = 'torus-message-usercolor';
+					performer.style.color = Torus.util.color_hash(message.performer);
+					performer.textContent = message.performer;
+				line.appendChild(performer);
+				line.appendChild(document.createTextNode(' promoted '));
+				var target = document.createElement('span');
+					target.className = 'torus-message-usercolor';
+					target.style.color = Torus.util.color_hash(message.target);
+					target.textContent = message.target;
+				line.appendChild(target);
+				line.appendChild(document.createTextNode(' to chatmod'));
+				break;
+			case 'kick':
+			case 'ban':
+			case 'unban':
+				//FIXME: i18n
+				if(message.event != 'kick') {var tense = 'ned';} //curse you, english language
+				else {var tense = 'ed'}
+				line.appendChild(document.createTextNode('== '));
+				var performer = document.createElement('span');
+					performer.className = 'torus-message-performercolor';
+					performer.style.color = Torus.util.color_hash(message.performer);
+					performer.textContent = message.performer;
+				line.appendChild(performer);
+				line.appendChild(document.createTextNode(' ' + message.event + tense + ' '));
+				var target = document.createElement('a');
+					target.className = 'torus-message-usercolor';
+					target.href = '/wiki/User:' + message.target;
+					target.style.color = Torus.util.color_hash(message.target);
+					target.textContent = message.target;
+					target.addEventListener('click', Torus.ui.click_link);
+				line.appendChild(target);
+				line.appendChild(document.createTextNode(' ('));
+				var talk = document.createElement('a');
+					talk.href = '/wiki/User_talk:' + message.target;
+					talk.textContent = 't';
+					talk.addEventListener('click', Torus.ui.click_link);
+				line.appendChild(talk);
+				line.appendChild(document.createTextNode('|'));
+				var talk = document.createElement('a');
+					talk.href = '/wiki/Special:Contributions/' + message.target;
+					talk.textContent = 'c';
+					talk.addEventListener('click', Torus.ui.click_link);
+				line.appendChild(talk);
+				line.appendChild(document.createTextNode('|'));
+				var talk = document.createElement('a');
+					talk.href = '/wiki/Special:Log/chatban?page=User:' + message.target;
+					talk.textContent = 'log';
+					talk.addEventListener('click', Torus.ui.click_link);
+				line.appendChild(talk);
+				line.appendChild(document.createTextNode('|'));
+				var talk = document.createElement('a');
+					//talk.href = '/wiki/Special:Log/chatconnect?user=' + message.target;
+					talk.className = 'torus-fakelink';
+					talk.textContent = 'ccon';
+					//talk.addEventListener('click', Torus.ui.click_link);
+					talk.addEventListener('click', function() { //FIXME: closure, also ccui is not required
+						Torus.ui.activate(Torus.ext.ccui);
+						Torus.ext.ccui.query(message.user);
+					});
+				line.appendChild(talk);
+				line.appendChild(document.createTextNode(') from ' + message.room.name));
+				if(message.event == 'ban') {line.appendChild(document.createTextNode(' for ' + message.expiry));}
+				break;
+			default: throw new Error('Message type ' + message.event + ' is not rendered. (ui.render_line)');
+		}
 	return line;
 }
 

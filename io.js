@@ -289,7 +289,7 @@ Torus.io.transports.polling.prototype.poll = function() {
 		} //status == 200
 		else if(this.status == 404) {this.sock.poll();} //this apparently happens a lot
 		else if(this.status != 0) {
-			this.sock.call_listeners('io', 'disconnect', {
+			this.sock.call_listeners({
 				type: 'io',
 				event: 'disconnect',
 				message: 'Socket error (polling): HTTP status ' + this.status,
@@ -302,7 +302,7 @@ Torus.io.transports.polling.prototype.poll = function() {
 	}
 	this.xhr.onabort = function(event) {
 		console.log(event);
-		this.sock.call_listeners('io', 'disconnect', {
+		this.sock.call_listeners({
 			type: 'io',
 			event: 'disconnect',
 			message: 'aborted',
