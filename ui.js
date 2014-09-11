@@ -892,6 +892,13 @@ Torus.util.empty = function(el) {
 	while(el.firstChild) {el.removeChild(el.firstChild);}
 }
 
+Torus.util.fill_el = function(el, arr) {
+	//TODO: Torus.util.empty(el); first?
+	var frag = document.createDocumentFragment();
+	for(var i = 0; i < arr.length; i++) {frag.appendChild(arr[i]);}
+	el.appendChild(frag);
+}
+
 {{MediaWiki:Torus.js/menu.js}}
 
 //(function() { //I really hate these but it's better then leaking temp variables everywhere

@@ -71,6 +71,8 @@ window.Torus = {
 	data: {
 		domains: {},
 		ids: {},
+		blocked: [],
+		blockedBy: [],
 		titleflash: document.title,
 		pinginterval: 0,
 		history: [],

@@ -1,7 +1,7 @@
 Torus.options = new Torus.classes.Extension('options', -2);
-Torus.ext.options.ui = true;
 Torus.ext.options.text = 'Options';
 
+Torus.options.sidebar = [];
 Torus.options.version = 1;
 Torus.options.selected = 'pings';
 Torus.options.pings = {
@@ -79,13 +79,30 @@ Torus.options.misc = {
 	}
 };
 
-Torus.options.render = function(group) {
-	var sidebar = '';
-	var html = '';
+Torus.options.rebuild = function() {
+	Torus.options.sidebar = [];
 	for(var i in Torus.options) {
-		if(typeof Torus.options[i] != 'object' || i == 'listeners') {continue;}
+		if(typeof Torus.options[i] != 'object' || i == 'listeners' || i == 'sidebar') {continue;}
+		var li = document.createElement('li');
+			li.className = 'torus-option-group';
+			li.textContent = i.charAt(0).toUpperCase() + i.substring(1);
+			li.addEventListener('click', Torus.options.click_sidebar);
+		Torus.options.sidebar.push(li);
+	}
 
-		sidebar += '<li class="torus-option-group' + (i == group ? ' torus-option-group-selected' : '') + '" onclick="Torus.options.render(\'' + i.toLowerCase() + '\');">' + i.charAt(0).toUpperCase() + i.substring(1) + '</li>';
+	//TODO: also do each group somewhere
+}
+
+Torus.options.render = function(group) {
+	var html = '';
+
+	for(var i in Torus.options.sidebar) {
+		if(i == group) {Torus.options.sidebar[i].classList.add('torus-option-group-selected');}
+		else {Torus.options.sidebar[i].classList.remove('torus-option-group-selected');}
+	}
+	for(var i in Torus.options) {
+		if(typeof Torus.options[i] != 'object' || i == 'listeners' || i == 'sidebar') {continue;}
+
 		if(i != group) {continue;}
 		for(var j in Torus.options[i]) {
 			if(typeof Torus.options[i][j] != 'object') {console.log(i, j, Torus.options[i][j]); continue;}
@@ -121,16 +138,17 @@ Torus.options.render = function(group) {
 		}
 	}
 	Torus.ui.ids['window'].innerHTML = '<div id="torus-options-window">' + html + '</div>';
-	Torus.ui.ids['sidebar'].innerHTML = sidebar;
+	Torus.util.fill_el(Torus.ui.ids['sidebar'], Torus.options.sidebar);
 
 	if(!group) {Torus.options.save();}
 	else {Torus.options.selected = group;}
-	//Torus.callListeners('options_render', group);
+	//Torus.call_listeners('options_render', group);
 }
 
 Torus.options.save = function() {
 	var save = {};
 	for(var i in Torus.options) {
+		if(i == 'sidebar') {continue;}
 		if(typeof Torus.options[i] == 'object') {
 			save[i] = {};
 			for(var j in Torus.options[i]) {
@@ -182,8 +200,12 @@ Torus.options.load = function() {
 	}
 }
 
+Torus.options.click_sidebar = function() {Torus.options.render(this.getAttribute('data-id'));}
+
 Torus.add_listener('window', 'load', Torus.options.load);
 Torus.add_listener('window', 'unload', Torus.options.save);
 
 Torus.options.add_listener('ui', 'activate', function() {Torus.options.render(Torus.options.selected);});
 Torus.options.add_listener('ui', 'deactivate', Torus.options.save);
+
+Torus.options.rebuild();
