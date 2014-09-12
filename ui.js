@@ -896,10 +896,6 @@ Torus.ui.tab_click = function(event) {
 }
 
 Torus.ui.onload = function() {
-	Torus.logs.messages[0] = [];
-	Torus.ui.activate(Torus.chats[0]);
-	Torus.ui.show(Torus.chats[0]);
-
 	var domain = window.location.hostname.substring(0, document.location.hostname.indexOf('.wikia.com'));
 	if(domain.indexOf('preview.') == 0) {domain = domain.substring(8);}
 	if(!domain) {domain = 'localhost';}
@@ -928,6 +924,10 @@ Torus.ui.onload = function() {
 		});
 	}
 
+	Torus.logs.messages[0] = [];
+	Torus.ui.activate(Torus.chats[0]);
+	Torus.ui.show(Torus.chats[0]);
+
 	if(wgCanonicalNamespace == 'Special' && wgTitle == 'Torus') {
 		document.title = 'Torus - It\'s a donut - ' + wgSiteName;
 		if(window.skin == 'oasis') {
@@ -943,6 +943,11 @@ Torus.ui.onload = function() {
 		}
 		document.getElementById(body).innerHTML = (document.getElementById('AdminDashboardHeader') ? '<div class="AdminDashboardGeneralHeader AdminDashboardArticleHeader"><h1>Torus</h1></div>' : '');
 		document.getElementById(body).appendChild(Torus.ui.window);
+
+		if(wgUserName == null) {
+			Torus.alert('You don\'t appear to be logged in - you must have an account to use chat on Wikia. Please [[Special:UserSignup|register]] or [[Special:UserLogin|log in]].'); //FIXME: i18n
+			return;
+		}
 
 		if(Torus.local.room && Torus.options.misc.connection.local.value) {(new Torus.classes.Chat(Torus.local.room, Torus.local.domain)).connect();}
 		if(Torus.options.misc.connection.default_rooms.value) {
@@ -985,7 +990,7 @@ Torus.util.empty = function(el) {
 
 {{MediaWiki:Torus.js/menu.js}}
 
-//(function() { //I really hate these but it's better then leaking temp variables everywhere
+//(function() { //I really hate these but it's better then leaking temp variables everywhere //FIXME: iffy causes load order problems
 	Torus.util.load_css('http://monchbox.wikia.com/wiki/MediaWiki:Torus.js/ui.css?action=raw&ctype=text/css&templates=expand&t=' + (new Date()).getTime());
 
 	Torus.ui.window.id = 'torus';
