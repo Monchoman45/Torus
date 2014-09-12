@@ -216,10 +216,10 @@ Torus.classes.Chat.prototype.mod = function(user) {this.send_command('givechatmo
 Torus.classes.Chat.prototype.kick = function(user) {this.send_command('kick', {userToKick: user});}
 Torus.classes.Chat.prototype.ban = function(user, expiry, reason) {
 	if(!expiry) {expiry = 0;} //this is also an unban
-	else if(typeof expiry == 'string') {expiry = Torus.util.expiryToSeconds(expiry);}
+	else if(typeof expiry == 'string') {expiry = Torus.util.expiry_to_seconds(expiry);}
 	if(!reason) {
-		if(expiry) {reason = 'Misbehaving in chat';} //is a ban
-		else {reason = 'undo';} //is an unban
+		if(expiry) {reason = 'Misbehaving in chat';} //is a ban //FIXME: ?action=query&meta=allmessages
+		else {reason = 'undo';} //is an unban //FIXME: ?action=query&meta=allmessages
 	}
 	this.send_command('ban', {userToBan: user, reason: reason, time: expiry});
 }
@@ -356,7 +356,7 @@ Torus.classes.Chat.prototype.event_ban = function(data) {
 	else {
 		event.event = 'ban';
 		event.seconds = data.attrs.time;
-		event.expiry = Torus.util.secondsToExpiry(data.attrs.time);
+		event.expiry = Torus.util.seconds_to_expiry(data.attrs.time);
 	}
 	return event;
 }

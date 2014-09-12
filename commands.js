@@ -38,7 +38,7 @@ Torus.commands.ban = {
 		var user = '';
 		for(var i = 1; i < arguments.length; i++) {user += ' ' + arguments[i];}
 		user = user.substring(1);
-		Torus.ui.active.ban(user, expiry * 1, 'Misbehaving in chat');
+		Torus.ui.active.ban(user, expiry * 1, 'Misbehaving in chat'); //FIXME: ?action=query&meta=allmessages
 	}
 };
 Torus.commands.unban = {
@@ -47,7 +47,7 @@ Torus.commands.unban = {
 		var user = '';
 		for(var i = 0; i < arguments.length; i++) {user += ' ' + arguments[i];}
 		user = user.substring(1);
-		Torus.ui.active.ban(user, 0, 'undo');
+		Torus.ui.active.ban(user, 0, 'undo'); //FIXME: ?action=query&meta=allmessages
 	}
 };
 Torus.commands.mod = '/givemod';
@@ -188,4 +188,5 @@ Torus.commands.eval = function(str, prop) {
 		else if(prop) {return command[prop];}
 		else {return command.func.apply(ref, com.slice(i + 1));}
 	}
+	else {return false;}
 }

@@ -295,14 +295,15 @@ Torus.ui.render_line = function(message) {
 		switch(message.event) {
 			case 'me':
 			case 'message':
-				if(message.event == 'me') {line.appendChild(document.createTextNode('<'));}
+				if(message.event == 'message') {line.appendChild(document.createTextNode('<'));}
 				else {line.appendChild(document.createTextNode('* '));}
 				var user = document.createElement('span');
 					user.className = 'torus-message-usercolor';
 					user.style.color = Torus.util.color_hash(message.user);
 					user.textContent = message.user;
 				line.appendChild(user);
-				if(message.event == 'me') {line.appendChild(document.createTextNode('> '));}
+				if(message.event == 'message') {line.appendChild(document.createTextNode('> '));}
+				else {line.appendChild(document.createTextNode(' '));}
 				line.innerHTML += message.html; //FIXME: innerHTML +=
 				break;
 			case 'alert':
@@ -643,7 +644,6 @@ Torus.ui.render_popup = function(name, room, coords) {
 			actions.appendChild(mod);
 		}
 
-		
 		if(user.staff || user.givemod || (user.mod && !target.givemod && !target.staff)) {
 			var kick = document.createElement('a');
 			kick.className = 'torus-popup-action';
@@ -821,16 +821,19 @@ Torus.ui.input = function(event) {
 
 		if(Torus.ui.active.id >= 0) {
 			while(this.value.charAt(0) == '/') {
+				if(this.value.indexOf('/me') == 0) {break;}
 				if(this.value.indexOf('\n') != -1) {
-					var result = Torus.commands.eval(this.value.substring(1, this.value.indexOf('\n')));
-					if(result !== undefined) {Torus.alert(result);}
+					var command = this.value.substring(1, this.value.indexOf('\n'));
 					this.value = this.value.substring(this.value.indexOf('\n') + 1);
 				}
 				else {
-					var result = Torus.commands.eval(this.value.substring(1));
-					if(result !== undefined) {Torus.alert(result);}
+					var command = this.value.substring(1);
 					this.value = '';
 				}
+
+				var result = Torus.commands.eval(command);
+				if(result === false) {Torus.alert('Can\'t find command `' + command.substring(0, command.indexOf(' ')) + '`.');}
+				else if(result != undefined) {Torus.alert('' + result);}
 			}
 		}
 		if(this.value) {
