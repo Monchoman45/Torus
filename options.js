@@ -1,9 +1,9 @@
-Torus.options = new Torus.classes.Extension('options', -2);
+new Torus.classes.Extension('options', -2);
 Torus.ext.options.text = 'Options';
 
-Torus.options.sidebar = [];
-Torus.options.version = 1;
-Torus.options.selected = 'pings';
+Torus.ext.options.sidebar = [];
+Torus.ext.options.version = 1;
+Torus.ext.options.selected = 'pings';
 Torus.options.pings = {
 	general: {
 		enabled: true,
@@ -79,26 +79,26 @@ Torus.options.misc = {
 	}
 };
 
-Torus.options.rebuild = function() {
-	Torus.options.sidebar = [];
+Torus.ext.options.rebuild = function() {
+	Torus.ext.options.sidebar = [];
 	for(var i in Torus.options) {
 		if(typeof Torus.options[i] != 'object' || i == 'listeners' || i == 'sidebar') {continue;}
 		var li = document.createElement('li');
 			li.className = 'torus-option-group';
 			li.textContent = i.charAt(0).toUpperCase() + i.substring(1);
 			li.addEventListener('click', Torus.options.click_sidebar);
-		Torus.options.sidebar.push(li);
+		Torus.ext.options.sidebar.push(li);
 	}
 
 	//TODO: also do each group somewhere
 }
 
-Torus.options.render = function(group) {
+Torus.ext.options.render = function(group) {
 	var html = '';
 
-	for(var i in Torus.options.sidebar) {
-		if(i == group) {Torus.options.sidebar[i].classList.add('torus-option-group-selected');}
-		else {Torus.options.sidebar[i].classList.remove('torus-option-group-selected');}
+	for(var i in Torus.ext.options.sidebar) {
+		if(i == group) {Torus.ext.options.sidebar[i].classList.add('torus-option-group-selected');}
+		else {Torus.ext.options.sidebar[i].classList.remove('torus-option-group-selected');}
 	}
 	for(var i in Torus.options) {
 		if(typeof Torus.options[i] != 'object' || i == 'listeners' || i == 'sidebar') {continue;}
@@ -138,14 +138,14 @@ Torus.options.render = function(group) {
 		}
 	}
 	Torus.ui.ids['window'].innerHTML = '<div id="torus-options-window">' + html + '</div>';
-	Torus.util.fill_el(Torus.ui.ids['sidebar'], Torus.options.sidebar);
+	Torus.util.fill_el(Torus.ui.ids['sidebar'], Torus.ext.options.sidebar);
 
-	if(!group) {Torus.options.save();}
-	else {Torus.options.selected = group;}
+	if(!group) {Torus.ext.options.save();}
+	else {Torus.ext.options.selected = group;}
 	//Torus.call_listeners('options_render', group);
 }
 
-Torus.options.save = function() {
+Torus.ext.options.save = function() {
 	var save = {};
 	for(var i in Torus.options) {
 		if(i == 'sidebar') {continue;}
@@ -164,15 +164,15 @@ Torus.options.save = function() {
 			}
 		}
 	}
-	save.version = Torus.options.version;
+	save.version = Torus.ext.options.version;
 	window.localStorage.setItem('torus-options', JSON.stringify(save));
 	return save;
 }
 
-Torus.options.load = function() {
+Torus.ext.options.load = function() {
 	var load = JSON.parse(window.localStorage.getItem('torus-options'));
 	if(!load) {return;}
-	else if(load.version != Torus.options.version) {
+	else if(load.version != Torus.ext.options.version) {
 		window.localStorage.removeItem('torus-options');
 		return;
 	}
@@ -200,12 +200,12 @@ Torus.options.load = function() {
 	}
 }
 
-Torus.options.click_sidebar = function() {Torus.options.render(this.getAttribute('data-id'));}
+Torus.options.click_sidebar = function() {Torus.ext.options.render(this.getAttribute('data-id'));}
 
-Torus.add_listener('window', 'load', Torus.options.load);
-Torus.add_listener('window', 'unload', Torus.options.save);
+Torus.add_listener('window', 'load', Torus.ext.options.load);
+Torus.add_listener('window', 'unload', Torus.ext.options.save);
 
-Torus.options.add_listener('ui', 'activate', function() {Torus.options.render(Torus.options.selected);});
-Torus.options.add_listener('ui', 'deactivate', Torus.options.save);
+Torus.options.add_listener('ui', 'activate', function() {Torus.ext.options.render(Torus.ext.options.selected);});
+Torus.options.add_listener('ui', 'deactivate', Torus.ext.options.save);
 
-Torus.options.rebuild();
+Torus.ext.options.rebuild();
