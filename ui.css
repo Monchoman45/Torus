@@ -86,6 +86,7 @@
 #torus-sidebar img.torus-user-icon-mod {
 	height: 1em;
 	margin-top: .1em;
+	vertical-align: baseline;
 }
 #torus-sidebar img.torus-user-icon-staff {
 	margin-top: .2em;
