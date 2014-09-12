@@ -1,10 +1,12 @@
 new Torus.classes.Extension('options', -2);
 Torus.ext.options.text = 'Options';
 
-Torus.ext.options.sidebar = [];
-Torus.ext.options.version = 1;
+Torus.ext.options.ui = {
+	sidebar: document.createDocumentFragment()
+};
+//FIXME: fill ext.options.ui with elements from a for i in Torus.options
 Torus.ext.options.selected = 'pings';
-Torus.options.pings = {
+Torus.options.pings = { //FIXME: move the values to ui and keep the metadata here
 	general: {
 		enabled: true,
 		alert: {
@@ -80,28 +82,29 @@ Torus.options.misc = {
 };
 
 Torus.ext.options.rebuild = function() {
-	Torus.ext.options.sidebar = [];
+	Torus.ext.options.ui.sidebar = document.createDocumentFragment();
 	for(var i in Torus.options) {
-		if(typeof Torus.options[i] != 'object' || i == 'listeners' || i == 'sidebar') {continue;}
+		if(typeof Torus.options[i] != 'object') {continue;}
 		var li = document.createElement('li');
 			li.className = 'torus-option-group';
+			li.setAttribute('data-id', i);
 			li.textContent = i.charAt(0).toUpperCase() + i.substring(1);
-			li.addEventListener('click', Torus.options.click_sidebar);
-		Torus.ext.options.sidebar.push(li);
+			li.addEventListener('click', Torus.ext.options.click_sidebar);
+		Torus.ext.options.ui.sidebar.appendChild(li); //FIXME: what if the sidebar is rendered?
 	}
 
 	//TODO: also do each group somewhere
 }
 
-Torus.ext.options.render = function(group) {
+Torus.ext.options.render = function(group) { //FIXME: innerHTML += 
 	var html = '';
 
-	for(var i in Torus.ext.options.sidebar) {
-		if(i == group) {Torus.ext.options.sidebar[i].classList.add('torus-option-group-selected');}
-		else {Torus.ext.options.sidebar[i].classList.remove('torus-option-group-selected');}
+	for(var i = 0; i < Torus.ext.options.ui.sidebar.children.length; i++) { //FIXME: what if the sidebar is rendered? hint: it probably is
+		if(i == group) {Torus.ext.options.ui.sidebar.children[i].classList.add('torus-option-group-selected');}
+		else {Torus.ext.options.ui.sidebar.children[i].classList.remove('torus-option-group-selected');}
 	}
 	for(var i in Torus.options) {
-		if(typeof Torus.options[i] != 'object' || i == 'listeners' || i == 'sidebar') {continue;}
+		if(typeof Torus.options[i] != 'object') {continue;}
 
 		if(i != group) {continue;}
 		for(var j in Torus.options[i]) {
@@ -138,11 +141,16 @@ Torus.ext.options.render = function(group) {
 		}
 	}
 	Torus.ui.ids['window'].innerHTML = '<div id="torus-options-window">' + html + '</div>';
-	Torus.util.fill_el(Torus.ui.ids['sidebar'], Torus.ext.options.sidebar);
+	Torus.ui.ids['sidebar'].appendChild(Torus.ext.options.ui.sidebar);
 
 	if(!group) {Torus.ext.options.save();}
 	else {Torus.ext.options.selected = group;}
 	//Torus.call_listeners('options_render', group);
+}
+
+Torus.ext.options.unrender = function(event) {
+	Torus.ext.options.ui.sidebar = event.old_sidebar;
+	Torus.ext.options.ui['group_' + Torus.ext.options.selected] = event.old_window;
 }
 
 Torus.ext.options.save = function() {
@@ -200,12 +208,15 @@ Torus.ext.options.load = function() {
 	}
 }
 
-Torus.options.click_sidebar = function() {Torus.ext.options.render(this.getAttribute('data-id'));}
+Torus.ext.options.click_sidebar = function() {Torus.ext.options.render(this.getAttribute('data-id'));}
 
 Torus.add_listener('window', 'load', Torus.ext.options.load);
 Torus.add_listener('window', 'unload', Torus.ext.options.save);
 
-Torus.options.add_listener('ui', 'activate', function() {Torus.ext.options.render(Torus.ext.options.selected);});
-Torus.options.add_listener('ui', 'deactivate', Torus.ext.options.save);
+Torus.ext.options.add_listener('ui', 'activate', function() {Torus.ext.options.render(Torus.ext.options.selected);});
+Torus.ext.options.add_listener('ui', 'deactivate', function(event) {
+	Torus.ext.options.unrender(event);
+	Torus.ext.options.save();
+});
 
 Torus.ext.options.rebuild();

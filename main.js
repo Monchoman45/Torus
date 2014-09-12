@@ -82,6 +82,7 @@ window.Torus = {
 		tabpos: 0,
 		fullscreen: false
 	},
+	options: {}
 }
 
 //Function for adding an event listener

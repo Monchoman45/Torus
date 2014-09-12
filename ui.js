@@ -73,7 +73,8 @@ Torus.ui.remove_room = function(event) {
 	delete Torus.ui.ids['tab-' + event.room.id];
 }
 
-Torus.ui.render = function() {
+Torus.ui.render = function(el) {
+	if(!el) {el = Torus.ui.ids['window'];}
 	var rooms = [];
 	var indexes = [];
 	var active = false;
@@ -107,12 +108,11 @@ Torus.ui.render = function() {
 		if(i == 0) {frag.appendChild(Torus.ui.render_line(message));}
 		else {frag.insertBefore(Torus.ui.render_line(message), frag.firstChild);}
 	}
-	Torus.util.empty(Torus.ui.ids['window']);
-	Torus.ui.ids['window'].appendChild(frag);
+	el.appendChild(frag);
 
 	//rerender userlist
+	//FIXME: now that this is a generalized function, should we still do this or move it somewhere else?
 	if(Torus.ui.active.id > 0) {
-		Torus.util.empty(Torus.ui.ids['sidebar']);
 		//FIXME: this is really hacky
 		var e = {room: Torus.ui.active};
 		for(var i in Torus.ui.active.userlist) {
@@ -121,9 +121,11 @@ Torus.ui.render = function() {
 		}
 	}
 
-	Torus.ui.ids['window'].scrollTop = Torus.ui.ids['window'].scrollHeight;
+	el.scrollTop = el.scrollHeight;
 
-	Torus.call_listeners(new Torus.classes.UIEvent('render'));
+	var event = new Torus.classes.UIEvent('render');
+	event.target = el;
+	Torus.call_listeners(event);
 }
 
 Torus.ui.activate = function(room) {
@@ -136,21 +138,21 @@ Torus.ui.activate = function(room) {
 	}
 	tab.className = classes.join(' ');
 
-	Torus.call_listeners(new Torus.classes.UIEvent('deactivate', Torus.ui.active));
+	Torus.util.empty(Torus.ui.ids['info']);
+	var event = new Torus.classes.UIEvent('deactivate', Torus.ui.active);
+	event.old_window = Torus.util.empty(Torus.ui.ids['window']);
+	event.old_sidebar = Torus.util.empty(Torus.ui.ids['sidebar']);
+	Torus.call_listeners(event);
 	Torus.ui.active = room;
 
 	if(room.id >= 0) {var tab = Torus.ui.ids['tab-' + room.id].className += ' torus-tab-active';}
 	else {var tab = Torus.ui.ids['tab--1'].className += ' torus-tab-active';}
 
-	Torus.util.empty(Torus.ui.ids['info']);
-	Torus.util.empty(Torus.ui.ids['window']);
-	Torus.util.empty(Torus.ui.ids['sidebar']);
-
 	if(room.id > 0) { //chat
 		if(!room.parent) {
 			Torus.ui.ids['info'].textContent = 'Public room'; //FIXME: i18n
 			if(room.name) {
-				Torus.ui.ids['info'].textContent += ' of ';
+				Torus.ui.ids['info'].appendChild(document.createTextNode(' of '));
 				var a = document.createElement('a');
 				a.href = 'http://' + room.name + '.wikia.com';
 				a.addEventListener('click', Torus.ui.click_link);
@@ -161,19 +163,19 @@ Torus.ui.activate = function(room) {
 		}
 		else {
 			Torus.ui.ids['info'].textContent = 'Private room of '; //FIXME: i18n
-			if(room.parent) {
+			if(room.parent.name) {
 				var a = document.createElement('a');
 				a.href = 'http://' + room.parent.name + '.wikia.com';
 				a.addEventListener('click', Torus.ui.click_link);
 				a.textContent = room.parent.name;
 				Torus.ui.ids['info'].appendChild(a);
 			}
-			else {Torus.ui.ids['info'].textContent += room.parent.name;}
+			else {Torus.ui.ids['info'].appendChild(document.createTextNode(room.parent.name));}
 			Torus.ui.ids['info'].appendChild(document.createTextNode(', between ' + room.priv_users.slice(0, room.priv_users.length - 1).join(', ') + ' and ' + room.priv_users[room.priv_users.length - 1] + '. (' + room.id + ')')); //FIXME: i18n
 		}
 	}
 	else { //extension
-		if(room.id == 0 || room.id == -1) {
+		if(room.id == 0 || room.id == -1) { //status and menu
 			Torus.ui.ids['info'].textContent = 'Torus v' + Torus.pretty_version + ', running on '; //FIXME: i18n
 			var a = document.createElement('a');
 				a.href = 'http://' + Torus.local.domain + '.wikia.com/wiki/';
@@ -189,7 +191,7 @@ Torus.ui.activate = function(room) {
 			Torus.ui.ids['info'].appendChild(a);
 		}
 	}
-	if(room.id >= 0) {Torus.ui.render();}
+	if(room.id >= 0) {Torus.ui.render(Torus.ui.ids['window']);}
 
 	Torus.call_listeners(new Torus.classes.UIEvent('activate', room));
 }
@@ -210,7 +212,8 @@ Torus.ui.show = function(room) {
 		}
 		tab.className = classes.join(' ');
 
-		Torus.ui.render();
+		Torus.util.empty(Torus.ui.ids['window']);
+		Torus.ui.render(Torus.ui.ids['window']);
 		Torus.call_listeners(new Torus.classes.UIEvent('unshow', room));
 	}
 	else { //show
@@ -219,7 +222,8 @@ Torus.ui.show = function(room) {
 
 		Torus.ui.ids['tab-' + room.id].className += ' torus-tab-viewing';
 
-		Torus.ui.render();
+		Torus.util.empty(Torus.ui.ids['window']);
+		Torus.ui.render(Torus.ui.ids['window']);
 		Torus.call_listeners(new Torus.classes.UIEvent('show', room));
 	}
 }
@@ -665,7 +669,7 @@ Torus.ui.unrender_popup = function() {
 	Torus.call_listeners(new Torus.classes.UIEvent('unrender_popup'));
 }
 
-Torus.ui.ping = function(room) {
+Torus.ui.ping = function(room) { //FIXME: highlight room name in red or something
 	if(Torus.options.pings.general.enabled && Torus.ui.window.parentNode && Torus.data.pinginterval == 0) {
 		Torus.data.titleflash = document.title;
 		document.title = Torus.options.pings.general.alert.value;
@@ -717,7 +721,10 @@ Torus.ui.initial = function(event) {
 		}
 	}
 	//userlist is already taken care of because Chat.event_updateUser calls Chat.update_user which ui.update_user listens to
-	if(event.room == Torus.ui.active) {Torus.ui.render();}
+	if(event.room == Torus.ui.active) {
+		Torus.util.empty(Torus.ui.ids['window']);
+		Torus.ui.render(Torus.ui.ids['window']);
+	}
 
 	if(event.room.parent) {Torus.ui.ping(event.room);}
 }
@@ -889,7 +896,9 @@ Torus.classes.UIEvent = function(event, room) {
 Torus.classes.UIEvent.prototype = Object.create(Torus.classes.Event.prototype);
 
 Torus.util.empty = function(el) {
-	while(el.firstChild) {el.removeChild(el.firstChild);}
+	var frag = document.createDocumentFragment();
+	while(el.firstChild) {frag.appendChild(el.firstChild);}
+	return frag;
 }
 
 Torus.util.fill_el = function(el, arr) {
