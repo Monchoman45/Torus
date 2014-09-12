@@ -164,24 +164,70 @@ Torus.ext.ccui.fill = function() {
 		var even = true;
 		for(var j = 0; j < matches[i].length; j++) {
 			var time = document.createElement('li');
-				time.textContent = Torus.util.print_mwdate(matches[i][j].timestamp);
 				time.className = 'torus-ext-ccui-timestamp';
-				if(even) {time.className += ' torus-ext-ccui-li-even';}
-				else {time.className += ' torus-ext-ccui-li-odd';}
+				if(even) {time.classList.add('torus-ext-ccui-li-even');}
+				else {time.classList.add('torus-ext-ccui-li-odd');}
+				time.textContent = Torus.util.print_mwdate(matches[i][j].timestamp);
 			Torus.ui.ids['ext-ccui-' + i + '-time'].appendChild(time);
 
 			var user = document.createElement('li');
-				user.textContent = matches[i][j].user;
 				user.className = 'torus-ext-ccui-user';
-				if(even) {user.className += ' torus-ext-ccui-li-even';}
-				else {user.className += ' torus-ext-ccui-li-odd';}
+				if(even) {user.classList.add('torus-ext-ccui-li-even');}
+				else {user.classList.add('torus-ext-ccui-li-odd');}
+				var userpage = document.createElement('a');
+					userpage.href = '/wiki/User:' + matches[i][j].user.replace(/ /g, String.fromCharCode(160));
+					userpage.textContent = matches[i][j].user;
+					userpage.addEventListener('click', Torus.ui.click_link);
+				user.appendChild(userpage);
+				user.appendChild(document.createTextNode(String.fromCharCode(160) + '('));
+				var talk = document.createElement('a');
+					talk.href = '/wiki/User_talk:' + matches[i][j].user;
+					talk.textContent = 't';
+					talk.addEventListener('click', Torus.ui.click_link);
+				user.appendChild(talk);
+				user.appendChild(document.createTextNode('|'));
+				var contribs = document.createElement('a');
+					contribs.href = '/wiki/Special:Contributions/' + matches[i][j].user;
+					contribs.textContent = 'c';
+					contribs.addEventListener('click', Torus.ui.click_link);
+				user.appendChild(contribs);
+				user.appendChild(document.createTextNode('|'));
+				var ban = document.createElement('a');
+					ban.href = '/wiki/Special:Log/chatban?page=User:' + matches[i][j].user;
+					ban.textContent = 'bans';
+					ban.addEventListener('click', Torus.ui.click_link);
+				user.appendChild(ban);
+				user.appendChild(document.createTextNode('|'));
+				var block = document.createElement('a');
+					block.href = '/wiki/Special:Log/block?page=User:' + matches[i][j].user;
+					block.textContent = 'blocks';
+					block.addEventListener('click', Torus.ui.click_link);
+				user.appendChild(block);
+				user.appendChild(document.createTextNode(')'));
 			Torus.ui.ids['ext-ccui-' + i + '-users'].appendChild(user);
 
 			var ip = document.createElement('li');
-				ip.textContent = matches[i][j].ip;
 				ip.className = 'torus-ext-ccui-ip';
-				if(even) {ip.className += ' torus-ext-ccui-li-even';}
-				else {ip.className += ' torus-ext-ccui-li-odd';}
+				if(even) {ip.classList.add('torus-ext-ccui-li-even');}
+				else {ip.classList.add('torus-ext-ccui-li-odd');}
+				var contribs = document.createElement('a');
+					contribs.href = '/wiki/Special:Contributions/' + matches[i][j].ip;
+					contribs.textContent = matches[i][j].ip;
+					contribs.addEventListener('click', Torus.ui.click_link);
+				ip.appendChild(contribs);
+				ip.appendChild(document.createTextNode(String.fromCharCode(160) + '('));
+				var block = document.createElement('a');
+					block.href = '/wiki/Special:Log/block?page=User:' + matches[i][j].ip;
+					block.textContent = 'blocks';
+					block.addEventListener('click', Torus.ui.click_link);
+				ip.appendChild(block);
+				ip.appendChild(document.createTextNode('|'));
+				var whois = document.createElement('a');
+					whois.href = 'http://whois.arin.net/rest/ip/' + matches[i][j].ip;
+					whois.textContent = 'whois';
+					whois.addEventListener('click', Torus.ui.click_link);
+				ip.appendChild(whois);
+				ip.appendChild(document.createTextNode(')'));
 			Torus.ui.ids['ext-ccui-' + i + '-ips'].appendChild(ip);
 
 			if(even) {even = false;}
