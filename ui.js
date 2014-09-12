@@ -130,17 +130,13 @@ Torus.ui.activate = function(room) {
 	if(Torus.ui.active.id >= 0) {var tab = Torus.ui.ids['tab-' + Torus.ui.active.id];}
 	else {var tab = Torus.ui.ids['tab--1'];}
 
-	var classes = tab.className.split(' ');
-	for(var j = 0; j < classes.length; j++) {
-		if(classes[j] == 'torus-tab-active') {classes.splice(j, 1); break;}
-	}
-	tab.className = classes.join(' ');
+	tab.classList.remove('torus-tab-active');
 
 	Torus.call_listeners(new Torus.classes.UIEvent('deactivate', Torus.ui.active));
 	Torus.ui.active = room;
 
-	if(room.id >= 0) {var tab = Torus.ui.ids['tab-' + room.id].className += ' torus-tab-active';}
-	else {var tab = Torus.ui.ids['tab--1'].className += ' torus-tab-active';}
+	if(room.id >= 0) {var tab = Torus.ui.ids['tab-' + room.id].classList.add('torus-tab-active');}
+	else {var tab = Torus.ui.ids['tab--1'].classList.add('torus-tab-active');}
 
 	Torus.util.empty(Torus.ui.ids['info']);
 	Torus.util.empty(Torus.ui.ids['window']);
@@ -204,11 +200,7 @@ Torus.ui.show = function(room) {
 		}
 
 		var tab = Torus.ui.ids['tab-' + room.id];
-		var classes = tab.className.split(' ');
-		for(var i = 0; i < classes.length; i++) {
-			if(classes[i] == 'torus-tab-viewing') {classes.splice(i, 1); break;}
-		}
-		tab.className = classes.join(' ');
+		tab.classList.remove('torus-tab-viewing');
 
 		Torus.ui.render();
 		Torus.call_listeners(new Torus.classes.UIEvent('unshow', room));
@@ -217,7 +209,7 @@ Torus.ui.show = function(room) {
 		room.viewing = true;
 		Torus.ui.viewing.push(room);
 
-		Torus.ui.ids['tab-' + room.id].className += ' torus-tab-viewing';
+		Torus.ui.ids['tab-' + room.id].classList.add('torus-tab-viewing');
 
 		Torus.ui.render();
 		Torus.call_listeners(new Torus.classes.UIEvent('show', room));
@@ -459,7 +451,7 @@ Torus.ui.update_user = function(event) {
 
 	li.className = 'torus-user torus-user-' + encodeURIComponent(event.user);
 	if(props.staff) {
-		li.className += ' torus-user-staff';
+		li.classList.add('torus-user-staff');
 
 		var icon = document.createElement('img');
 		icon.className = 'torus-user-icon-staff';
@@ -467,7 +459,7 @@ Torus.ui.update_user = function(event) {
 		li.appendChild(icon);
 	}
 	else if(props.mod) {
-		li.className += ' torus-user-mod';
+		li.classList.add('torus-user-mod');
 
 		var icon = document.createElement('img');
 		icon.className = 'torus-user-icon-mod';
@@ -479,7 +471,7 @@ Torus.ui.update_user = function(event) {
 
 	var span = document.createElement('span');
 	span.className = 'torus-user-name';
-	if(props.status_state.toLowerCase() == 'away') {span.className += ' torus-user-away';}
+	if(props.status_state.toLowerCase() == 'away') {span.classList.add('torus-user-away');}
 	span.textContent = event.user;
 	li.appendChild(span);
 }
