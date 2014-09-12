@@ -16,10 +16,16 @@ Torus.ui.menu.render = function() {
 		links.appendChild(github);
 		links.appendChild(document.createTextNode(' | '));
 		var report = document.createElement('a');
-			report.href = 'https://github.com/Monchoman45/Torus/issues/new';
+			report.href = 'https://github.com/Monchoman45/Torus/issues/new?labels=bug';
 			report.textContent = 'report a bug';
 			report.addEventListener('click', Torus.ui.click_link);
 		links.appendChild(report);
+		links.appendChild(document.createTextNode(' | '));
+		var suggest = document.createElement('a');
+			suggest.href = 'https://github.com/Monchoman45/Torus/issues/new?labels=feature-request';
+			suggest.textContent = 'suggest a bug';
+			suggest.addEventListener('click', Torus.ui.click_link);
+		links.appendChild(suggest);
 		links.appendChild(document.createTextNode(' | '));
 		var doc = document.createElement('a');
 			doc.href = 'http://monchbox.wikia.com/wiki/Torus';
