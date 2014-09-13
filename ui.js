@@ -97,7 +97,6 @@ Torus.ui.render = function(el) {
 	}
 
 	var frag = document.createDocumentFragment(); //yo these things are so cool
-	console.log(Torus.options);
 	for(var i = 0; i < Torus.options['messages-general-max'] && rooms.length > 0; i++) {
 		var message = rooms[0][indexes[0]];
 		var source = 0;

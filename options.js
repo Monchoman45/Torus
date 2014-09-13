@@ -155,7 +155,7 @@ Torus.ext.options.render = function(group) {
 	Torus.ui.ids['window'].appendChild(Torus.ext.options.ui['group_' + group]);
 	Torus.ui.ids['sidebar'].appendChild(Torus.ext.options.ui.sidebar);
 
-	if(!group) {Torus.ext.options.save();} //FIXME: when does this happen?
+	if(!group) {Torus.save_options();} //FIXME: when does this happen?
 	else {Torus.ext.options.selected = group;}
 }
 
@@ -214,70 +214,12 @@ Torus.ext.options.blur_string = function () {Torus.options[this.getAttribute('da
 Torus.ext.options.blur_number = function () {Torus.options[this.getAttribute('data-id')] = this.value * 1;}
 Torus.ext.options.click_boolean = function () {Torus.options[this.getAttribute('data-id')] = this.checked;}
 
-Torus.ext.options.save = function() {
-	var save = {};
-	for(var i in Torus.options) {
-		if(i == 'sidebar') {continue;}
-		if(typeof Torus.options[i] == 'object') {
-			save[i] = {};
-			for(var j in Torus.options[i]) {
-				if(typeof Torus.options[i][j] == 'object') {
-					for(var k in Torus.options[i][j]) {
-						if(Torus.options[i][j][k]) {
-							//if just one has a value, include all of them
-							save[i][j] = Torus.options[i][j];
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
-	save.version = Torus.ext.options.version;
-	window.localStorage.setItem('torus-options', JSON.stringify(save));
-	return save;
-}
-
-Torus.ext.options.load = function() {
-	var load = JSON.parse(window.localStorage.getItem('torus-options'));
-	if(!load) {return;}
-	else if(load.version != Torus.ext.options.version) {
-		window.localStorage.removeItem('torus-options');
-		return;
-	}
-
-	for(var i in load) {
-		if(typeof load[i] == 'object') {
-			if(!Torus.options[i]) {
-				Torus.options[i] = load[i];
-				continue;
-			}
-			for(var j in load[i]) {
-				if(typeof load[i][j] == 'object') {
-					if(!Torus.options[i][j]) {
-						Torus.options[i][j] = load[i][j];
-						continue;
-					}
-					for(var k in load[i][j]) {
-						if(typeof load[i][j][k] == 'object' || (k == 'enabled' && typeof Torus.options[i][j][k] == 'boolean')) {
-							Torus.options[i][j][k] = load[i][j][k];
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
 Torus.ext.options.click_sidebar = function() {Torus.ext.options.render(this.getAttribute('data-id'));}
-
-Torus.add_listener('window', 'load', Torus.ext.options.load);
-Torus.add_listener('window', 'unload', Torus.ext.options.save);
 
 Torus.ext.options.add_listener('ui', 'activate', function() {Torus.ext.options.render(Torus.ext.options.selected);});
 Torus.ext.options.add_listener('ui', 'deactivate', function(event) {
 	Torus.ext.options.unrender(event);
-	Torus.ext.options.save();
+	Torus.save_options();
 });
 
-Torus.ext.options.rebuild();
+Torus.add_listener('ext', 'after_load_options', Torus.ext.options.rebuild);

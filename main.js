@@ -11,8 +11,8 @@ window.Torus = {
 		room: 0,
 		domain: ''
 	},
-	version: 224,
-	pretty_version: '2.2.4',
+	version: 230,
+	pretty_version: '2.3.0',
 	chats: {},
 	listeners: {
 		window: {
@@ -61,6 +61,9 @@ window.Torus = {
 		},
 		ext: {
 			'new': [],
+			load_options: [], //FIXME: find a better place for this
+			after_load_options: [], //FIXME: find a better place for this
+			save_options: [], //FIXME: find a better place for this
 		}
 	},
 	io: {
@@ -156,6 +159,7 @@ Torus.alert = function(text, room) {
 }
 
 Torus.onload = function() {
+	Torus.load_options();
 	Torus.call_listeners(new Torus.classes.WindowEvent('load'));
 	//Torus.alert('Initialized.');
 	Torus.init = true;
@@ -163,7 +167,35 @@ Torus.onload = function() {
 
 Torus.unload = function() {
 	Torus.logout();
+	Torus.save_options();
 	Torus.call_listeners(new Torus.classes.WindowEvent('unload'));
+}
+
+Torus.save_options = function() {
+	var save = {version: Torus.version, data: Torus.options};
+	var event = new Torus.classes.ExtEvent('save_options');
+	event.options = save;
+	Torus.call_listeners(event);
+	window.localStorage.setItem('torus-options', JSON.stringify(save));
+	
+	return save;
+}
+
+Torus.load_options = function() {
+	var load = JSON.parse(window.localStorage.getItem('torus-options'));
+	if(!load) {return;}
+	if(load.version < 230) {
+		window.localStorage.removeItem('torus-options');
+		return;
+	}
+	var event = new Torus.classes.ExtEvent('load_options');
+	event.options = load;
+	Torus.call_listeners(event);
+
+	for(var i in load.data) {Torus.options[i] = load.data[i];}
+
+	Torus.call_listeners(new Torus.classes.ExtEvent('after_load_options'));
+	return Torus.options;
 }
 
 window.addEventListener('load', Torus.onload);
