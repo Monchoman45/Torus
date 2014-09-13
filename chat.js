@@ -9,13 +9,6 @@ Torus.classes.Chat = function(room, name) {
 	if(room > 0) {
 		Torus.chats[name] = this;
 
-		if(!Torus.options.pings[name]) {
-			Torus.options.pings[name] = {};
-			Torus.options.pings[name].enabled = true;
-			Torus.options.pings[name].case_sensitive = {type: 'text', value: ''};
-			Torus.options.pings[name].case_insensitive = {type: 'text', value: ''};
-		}
-
 		this.id = room;
 		this.parent = false; //the source of a PM
 		this.name = name;

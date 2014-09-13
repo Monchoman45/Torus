@@ -21,12 +21,12 @@ Torus.util.color_hash = function(str) {
 	if(str === undefined) {throw new Error('Not enough parameters. (util.colorHash)');}
 	str += ''; //cast to string
 	var hue = 0;
-	var val = Torus.options.misc.user_colors.val;
-	var sat = Torus.options.misc.user_colors.sat;
+	var val = Torus.options['misc-user_colors-val'];
+	var sat = Torus.options['misc-user_colors-sat'];
 	for(var i = 0; i < str.length; i++) {
 		hue = 31 * hue + str.charCodeAt(i); //same hash algorithm as webchat, except this is case sensitive
 	}
-	hue = (hue + Torus.options.misc.user_colors.hue) % 360;
+	hue = (hue + Torus.options['misc-user_colors-hue']) % 360;
 
 	//1 letter variables are fun don't you love mathematicians
 	var c = val * sat;
@@ -173,7 +173,7 @@ Torus.util.text_index = function(text, find) { //indexOf, but ignore stuff like 
 Torus.util.timestamp = function(time) {
 	var date = new Date();
 	if(time) {date.setTime(time);}
-	date.setUTCHours(date.getUTCHours() + Torus.options.messages.general.timezone);
+	date.setUTCHours(date.getUTCHours() + Torus.options['messages-general-timezone']);
 	var hours = date.getUTCHours();
 	if(hours < 10) {hours = '0' + hours;}
 	var minutes = date.getUTCMinutes();
