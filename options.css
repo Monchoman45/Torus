@@ -18,6 +18,6 @@
 	display: block;
 }
 #torus-window input.torus-option-boolean {
-	vertical-align: top;
+	vertical-align: middle;
 	margin: 0;
 }

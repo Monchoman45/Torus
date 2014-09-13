@@ -1,189 +1,225 @@
-Torus.options = new Torus.classes.Extension('options', -2);
-Torus.ext.options.ui = true;
+new Torus.classes.Extension('options', -2);
 Torus.ext.options.text = 'Options';
 
-Torus.options.version = 1;
-Torus.options.selected = 'pings';
-Torus.options.pings = {
+Torus.ext.options.ui = {
+	sidebar: document.createDocumentFragment()
+};
+//FIXME: fill ext.options.ui with elements from a for i in Torus.options
+Torus.ext.options.selected = 'pings';
+Torus.ext.options.dir = {};
+Torus.ext.options.types = {};
+
+Torus.ext.options.dir.pings = {
 	general: {
-		enabled: true,
+		enabled: {
+			type: 'boolean',
+		},
 		alert: {
 			type: 'string',
-			value: 'Activity!'
+			help: '', //TODO:
 		},
 		interval: {
 			type: 'number',
-			value: 500
+			help: '', //TODO:
 		},
 		beep: {
 			type: 'boolean',
-			value: true
+			help: '', //TODO:
 		},
 		sound: {
 			type: 'string',
-			value: 'http://images.wikia.com/monchbox/images/0/01/Beep-sound.ogg'
-		}
+			help: '', //TODO:
+		},
 	},
 	global: {
 		case_sensitive: {
 			type: 'text',
-			value: ''
+			help: '', //TODO:
 		},
 		case_insensitive: {
 			type: 'text',
-			value: wgUserName
-		}
-	}
+			help: '', //TODO:
+		},
+	},
 };
-Torus.options.messages = {
+Torus.ext.options.dir.messages = {
 	general: {
 		max: {
 			type: 'number',
-			value: 200
+			help: '', //TODO:
 		},
 		rejoins: {
 			type: 'boolean',
-			value: false
+			help: '', //TODO:
 		},
 		timezone: {
 			type: 'number',
-			value: 0
-		}
-	}
+			help: '', //TODO:
+		},
+	},
 };
-Torus.options.misc = {
+Torus.ext.options.dir.misc = {
 	connection: {
 		default_rooms: {
 			type: 'text',
-			value: ''
+			help: '', //TODO:
 		},
 		local: {
 			type: 'boolean',
-			value: true
-		}
+			help: '', //TODO:
+		},
 	},
 	user_colors: {
-		enabled: true,
+		enabled: {
+			type: 'boolean',
+		},
 		hue: {
 			type: 'number',
-			value: 0
+			help: '', //TODO:
 		},
 		sat: {
 			type: 'number',
-			value: .7
+			help: '', //TODO:
 		},
 		val: {
 			type: 'number',
-			value: .6
-		}
-	}
+			help: '', //TODO:
+		},
+	},
 };
 
-Torus.options.render = function(group) {
-	var sidebar = '';
-	var html = '';
-	for(var i in Torus.options) {
-		if(typeof Torus.options[i] != 'object' || i == 'listeners') {continue;}
+Torus.ext.options.rebuild = function() { //FIXME: what if options is active?
+	Torus.ext.options.ui.sidebar = document.createDocumentFragment();
+	for(var i in Torus.ext.options.dir) {
+		var li = document.createElement('li');
+			li.className = 'torus-option-group';
+			if(i == Torus.ext.options.selected) {li.classList.add('torus-option-group-selected');}
+			li.setAttribute('data-id', i);
+			li.textContent = Torus.util.cap(i);
+			li.addEventListener('click', Torus.ext.options.click_sidebar);
+		Torus.ext.options.ui.sidebar.appendChild(li);
 
-		sidebar += '<li class="torus-option-group' + (i == group ? ' torus-option-group-selected' : '') + '" onclick="Torus.options.render(\'' + i.toLowerCase() + '\');">' + i.charAt(0).toUpperCase() + i.substring(1) + '</li>';
-		if(i != group) {continue;}
-		for(var j in Torus.options[i]) {
-			if(typeof Torus.options[i][j] != 'object') {console.log(i, j, Torus.options[i][j]); continue;}
-
-			html += '<fieldset id="torus-option-set-' + i.toLowerCase() + '-' + j.toLowerCase() + '"><legend>';
-			if(typeof Torus.options[i][j].enabled == 'boolean') {html += '<label for="torus-option-value-' + i.toLowerCase() + '-' + j.toLowerCase() + '-enabled">' + j.charAt(0).toUpperCase() + j.substring(1) + '</label> <input id="torus-option-value-' + i.toLowerCase() + '-' + j.toLowerCase() + '-enabled" type="checkbox" checked="' + Torus.options[i][j].enabled + '" onchange="Torus.options[\'' + i + '\'][\'' + j + '\'].enabled = this.checked;">'}
-			else {html += j.charAt(0).toUpperCase() + j.substring(1);}
-			html += '</legend>';
-			for(var k in Torus.options[i][j]) {
-				if(typeof Torus.options[i][j][k] != 'object' || Torus.options[i][j][k].value == undefined || !Torus.options[i][j][k].type) {console.log(i, j, k, Torus.options[i][j][k]); continue;}
-
-				if(Torus.options[i][j][k].name) {var name = Torus.options[i][j][k].name;}
-				else {var name = k.charAt(0).toUpperCase() + k.substring(1);}
+		var frag = document.createDocumentFragment();
+		for(var j in Torus.ext.options.dir[i]) {
+			var fieldset = document.createElement('fieldset');
+				fieldset.id = 'torus-option-set-' + i + '-' + j;
+				Torus.ui.ids['torus-option-set-' + i + '-' + j] = fieldset;
+				var name = Torus.util.cap(j);
 				while(name.indexOf('_') != -1) {name = name.replace('_', ' ');}
-				html += '<div id="torus-option-value-' + i.toLowerCase() + '-' + j.toLowerCase() + '-' + k.toLowerCase() + '">';
-				switch(Torus.options[i][j][k].type) {
-					case 'text':
-						html += '<label for="torus-option-value-' + i.toLowerCase() + '-' + j.toLowerCase() + '-' + k.toLowerCase() + '-input">' + name + '</label>: <textarea id="torus-option-value-' + i.toLowerCase() + '-' + j.toLowerCase() + '-' + k.toLowerCase() + '-input" class="torus-option-text" rows="6" onblur="Torus.options[\'' + i + '\'][\'' + j + '\'][\'' + k + '\'].value = this.value;">' + Torus.options[i][j][k].value + '</textarea>';
-						break;
-					case 'boolean':
-						html += '<label for="torus-option-value-' + i.toLowerCase() + '-' + j.toLowerCase() + '-' + k.toLowerCase() + '-input">' + name + '</label>: <input id="torus-option-value-' + i.toLowerCase() + '-' + j.toLowerCase() + '-' + k.toLowerCase() + '-input" class="torus-option-boolean" type="checkbox" checked="' + Torus.options[i][j][k].value + ' onchange="Torus.options[\'' + i + '\'][\'' + j + '\'][\'' + k + '\'].value = this.checked;">';
-						break;
-					case 'string':
-						html += '<label for="torus-option-value-' + i.toLowerCase() + '-' + j.toLowerCase() + '-' + k.toLowerCase() + '-input">' + name + '</label>: <input id="torus-option-value-' + i.toLowerCase() + '-' + j.toLowerCase() + '-' + k.toLowerCase() + '-input" class="torus-option-string" type="text" value="' + Torus.options[i][j][k].value + '" onblur="Torus.options[\'' + i + '\'][\'' + j + '\'][\'' + k + '\'].value = this.value;">';
-						break;
-					case 'number':
-						html += '<label for="torus-option-value-' + i.toLowerCase() + '-' + j.toLowerCase() + '-' + k.toLowerCase() + '-input">' + name + '</label>: <input id="torus-option-value-' + i.toLowerCase() + '-' + j.toLowerCase() + '-' + k.toLowerCase() + '-input" class="torus-option-number" type="number" value="' + Torus.options[i][j][k].value + '" onblur="if(!isNaN(this.value * 1)) {Torus.options[\'' + i + '\'][\'' + j + '\'][\'' + k + '\'].value = this.value * 1;} else {Torus.options[\'' + i + '\'][\'' + j + '\'][\'' + k + '\'].value = undefined;}">';
-						break;
-				}
-				html += '</div>';
-			}
-			html += '</fieldset>';
-		}
-	}
-	Torus.ui.ids['window'].innerHTML = '<div id="torus-options-window">' + html + '</div>';
-	Torus.ui.ids['sidebar'].innerHTML = sidebar;
-
-	if(!group) {Torus.options.save();}
-	else {Torus.options.selected = group;}
-	//Torus.callListeners('options_render', group);
-}
-
-Torus.options.save = function() {
-	var save = {};
-	for(var i in Torus.options) {
-		if(typeof Torus.options[i] == 'object') {
-			save[i] = {};
-			for(var j in Torus.options[i]) {
-				if(typeof Torus.options[i][j] == 'object') {
-					for(var k in Torus.options[i][j]) {
-						if(Torus.options[i][j][k].value) {
-							//if just one has a value, include all of them
-							save[i][j] = Torus.options[i][j];
-							break;
-						}
+				var legend = document.createElement('legend');
+					if(Torus.ext.options.dir[i][j].enabled && Torus.ext.options.dir[i][j].enabled.type == 'boolean') { //FIXME: target
+						var label = document.createElement('label');
+							label.setAttribute('for', 'torus-option-value-' + i + '-' + j + '-enabled');
+							label.textContent = name;
+						legend.appendChild(label);
+						legend.appendChild(document.createTextNode(' '));
+						legend.appendChild(Torus.ext.options.types['boolean'](i + '-' + j + '-enabled'));
 					}
-				}
-			}
-		}
-	}
-	save.version = Torus.options.version;
-	window.localStorage.setItem('torus-options', JSON.stringify(save));
-	return save;
-}
+					else {legend.textContent = name;}
+				fieldset.appendChild(legend);
 
-Torus.options.load = function() {
-	var load = JSON.parse(window.localStorage.getItem('torus-options'));
-	if(!load) {return;}
-	else if(load.version != Torus.options.version) {
-		window.localStorage.removeItem('torus-options');
-		return;
-	}
+				for(var k in Torus.ext.options.dir[i][j]) {
+					if(Torus.ext.options.dir[i][j][k].name) {var name = Torus.ext.options.dir[i][j][k].name;}
+					else {var name = Torus.util.cap(k);}
+					while(name.indexOf('_') != -1) {name = name.replace('_', ' ');}
+					if(Torus.ext.options.dir[i][j][k].target) {var option = Torus.ext.options.dir[i][j][k].target;} 
+					else {var option = i + '-' + j + '-' + k;}
 
-	for(var i in load) {
-		if(typeof load[i] == 'object') {
-			if(!Torus.options[i]) {
-				Torus.options[i] = load[i];
-				continue;
-			}
-			for(var j in load[i]) {
-				if(typeof load[i][j] == 'object') {
-					if(!Torus.options[i][j]) {
-						Torus.options[i][j] = load[i][j];
-						continue;
-					}
-					for(var k in load[i][j]) {
-						if(typeof load[i][j][k] == 'object' || (k == 'enabled' && typeof Torus.options[i][j][k] == 'boolean')) {
-							Torus.options[i][j][k] = load[i][j][k];
-						}
-					}
+					var div = document.createElement('div');
+						div.id = 'torus-option-value-' + option;
+						Torus.ui.ids['torus-option-value-' + option];
+						var label = document.createElement('label');
+							label.setAttribute('for', 'torus-option-value-' + option + '-input');
+							label.textContent = name;
+						div.appendChild(label);
+						div.appendChild(document.createTextNode(': '));
+						div.appendChild(Torus.ext.options.types[Torus.ext.options.dir[i][j][k].type](option));
+					fieldset.appendChild(div);
 				}
-			}
+			frag.appendChild(fieldset);
 		}
+		Torus.ext.options.ui['group_' + i] = frag;
 	}
 }
 
-Torus.add_listener('window', 'load', Torus.options.load);
-Torus.add_listener('window', 'unload', Torus.options.save);
+Torus.ext.options.render = function(group) {
+	if(Torus.ui.ids['window'].firstChild) { //an options group is already rendered, put it back
+		Torus.ext.options.ui['group_' + Torus.ext.options.selected] = Torus.util.empty(Torus.ui.ids['window']);
+	}
 
-Torus.options.add_listener('ui', 'activate', function() {Torus.options.render(Torus.options.selected);});
-Torus.options.add_listener('ui', 'deactivate', Torus.options.save);
+	for(var i = 0; i < Torus.ui.ids['sidebar'].children.length; i++) { //FIXME: what if options isn't active?
+		if(Torus.ui.ids['sidebar'].children[i].getAttribute('data-id') == group) {Torus.ui.ids['sidebar'].children[i].classList.add('torus-option-group-selected');}
+		else {Torus.ui.ids['sidebar'].children[i].classList.remove('torus-option-group-selected');}
+	}
+
+	Torus.ui.ids['window'].appendChild(Torus.ext.options.ui['group_' + group]);
+	Torus.ui.ids['sidebar'].appendChild(Torus.ext.options.ui.sidebar);
+
+	if(!group) {Torus.save_options();} //FIXME: when does this happen?
+	else {Torus.ext.options.selected = group;}
+}
+
+Torus.ext.options.unrender = function(event) {
+	Torus.ext.options.ui.sidebar = event.old_sidebar;
+	Torus.ext.options.ui['group_' + Torus.ext.options.selected] = event.old_window;
+}
+
+Torus.ext.options.types['text'] = function(option) {
+	var textarea = document.createElement('textarea');
+		textarea.id = 'torus-option-value-' + option + '-input';
+		Torus.ui.ids['torus-option-value-' + option + '-input'] = textarea;
+		textarea.className = 'torus-option-text';
+		textarea.rows = 6;
+		textarea.value = Torus.options[option];
+		textarea.setAttribute('data-id', option);
+		textarea.addEventListener('blur', Torus.ext.options.blur_textarea);
+	return textarea;
+}
+Torus.ext.options.types['string'] = function(option) {
+	var input = document.createElement('input');
+		input.id = 'torus-option-value-' + option + '-input';
+		Torus.ui.ids['torus-option-value-' + option + '-input'] = input;
+		input.className = 'torus-option-string';
+		input.type = 'text';
+		input.value = Torus.options[option];
+		input.setAttribute('data-id', option);
+		input.addEventListener('blur', Torus.ext.options.blur_string);
+	return input;
+}
+Torus.ext.options.types['number'] = function(option) {
+	var input = document.createElement('input');
+		input.id = 'torus-option-value-' + option + '-input';
+		Torus.ui.ids['torus-option-value-' + option + '-input'] = input;
+		input.className = 'torus-option-number';
+		input.type = 'number';
+		input.value = Torus.options[option];
+		input.setAttribute('data-id', option);
+		input.addEventListener('blur', Torus.ext.options.blur_number);
+	return input;
+}
+Torus.ext.options.types['boolean'] = function(option) {
+	var checkbox = document.createElement('input');
+		checkbox.id = 'torus-option-value-' + option + '-input';
+		Torus.ui.ids['torus-option-value-' + option + '-input'] = checkbox;
+		checkbox.className = 'torus-option-boolean';
+		checkbox.type = 'checkbox';
+		checkbox.checked = Torus.options[option];
+		checkbox.setAttribute('data-id', option);
+		checkbox.addEventListener('change', Torus.ext.options.click_boolean);
+	return checkbox;
+}
+
+Torus.ext.options.blur_textarea = function () {Torus.options[this.getAttribute('data-id')] = this.value;}
+Torus.ext.options.blur_string = function () {Torus.options[this.getAttribute('data-id')] = this.value;}
+Torus.ext.options.blur_number = function () {Torus.options[this.getAttribute('data-id')] = this.value * 1;}
+Torus.ext.options.click_boolean = function () {Torus.options[this.getAttribute('data-id')] = this.checked;}
+
+Torus.ext.options.click_sidebar = function() {Torus.ext.options.render(this.getAttribute('data-id'));}
+
+Torus.ext.options.add_listener('ui', 'activate', function() {Torus.ext.options.render(Torus.ext.options.selected);});
+Torus.ext.options.add_listener('ui', 'deactivate', function(event) {
+	Torus.ext.options.unrender(event);
+	Torus.save_options();
+});
+
+Torus.add_listener('ext', 'after_load_options', Torus.ext.options.rebuild);

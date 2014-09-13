@@ -47,11 +47,17 @@ Torus.ui.add_room = function(event) {
 	Torus.ui.ids['tabs'].appendChild(tab);
 
 	if(event.room.id > 0) {
-		if(!Torus.options.pings[event.room.name]) {
-			Torus.options.pings[event.room.name] = {};
-			Torus.options.pings[event.room.name].enabled = true;
-			Torus.options.pings[event.room.name].case_sensitive = {type: 'text', value: ''};
-			Torus.options.pings[event.room.name].case_insensitive = {type: 'text', value: ''};
+		if(!event.room.parent && !Torus.options['pings-' + event.room.name + '-enabled']) {
+			//TODO: regex pings are next, sactage
+			Torus.options['pings-' + event.room.name + '-enabled'] = true;
+			Torus.options['pings-' + event.room.name + '-case_sensitive'] = '';
+			Torus.options['pings-' + event.room.name + '-case_insensitive'] = '';
+
+			Torus.ext.options.dir.pings[event.room.name] = {
+				enabled: {type: 'boolean'},
+				case_sensitive: {type: 'text', help: ''}, //FIXME: i18n something
+				case_insensitive: {type: 'text', help: ''}, //FIXME: i18n something
+			};
 		}
 
 		for(var i in Torus.logs) {
@@ -73,7 +79,8 @@ Torus.ui.remove_room = function(event) {
 	delete Torus.ui.ids['tab-' + event.room.id];
 }
 
-Torus.ui.render = function() {
+Torus.ui.render = function(el) {
+	if(!el) {el = Torus.ui.ids['window'];}
 	var rooms = [];
 	var indexes = [];
 	var active = false;
@@ -90,7 +97,7 @@ Torus.ui.render = function() {
 	}
 
 	var frag = document.createDocumentFragment(); //yo these things are so cool
-	for(var i = 0; i < Torus.options.messages.general.max.value && rooms.length > 0; i++) {
+	for(var i = 0; i < Torus.options['messages-general-max'] && rooms.length > 0; i++) {
 		var message = rooms[0][indexes[0]];
 		var source = 0;
 		for(var j = 1; j < rooms.length; j++) {
@@ -107,12 +114,11 @@ Torus.ui.render = function() {
 		if(i == 0) {frag.appendChild(Torus.ui.render_line(message));}
 		else {frag.insertBefore(Torus.ui.render_line(message), frag.firstChild);}
 	}
-	Torus.util.empty(Torus.ui.ids['window']);
-	Torus.ui.ids['window'].appendChild(frag);
+	el.appendChild(frag);
 
 	//rerender userlist
+	//FIXME: now that this is a generalized function, should we still do this or move it somewhere else?
 	if(Torus.ui.active.id > 0) {
-		Torus.util.empty(Torus.ui.ids['sidebar']);
 		//FIXME: this is really hacky
 		var e = {room: Torus.ui.active};
 		for(var i in Torus.ui.active.userlist) {
@@ -121,9 +127,11 @@ Torus.ui.render = function() {
 		}
 	}
 
-	Torus.ui.ids['window'].scrollTop = Torus.ui.ids['window'].scrollHeight;
+	el.scrollTop = el.scrollHeight;
 
-	Torus.call_listeners(new Torus.classes.UIEvent('render'));
+	var event = new Torus.classes.UIEvent('render');
+	event.target = el;
+	Torus.call_listeners(event);
 }
 
 Torus.ui.activate = function(room) {
@@ -132,21 +140,21 @@ Torus.ui.activate = function(room) {
 
 	tab.classList.remove('torus-tab-active');
 
-	Torus.call_listeners(new Torus.classes.UIEvent('deactivate', Torus.ui.active));
+	Torus.util.empty(Torus.ui.ids['info']);
+	var event = new Torus.classes.UIEvent('deactivate', Torus.ui.active);
+	event.old_window = Torus.util.empty(Torus.ui.ids['window']);
+	event.old_sidebar = Torus.util.empty(Torus.ui.ids['sidebar']);
+	Torus.call_listeners(event);
 	Torus.ui.active = room;
 
 	if(room.id >= 0) {var tab = Torus.ui.ids['tab-' + room.id].classList.add('torus-tab-active');}
 	else {var tab = Torus.ui.ids['tab--1'].classList.add('torus-tab-active');}
 
-	Torus.util.empty(Torus.ui.ids['info']);
-	Torus.util.empty(Torus.ui.ids['window']);
-	Torus.util.empty(Torus.ui.ids['sidebar']);
-
 	if(room.id > 0) { //chat
 		if(!room.parent) {
 			Torus.ui.ids['info'].textContent = 'Public room'; //FIXME: i18n
 			if(room.name) {
-				Torus.ui.ids['info'].textContent += ' of ';
+				Torus.ui.ids['info'].appendChild(document.createTextNode(' of '));
 				var a = document.createElement('a');
 				a.href = 'http://' + room.name + '.wikia.com';
 				a.textContent = room.name;
@@ -157,19 +165,19 @@ Torus.ui.activate = function(room) {
 		}
 		else {
 			Torus.ui.ids['info'].textContent = 'Private room of '; //FIXME: i18n
-			if(room.parent) {
+			if(room.parent.name) {
 				var a = document.createElement('a');
 				a.href = 'http://' + room.parent.name + '.wikia.com';
 				a.textContent = room.parent.name;
 				a.addEventListener('click', Torus.ui.click_link);
 				Torus.ui.ids['info'].appendChild(a);
 			}
-			else {Torus.ui.ids['info'].textContent += room.parent.name;}
+			else {Torus.ui.ids['info'].appendChild(document.createTextNode(room.parent.name));}
 			Torus.ui.ids['info'].appendChild(document.createTextNode(', between ' + room.priv_users.slice(0, room.priv_users.length - 1).join(', ') + ' and ' + room.priv_users[room.priv_users.length - 1] + '. (' + room.id + ')')); //FIXME: i18n
 		}
 	}
 	else { //extension
-		if(room.id == 0 || room.id == -1) {
+		if(room.id == 0 || room.id == -1) { //status and menu
 			Torus.ui.ids['info'].textContent = 'Torus v' + Torus.pretty_version + ', running on '; //FIXME: i18n
 			var a = document.createElement('a');
 				a.href = 'http://' + Torus.local.domain + '.wikia.com/wiki/';
@@ -185,7 +193,7 @@ Torus.ui.activate = function(room) {
 			Torus.ui.ids['info'].appendChild(a);
 		}
 	}
-	if(room.id >= 0) {Torus.ui.render();}
+	if(room.id >= 0) {Torus.ui.render(Torus.ui.ids['window']);}
 
 	Torus.call_listeners(new Torus.classes.UIEvent('activate', room));
 }
@@ -202,7 +210,8 @@ Torus.ui.show = function(room) {
 		var tab = Torus.ui.ids['tab-' + room.id];
 		tab.classList.remove('torus-tab-viewing');
 
-		Torus.ui.render();
+		Torus.util.empty(Torus.ui.ids['window']);
+		Torus.ui.render(Torus.ui.ids['window']);
 		Torus.call_listeners(new Torus.classes.UIEvent('unshow', room));
 	}
 	else { //show
@@ -211,7 +220,8 @@ Torus.ui.show = function(room) {
 
 		Torus.ui.ids['tab-' + room.id].classList.add('torus-tab-viewing');
 
-		Torus.ui.render();
+		Torus.util.empty(Torus.ui.ids['window']);
+		Torus.ui.render(Torus.ui.ids['window']);
 		Torus.call_listeners(new Torus.classes.UIEvent('show', room));
 	}
 }
@@ -228,7 +238,7 @@ Torus.ui.parse_message = function(event) {
 	while(event.html.indexOf('\n') != -1) {event.html = event.html.replace('\n', '<br />');}
 
 	if(data.attrs.name != wgUserName) {
-		var pings = (Torus.options.pings.global.case_sensitive.value + '\n' + Torus.options.pings[event.room.name].case_sensitive.value).split('\n');
+		var pings = (Torus.options['pings-global-case_sensitive'] + '\n' + Torus.options['pings-' + event.room.name + '-case_sensitive']).split('\n');
 		for(var i = 0; i < pings.length; i++) {
 			var ping = pings[i];
 			if(!ping) {continue;}
@@ -241,7 +251,7 @@ Torus.ui.parse_message = function(event) {
 				break;
 			}
 		}
-		pings = (Torus.options.pings.global.case_insensitive.value + '\n' + Torus.options.pings[event.room.name].case_insensitive.value).toLowerCase().split('\n');
+		pings = (Torus.options['pings-global-case_insensitive'] + '\n' + Torus.options['pings-' + event.room.name + '-incase_sensitive']).split('\n');
 		for(var i = 0; i < pings.length; i++) {
 			var ping = pings[i];
 			if(!ping) {continue;}
@@ -272,7 +282,7 @@ Torus.ui.add_line = function(event) {
 		Torus.ui.ids['window'].appendChild(Torus.ui.render_line(event));
 		if(scroll) {Torus.ui.ids['window'].scrollTop = Torus.ui.ids['window'].scrollHeight;}
 
-		if(Torus.ui.ids['window'].children.length > Torus.options.messages.general.max.value) {Torus.ui.ids['window'].removeChild(Torus.ui.ids['window'].children[0]);}
+		if(Torus.ui.ids['window'].children.length > Torus.options['messages-general-max']) {Torus.ui.ids['window'].removeChild(Torus.ui.ids['window'].children[0]);}
 	}
 }
 
@@ -753,17 +763,17 @@ Torus.ui.unrender_popup = function() {
 	Torus.call_listeners(new Torus.classes.UIEvent('unrender_popup'));
 }
 
-Torus.ui.ping = function(room) {
-	if(Torus.options.pings.general.enabled && Torus.ui.window.parentNode && Torus.data.pinginterval == 0) {
+Torus.ui.ping = function(room) { //FIXME: highlight room name in red or something
+	if(Torus.options['pings-general-enabled'] && Torus.ui.window.parentNode && Torus.data.pinginterval == 0) {
 		Torus.data.titleflash = document.title;
-		document.title = Torus.options.pings.general.alert.value;
+		document.title = Torus.options['pings-general-alert'];
 		Torus.data.pinginterval = setInterval(function() {
-			if(document.title != Torus.options.pings.general.alert.value) {document.title = Torus.options.pings.general.alert.value;}
+			if(document.title != Torus.options['pings-general-alert']) {document.title = Torus.options['pings-general-alert'];}
 			else {document.title = Torus.data.titleflash;}
-		}, Torus.options.pings.general.interval.value);
-		if(Torus.options.pings.general.beep.value) {
+		}, Torus.options['pings-general-interval']);
+		if(Torus.options['pings-general-beep']) {
 			var beep = document.createElement('audio');
-			beep.src = Torus.options.pings.general.sound.value;
+			beep.src = Torus.options['pings-general-sound'];
 			beep.play();
 		}
 	}
@@ -805,7 +815,10 @@ Torus.ui.initial = function(event) {
 		}
 	}
 	//userlist is already taken care of because Chat.event_updateUser calls Chat.update_user which ui.update_user listens to
-	if(event.room == Torus.ui.active) {Torus.ui.render();}
+	if(event.room == Torus.ui.active) {
+		Torus.util.empty(Torus.ui.ids['window']);
+		Torus.ui.render(Torus.ui.ids['window']);
+	}
 
 	if(event.room.parent) {Torus.ui.ping(event.room);}
 }
@@ -920,7 +933,7 @@ Torus.ui.onload = function() {
 				};
 				Torus.local.room = data.roomId;
 			}
-			if(wgCanonicalNamespace == 'Special' && wgTitle == 'Torus' && Torus.options.misc.connection.local.value) {(new Torus.classes.Chat(Torus.local.room, Torus.local.domain)).connect();}
+			if(wgCanonicalNamespace == 'Special' && wgTitle == 'Torus' && Torus.options['misc-connection-local']) {(new Torus.classes.Chat(Torus.local.room, Torus.local.domain)).connect();}
 		});
 	}
 
@@ -949,9 +962,9 @@ Torus.ui.onload = function() {
 			return;
 		}
 
-		if(Torus.local.room && Torus.options.misc.connection.local.value) {(new Torus.classes.Chat(Torus.local.room, Torus.local.domain)).connect();}
-		if(Torus.options.misc.connection.default_rooms.value) {
-			var rooms = Torus.options.misc.connection.default_rooms.value.split('\n');
+		if(Torus.local.room && Torus.options['misc-connection-local']) {(new Torus.classes.Chat(Torus.local.room, Torus.local.domain)).connect();}
+		if(Torus.options['misc-connection-default_rooms']) {
+			var rooms = Torus.options['misc-connection-default_rooms'].split('\n');
 			for(var i = 0; i < rooms.length; i++) {
 				if(!Torus.chats[rooms[i]] && Torus.database[rooms[i]]) {(new Torus.classes.Chat(Torus.database[rooms[i]].room, rooms[i])).connect();} //could be Torus.local.room
 			}
@@ -985,8 +998,36 @@ Torus.classes.UIEvent = function(event, room) {
 Torus.classes.UIEvent.prototype = Object.create(Torus.classes.Event.prototype);
 
 Torus.util.empty = function(el) {
-	while(el.firstChild) {el.removeChild(el.firstChild);}
+	var frag = document.createDocumentFragment();
+	while(el.firstChild) {frag.appendChild(el.firstChild);}
+	return frag;
 }
+
+Torus.util.fill_el = function(el, arr) {
+	//TODO: Torus.util.empty(el); first?
+	var frag = document.createDocumentFragment();
+	for(var i = 0; i < arr.length; i++) {frag.appendChild(arr[i]);}
+	el.appendChild(frag);
+}
+
+Torus.options['pings-general-enabled'] = true;
+Torus.options['pings-general-alert'] = 'Activity!';
+Torus.options['pings-general-interval'] = 500;
+Torus.options['pings-general-beep'] = true;
+Torus.options['pings-general-sound'] = 'http://images.wikia.com/monchbox/images/0/01/Beep-sound.ogg'; 
+Torus.options['pings-global-case_sensitive'] = '';
+Torus.options['pings-global-case_insensitive'] = wgUserName;
+
+Torus.options['messages-general-max'] = 200;
+Torus.options['messages-general-rejoins'] = false;
+Torus.options['messages-general-timezone'] = 0;
+
+Torus.options['misc-connection-default_rooms'] = '';
+Torus.options['misc-connection-local'] = true;
+Torus.options['misc-user_colors-enabled'] = true;
+Torus.options['misc-user_colors-hue'] = 0;
+Torus.options['misc-user_colors-sat'] = .7;
+Torus.options['misc-user_colors-val'] = .6;
 
 {{MediaWiki:Torus.js/menu.js}}
 
