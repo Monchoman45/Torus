@@ -48,10 +48,17 @@ Torus.ui.add_room = function(event) {
 
 	if(event.room.id > 0) {
 		if(!Torus.options.pings[event.room.name]) {
-			Torus.options.pings[event.room.name] = {};
-			Torus.options.pings[event.room.name].enabled = true;
-			Torus.options.pings[event.room.name].case_sensitive = {type: 'text', value: ''};
-			Torus.options.pings[event.room.name].case_insensitive = {type: 'text', value: ''};
+			Torus.options.pings[event.room.name] = {
+				enabled: true,
+				case_sensitive: '',
+				case_insensitive: '',
+			};
+
+			Torus.ext.options.dir.pings[event.room.name] = {
+				enabled: {type: 'boolean'},
+				case_sensitive: {type: 'text', help: ''}, //FIXME: i18n something
+				case_insensitive: {type: 'text', help: ''}, //FIXME: i18n something
+			};
 		}
 
 		for(var i in Torus.logs) {
@@ -91,7 +98,8 @@ Torus.ui.render = function(el) {
 	}
 
 	var frag = document.createDocumentFragment(); //yo these things are so cool
-	for(var i = 0; i < Torus.options.messages.general.max.value && rooms.length > 0; i++) {
+	console.log(Torus.options);
+	for(var i = 0; i < Torus.options.messages.general.max && rooms.length > 0; i++) {
 		var message = rooms[0][indexes[0]];
 		var source = 0;
 		for(var j = 1; j < rooms.length; j++) {
@@ -240,7 +248,7 @@ Torus.ui.parse_message = function(event) {
 	while(event.html.indexOf('\n') != -1) {event.html = event.html.replace('\n', '<br />');}
 
 	if(data.attrs.name != wgUserName) {
-		var pings = (Torus.options.pings.global.case_sensitive.value + '\n' + Torus.options.pings[event.room.name].case_sensitive.value).split('\n');
+		var pings = (Torus.options.pings.global.case_sensitive + '\n' + Torus.options.pings[event.room.name].case_sensitive).split('\n');
 		for(var i = 0; i < pings.length; i++) {
 			var ping = pings[i];
 			if(!ping) {continue;}
@@ -253,7 +261,7 @@ Torus.ui.parse_message = function(event) {
 				break;
 			}
 		}
-		pings = (Torus.options.pings.global.case_insensitive.value + '\n' + Torus.options.pings[event.room.name].case_insensitive.value).toLowerCase().split('\n');
+		pings = (Torus.options.pings.global.case_insensitive + '\n' + Torus.options.pings[event.room.name].case_insensitive).toLowerCase().split('\n');
 		for(var i = 0; i < pings.length; i++) {
 			var ping = pings[i];
 			if(!ping) {continue;}
@@ -284,7 +292,7 @@ Torus.ui.add_line = function(event) {
 		Torus.ui.ids['window'].appendChild(Torus.ui.render_line(event));
 		if(scroll) {Torus.ui.ids['window'].scrollTop = Torus.ui.ids['window'].scrollHeight;}
 
-		if(Torus.ui.ids['window'].children.length > Torus.options.messages.general.max.value) {Torus.ui.ids['window'].removeChild(Torus.ui.ids['window'].children[0]);}
+		if(Torus.ui.ids['window'].children.length > Torus.options.messages.general.max) {Torus.ui.ids['window'].removeChild(Torus.ui.ids['window'].children[0]);}
 	}
 }
 
@@ -672,14 +680,14 @@ Torus.ui.unrender_popup = function() {
 Torus.ui.ping = function(room) { //FIXME: highlight room name in red or something
 	if(Torus.options.pings.general.enabled && Torus.ui.window.parentNode && Torus.data.pinginterval == 0) {
 		Torus.data.titleflash = document.title;
-		document.title = Torus.options.pings.general.alert.value;
+		document.title = Torus.options.pings.general.alert;
 		Torus.data.pinginterval = setInterval(function() {
-			if(document.title != Torus.options.pings.general.alert.value) {document.title = Torus.options.pings.general.alert.value;}
+			if(document.title != Torus.options.pings.general.alert) {document.title = Torus.options.pings.general.alert;}
 			else {document.title = Torus.data.titleflash;}
-		}, Torus.options.pings.general.interval.value);
-		if(Torus.options.pings.general.beep.value) {
+		}, Torus.options.pings.general.interval);
+		if(Torus.options.pings.general.beep) {
 			var beep = document.createElement('audio');
-			beep.src = Torus.options.pings.general.sound.value;
+			beep.src = Torus.options.pings.general.sound;
 			beep.play();
 		}
 	}
@@ -840,7 +848,7 @@ Torus.ui.onload = function() {
 				};
 				Torus.local.room = data.roomId;
 			}
-			if(wgCanonicalNamespace == 'Special' && wgTitle == 'Torus' && Torus.options.misc.connection.local.value) {(new Torus.classes.Chat(Torus.local.room, Torus.local.domain)).connect();}
+			if(wgCanonicalNamespace == 'Special' && wgTitle == 'Torus' && Torus.options.misc.connection.local) {(new Torus.classes.Chat(Torus.local.room, Torus.local.domain)).connect();}
 		});
 	}
 
@@ -860,9 +868,9 @@ Torus.ui.onload = function() {
 		document.getElementById(body).innerHTML = (document.getElementById('AdminDashboardHeader') ? '<div class="AdminDashboardGeneralHeader AdminDashboardArticleHeader"><h1>Torus</h1></div>' : '');
 		document.getElementById(body).appendChild(Torus.ui.window);
 
-		if(Torus.local.room && Torus.options.misc.connection.local.value) {(new Torus.classes.Chat(Torus.local.room, Torus.local.domain)).connect();}
-		if(Torus.options.misc.connection.default_rooms.value) {
-			var rooms = Torus.options.misc.connection.default_rooms.value.split('\n');
+		if(Torus.local.room && Torus.options.misc.connection.local) {(new Torus.classes.Chat(Torus.local.room, Torus.local.domain)).connect();}
+		if(Torus.options.misc.connection.default_rooms) {
+			var rooms = Torus.options.misc.connection.default_rooms.split('\n');
 			for(var i = 0; i < rooms.length; i++) {
 				if(!Torus.chats[rooms[i]] && Torus.database[rooms[i]]) {(new Torus.classes.Chat(Torus.database[rooms[i]].room, rooms[i])).connect();} //could be Torus.local.room
 			}
@@ -907,6 +915,39 @@ Torus.util.fill_el = function(el, arr) {
 	for(var i = 0; i < arr.length; i++) {frag.appendChild(arr[i]);}
 	el.appendChild(frag);
 }
+
+Torus.options.pings = {
+	general: {
+		enabled: true,
+		alert: 'Activity!',
+		interval: 500,
+		beep: true,
+		sound: 'http://images.wikia.com/monchbox/images/0/01/Beep-sound.ogg',
+	},
+	global: {
+		case_sensitive: '',
+		case_insensitive: wgUserName,
+	},
+};
+Torus.options.messages = {
+	general: {
+		max: 200,
+		rejoins: false,
+		timezone: 0,
+	},
+};
+Torus.options.misc = {
+	connection: {
+		default_rooms: '',
+		local: true,
+	},
+	user_colors: {
+		enabled: true,
+		hue: 0,
+		sat: .7,
+		val: .6,
+	},
+};
 
 {{MediaWiki:Torus.js/menu.js}}
 

@@ -15,16 +15,18 @@ Torus.util.compare_strings = function(str1, str2) {
 	return str1.length - str2.length;
 }
 
+Torus.util.cap = function(str) {return str.charAt(0).toUpperCase() + str.substring(1);}
+
 Torus.util.color_hash = function(str) {
 	if(str === undefined) {throw new Error('Not enough parameters. (util.colorHash)');}
 	str += ''; //cast to string
 	var hue = 0;
-	var val = Torus.options.misc.user_colors.val.value;
-	var sat = Torus.options.misc.user_colors.sat.value;
+	var val = Torus.options.misc.user_colors.val;
+	var sat = Torus.options.misc.user_colors.sat;
 	for(var i = 0; i < str.length; i++) {
 		hue = 31 * hue + str.charCodeAt(i); //same hash algorithm as webchat, except this is case sensitive
 	}
-	hue = (hue + Torus.options.misc.user_colors.hue.value) % 360;
+	hue = (hue + Torus.options.misc.user_colors.hue) % 360;
 
 	//1 letter variables are fun don't you love mathematicians
 	var c = val * sat;
@@ -151,9 +153,9 @@ Torus.util.normalize_pagename = function(page) {
 	if(page.indexOf(':') != -1) { //Namespace:Title
 		var namespace = page.substring(0, page.indexOf(':'));
 		var title = page.substring(page.indexOf(':') + 1);
-		page = namespace.charAt(0).toUpperCase() + namespace.substring(1) + ':' + title.charAt(0).toUpperCase() + title.substring(1);
+		page = Torus.util.cap(namespace) + ':' + Torus.util.cap(title);
 	}
-	else {page = page.charAt(0).toUpperCase() + page.substring(1);} //Title (mainspace)
+	else {page = Torus.util.cap(page);} //Title (mainspace)
 	while(page.indexOf('_') != -1) {page = page.replace('_', ' ');}
 	return page;
 }
@@ -171,7 +173,7 @@ Torus.util.text_index = function(text, find) { //indexOf, but ignore stuff like 
 Torus.util.timestamp = function(time) {
 	var date = new Date();
 	if(time) {date.setTime(time);}
-	date.setUTCHours(date.getUTCHours() + Torus.options.messages.general.timezone.value);
+	date.setUTCHours(date.getUTCHours() + Torus.options.messages.general.timezone);
 	var hours = date.getUTCHours();
 	if(hours < 10) {hours = '0' + hours;}
 	var minutes = date.getUTCMinutes();
