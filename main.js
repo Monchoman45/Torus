@@ -11,8 +11,8 @@ window.Torus = {
 		room: 0,
 		domain: ''
 	},
-	version: 230,
-	pretty_version: '2.3.0',
+	version: 231,
+	pretty_version: '2.3.1',
 	chats: {},
 	listeners: {
 		window: {
@@ -184,9 +184,9 @@ Torus.save_options = function() {
 Torus.load_options = function() {
 	var load = JSON.parse(window.localStorage.getItem('torus-options'));
 	if(!load) {return;}
-	if(load.version < 230) {
+	if(load.version < 231) {
 		window.localStorage.removeItem('torus-options');
-		return;
+		load.data = {};
 	}
 	var event = new Torus.classes.ExtEvent('load_options');
 	event.options = load;

@@ -17,38 +17,8 @@ Torus.util.compare_strings = function(str1, str2) {
 
 Torus.util.cap = function(str) {return str.charAt(0).toUpperCase() + str.substring(1);}
 
-Torus.util.color_hash = function(str) {
-	if(str === undefined) {throw new Error('Not enough parameters. (util.colorHash)');}
-	str += ''; //cast to string
-	var hue = 0;
-	var val = Torus.options['misc-user_colors-val'];
-	var sat = Torus.options['misc-user_colors-sat'];
-	for(var i = 0; i < str.length; i++) {
-		hue = 31 * hue + str.charCodeAt(i); //same hash algorithm as webchat, except this is case sensitive
-	}
-	hue = (hue + Torus.options['misc-user_colors-hue']) % 360;
-
-	//1 letter variables are fun don't you love mathematicians
-	var c = val * sat;
-	var m = val - c;
-	var C = Math.floor((c + m) * 255).toString(16);
-	var X = Math.floor((c * (1 - Math.abs((hue / 60) % 2 - 1)) + m) * 255).toString(16);
-	var O = Math.floor(m * 255).toString(16);
-	if(C.length == 1) {C = '0' + C;}
-	if(X.length == 1) {X = '0' + X;}
-	if(O.length == 1) {O = '0' + O;}
-	switch(Math.floor(hue / 60)) {
-		case 0: return '#' + C + X + O;
-		case 1: return '#' + X + C + O;
-		case 2: return '#' + O + C + X;
-		case 3: return '#' + O + X + C;
-		case 4: return '#' + X + O + C;
-		case 5: return '#' + C + O + X;
-	}
-}
-
 Torus.util.parse_links = function (text, wiki) {
-	if(!text) {throw new Error('Not enough parameters. (util.parse_links)');}
+	if(!text) {return '';}
 	if(!isNaN(wiki * 1)) {wiki = '';}
  
 	var ref = 0;
@@ -158,16 +128,6 @@ Torus.util.normalize_pagename = function(page) {
 	else {page = Torus.util.cap(page);} //Title (mainspace)
 	while(page.indexOf('_') != -1) {page = page.replace('_', ' ');}
 	return page;
-}
-
-Torus.util.text_index = function(text, find) { //indexOf, but ignore stuff like the href="" attribute of links
-	var ref = 0;
-	var index = 0;
-	while((index = text.indexOf(find, ref)) != -1) {
-		if(text.lastIndexOf('<a href="', index) <= text.lastIndexOf('">', index)) {return index;}
-		else {ref = index + 1;}
-	}
-	return -1;
 }
 
 Torus.util.timestamp = function(time) {

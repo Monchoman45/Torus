@@ -32,11 +32,11 @@ Torus.ext.options.dir.pings = {
 		},
 	},
 	global: {
-		case_sensitive: {
+		literal: {
 			type: 'text',
 			help: '', //TODO:
 		},
-		case_insensitive: {
+		regex: {
 			type: 'text',
 			help: '', //TODO:
 		},

@@ -47,6 +47,9 @@
 #torus-tabs span.torus-tab-close:hover {
 	color: red;
 }
+#torus-tabs span.torus-tab-ping {
+	color: red;
+}
 #torus-tabs #torus-tab--1 { /*#id #id is dumb but without this #torus-tabs span.torus-tab overrides this*/
 	position: absolute;
 	top: .2em;

@@ -48,15 +48,14 @@ Torus.ui.add_room = function(event) {
 
 	if(event.room.id > 0) {
 		if(!event.room.parent && !Torus.options['pings-' + event.room.name + '-enabled']) {
-			//TODO: regex pings are next, sactage
 			Torus.options['pings-' + event.room.name + '-enabled'] = true;
-			Torus.options['pings-' + event.room.name + '-case_sensitive'] = '';
-			Torus.options['pings-' + event.room.name + '-case_insensitive'] = '';
+			Torus.options['pings-' + event.room.name + '-literal'] = '';
+			Torus.options['pings-' + event.room.name + '-regex'] = '';
 
 			Torus.ext.options.dir.pings[event.room.name] = {
 				enabled: {type: 'boolean'},
-				case_sensitive: {type: 'text', help: ''}, //FIXME: i18n something
-				case_insensitive: {type: 'text', help: ''}, //FIXME: i18n something
+				literal: {type: 'text', help: ''}, //FIXME: i18n something
+				regex: {type: 'text', help: ''}, //FIXME: i18n something
 			};
 		}
 
@@ -135,20 +134,22 @@ Torus.ui.render = function(el) {
 }
 
 Torus.ui.activate = function(room) {
-	if(Torus.ui.active.id >= 0) {var tab = Torus.ui.ids['tab-' + Torus.ui.active.id];}
-	else {var tab = Torus.ui.ids['tab--1'];}
-
-	tab.classList.remove('torus-tab-active');
+	if(Torus.ui.active.id >= 0) {Torus.ui.ids['tab-' + Torus.ui.active.id].classList.remove('torus-tab-active');}
+	else {Torus.ui.ids['tab--1'].classList.remove('torus-tab-active');}
 
 	Torus.util.empty(Torus.ui.ids['info']);
 	var event = new Torus.classes.UIEvent('deactivate', Torus.ui.active);
 	event.old_window = Torus.util.empty(Torus.ui.ids['window']);
 	event.old_sidebar = Torus.util.empty(Torus.ui.ids['sidebar']);
 	Torus.call_listeners(event);
+
 	Torus.ui.active = room;
 
-	if(room.id >= 0) {var tab = Torus.ui.ids['tab-' + room.id].classList.add('torus-tab-active');}
-	else {var tab = Torus.ui.ids['tab--1'].classList.add('torus-tab-active');}
+	if(room.id >= 0) {
+		Torus.ui.ids['tab-' + room.id].classList.add('torus-tab-active');
+		Torus.ui.ids['tab-' + room.id].classList.remove('torus-tab-ping');
+	}
+	else {Torus.ui.ids['tab--1'].classList.add('torus-tab-active');}
 
 	if(room.id > 0) { //chat
 		if(!room.parent) {
@@ -229,49 +230,54 @@ Torus.ui.show = function(room) {
 Torus.ui.parse_message = function(event) {
 	event.html = event.text;
 
+	var pinged = false;
+	if(event.user != wgUserName) {
+		var pings = Torus.options['pings-global-literal'];
+		if(event.room.parent) {pings += '\n' + Torus.options['pings-' + event.room.parent.name + '-literal'];}
+		else {pings += '\n' + Torus.options['pings-' + event.room.name + '-literal'];}
+
+		pings = pings.toLowerCase().split('\n');
+		for(var i = 0; i < pings.length; i++) {
+			if(!pings[i]) {continue;}
+			if(event.text.toLowerCase().indexOf(pings[i]) != -1) {
+				Torus.ui.ping(event.room);
+				pinged = true;
+				break;
+			}
+		}
+
+		if(!pinged) {
+			//FIXME: precompile these instead of recompiling them every time a message is received
+			pings = Torus.options['pings-global-regex'];
+			if(event.room.parent) {pings += '\n' + Torus.options['pings-' + event.room.parent.name + '-regex'];}
+			else {pings += '\n' + Torus.options['pings-' + event.room.name + '-regex'];}
+
+			pings = pings.split('\n');
+			for(var i = 0; i < pings.length; i++) {
+				if(!pings[i]) {continue;}
+				var ping = new RegExp(pings[i], 'ig');
+				if(ping.test(event.text)) {
+					Torus.ui.ping(event.room);
+					pinged = true;
+					break;
+				}
+			}
+		}
+	}
+
 	while(event.html.indexOf('<') != -1) {event.html = event.html.replace('<', '&lt;');}
 	while(event.html.indexOf('>') != -1) {event.html = event.html.replace('>', '&gt;');}
+
+	if(pinged) {event.html = '<span class="torus-message-ping">' + event.html + '</span>';} //FIXME: set something on the li instead
 
 	if(event.room.parent) {event.html = Torus.util.parse_links(event.html, event.room.parent.name);}
 	else {event.html = Torus.util.parse_links(event.html, event.room.name);}
 
 	while(event.html.indexOf('\n') != -1) {event.html = event.html.replace('\n', '<br />');}
-
-	if(data.attrs.name != wgUserName) {
-		var pings = (Torus.options['pings-global-case_sensitive'] + '\n' + Torus.options['pings-' + event.room.name + '-case_sensitive']).split('\n');
-		for(var i = 0; i < pings.length; i++) {
-			var ping = pings[i];
-			if(!ping) {continue;}
-			while(ping.indexOf('<') != -1) {ping = ping.replace('<', '&lt;');} //this is a horrible solution
-			while(ping.indexOf('>') != -1) {ping = ping.replace('>', '&gt;');}
-			var index = Torus.util.text_index(event.html, pings[i]);
-			if(index != -1) {
-				Torus.ui.ping(event.room);
-				event.html = event.html.substring(0, index) + '<span class="torus-message-ping">' + event.html.substring(index, index + ping.length) + '</span>' + event.html.substring(index + ping.length);
-				break;
-			}
-		}
-		pings = (Torus.options['pings-global-case_insensitive'] + '\n' + Torus.options['pings-' + event.room.name + '-incase_sensitive']).split('\n');
-		for(var i = 0; i < pings.length; i++) {
-			var ping = pings[i];
-			if(!ping) {continue;}
-			while(ping.indexOf('<') != -1) {ping = ping.replace('<', '&lt;');} //this is a horrible solution
-			while(ping.indexOf('>') != -1) {ping = ping.replace('>', '&gt;');}
-			var index = Torus.util.text_index(event.html.toLowerCase(), pings[i]);
-			if(index != -1) {
-				Torus.ui.ping(event.room);
-				event.html = event.html.substring(0, index) + '<span class="torus-message-ping">' + event.html.substring(index, index + ping.length) + '</span>' + event.html.substring(index + ping.length);
-				break;
-			}
-		}
-	}
 }
 
 Torus.ui.add_line = function(event) {
-	if(event.text && !event.html) {
-		if(event.room.parent) {event.html = Torus.util.parse_links(event.text, event.room.parent.name);}
-		else {event.html = Torus.util.parse_links(event.text, event.room.name);}
-	}
+	if(event.text && !event.html) {Torus.ui.parse_message(event);}
 
 	Torus.logs.messages[event.room.id].push(event);
 	//Torus.logs.plain[event.room.id].push(event); //TODO: this is supposed to be like just text right?
@@ -439,7 +445,7 @@ Torus.ui.update_user = function(event) {
 			break;
 		}
 	}
-	if(!li) { //TODO: sort staff at top, then mods, then normal users
+	if(!li) {
 		var li = document.createElement('li');
 		li.setAttribute('data-user', event.user);
 		li.addEventListener('mouseover', function(event) {Torus.ui.render_popup(this.getAttribute('data-user'), Torus.ui.active);}); //FIXME: hardcoded function
@@ -764,6 +770,8 @@ Torus.ui.unrender_popup = function() {
 }
 
 Torus.ui.ping = function(room) { //FIXME: highlight room name in red or something
+	Torus.ui.ids['tab-' + room.id].classList.add('torus-tab-ping');
+
 	if(Torus.options['pings-general-enabled'] && Torus.ui.window.parentNode && Torus.data.pinginterval == 0) {
 		Torus.data.titleflash = document.title;
 		document.title = Torus.options['pings-general-alert'];
@@ -834,6 +842,10 @@ Torus.ui.input = function(event) {
 
 		if(Torus.ui.active.id >= 0) {
 			while(this.value.charAt(0) == '/') {
+				if(this.value.charAt(1) == '/') {
+					this.value = this.value.substring(1);
+					break;
+				}
 				if(this.value.indexOf('/me') == 0) {break;}
 				if(this.value.indexOf('\n') != -1) {
 					var command = this.value.substring(1, this.value.indexOf('\n'));
@@ -850,7 +862,7 @@ Torus.ui.input = function(event) {
 			}
 		}
 		if(this.value) {
-			if(this.value.indexOf('./') == 0 || this.value.indexOf('//') == 0) {Torus.ui.active.send_message(this.value.substring(1), false);}
+			if(this.value.indexOf('./') == 0) {Torus.ui.active.send_message(this.value.substring(1), false);}
 			else {Torus.ui.active.send_message(this.value, false);}
 			this.value = '';
 		}
@@ -1003,11 +1015,34 @@ Torus.util.empty = function(el) {
 	return frag;
 }
 
-Torus.util.fill_el = function(el, arr) {
-	//TODO: Torus.util.empty(el); first?
-	var frag = document.createDocumentFragment();
-	for(var i = 0; i < arr.length; i++) {frag.appendChild(arr[i]);}
-	el.appendChild(frag);
+Torus.util.color_hash = function(str) {
+	if(str === undefined) {throw new Error('Not enough parameters. (util.color_hash)');}
+	str += ''; //cast to string
+	var hue = 0;
+	var val = Torus.options['misc-user_colors-val'];
+	var sat = Torus.options['misc-user_colors-sat'];
+	for(var i = 0; i < str.length; i++) {
+		hue = 31 * hue + str.charCodeAt(i); //same hash algorithm as webchat, except this is case sensitive
+	}
+	hue = (hue + Torus.options['misc-user_colors-hue']) % 360;
+
+	//1 letter variables are fun don't you love mathematicians
+	var c = val * sat;
+	var m = val - c;
+	var C = Math.floor((c + m) * 255).toString(16);
+	var X = Math.floor((c * (1 - Math.abs((hue / 60) % 2 - 1)) + m) * 255).toString(16);
+	var O = Math.floor(m * 255).toString(16);
+	if(C.length == 1) {C = '0' + C;}
+	if(X.length == 1) {X = '0' + X;}
+	if(O.length == 1) {O = '0' + O;}
+	switch(Math.floor(hue / 60)) {
+		case 0: return '#' + C + X + O;
+		case 1: return '#' + X + C + O;
+		case 2: return '#' + O + C + X;
+		case 3: return '#' + O + X + C;
+		case 4: return '#' + X + O + C;
+		case 5: return '#' + C + O + X;
+	}
 }
 
 Torus.options['pings-general-enabled'] = true;
@@ -1101,9 +1136,6 @@ Torus.add_listener('io', 'update_user', Torus.ui.update_user);
 Torus.add_listener('io', 'part', Torus.ui.remove_user);
 Torus.add_listener('io', 'logout', Torus.ui.remove_user);
 Torus.add_listener('io', 'ghost', Torus.ui.remove_user);
-
-Torus.add_listener('io', 'message', Torus.ui.parse_message); //I think it's really important that this goes before add_line
-Torus.add_listener('io', 'me', Torus.ui.parse_message); //ditto
 
 Torus.add_listener('io', 'message', Torus.ui.add_line);
 Torus.add_listener('io', 'me', Torus.ui.add_line);
