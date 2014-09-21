@@ -43,7 +43,13 @@ Torus.classes.Chat.socket_connect = function(event) {
 	Torus.call_listeners(new Torus.classes.ChatEvent('open', event.sock.chat));
 }
 Torus.classes.Chat.socket_disconnect = function(event) {event.sock.chat.disconnect(event.message);}
-Torus.classes.Chat.socket_message = function(event) {event.sock.chat.receive(event.message);}
+Torus.classes.Chat.socket_message = function(event) {
+	if(event.message.data) {data = JSON.parse(event.message.data);}
+	else {data = {};} //disableReconnect and probably forceReconnect do this
+
+	var e = event.sock.chat['event_' + event.message.event](data);
+	Torus.call_listeners(e);
+}
 
 Torus.classes.Chat.prototype.connect = function(transport) {
 	if(this.connected || this.connecting) {throw new Error('Tried to open ' + this.name + ' which is already open. (Chat.connect)');}
@@ -57,7 +63,7 @@ Torus.classes.Chat.prototype.connect = function(transport) {
 			domain: this.parent.socket.domain,
 			port: this.parent.socket.port,
 			server: this.parent.socket.server,
-			room: this.parent.socket.room,
+			room: this.id,
 			key: this.parent.socket.key
 		};
 	}
@@ -71,49 +77,6 @@ Torus.classes.Chat.prototype.connect = function(transport) {
 	this.socket.add_listener('io', 'disconnect', Torus.classes.Chat.socket_disconnect);
 	this.socket.add_listener('io', 'message', Torus.classes.Chat.socket_message);
 }
-
-/*Torus.classes.Chat.prototype.connect = function(key, server, port, session, transport) {
-	if(this.connected || this.connecting) {throw new Error('Tried to open ' + this.id + ' (' + this.name + ') which is already open.');}
-
-	this.connecting = true;
-	//FIXME: this is probably a bad idea
-	if(!Torus.chats[this.id]) {Torus.chats[this.id] = this;}
-	if(this.id != this.name && !Torus.chats[this.name]) {Torus.chats[this.name] = this;}
-
-	if(!key || !server) {
-		var c = this; //FIXME: this forces a closure scope
-		Torus.io.spider(function(data) { //FIXME: shouldn't we close this room before throwing an error
-			if(!data) {
-				this.disconnect('Wiki does not have chat');
-				//throw new Error('Can\'t spider: wiki does not have chat. (Chat.connect)');
-			}
-
-			if(data.chatkey.key === false) {throw new Error('Not logged in');} //FIXME: this is dumb, do something better
-			if(!key) {key = data.chatkey;}
-			if(!server) {server = data.nodeInstance;}
-			if(!port) {port = data.nodePort;}
-			c.connecting = false;
-			return c.connect(key, server, port, session, transport);
-		});
-		return;
-	}
-	if(!port) {port = '80';}
-
-	if(!transport) {transport = 'polling';}
-	this.transport = transport;
-
-	if(!session) {
-		var c = this; //FIXME: this forces a closure scope
-		Torus.io.session(transport, this.id, key, server, port, function(data) {
-			c.connecting = false;
-			if(typeof data == 'string') {return c.connect(key, server, port, data, transport);}
-			else {c.disconnect('Unable to retrieve session id: ' + data.message);}
-		});
-		return;
-	}
-	
-	this.socket = new Torus.io.transports[transport](this.id, key, server, port, session);
-}*/
 Torus.classes.Chat.prototype.reconnect = function() {
 	this.socket.close(true);
 	this.connected = false;
@@ -382,14 +345,6 @@ Torus.classes.Chat.prototype.event_disableReconnect = function(data) {
 	Torus.call_listeners(event); //FIXME: this will occur twice
 	this.disconnect('Server closed the connection');
 	return event;
-}
-
-Torus.classes.Chat.prototype.receive = function(message) {
-	if(message.data) {data = JSON.parse(message.data);}
-	else {data = {};} //disableReconnect and probably forceReconnect do this
-
-	var event = this['event_' + message.event](data);
-	Torus.call_listeners(event);
 }
 
 Torus.classes.Chat.prototype.add_listener = Torus.add_listener;
