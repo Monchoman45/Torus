@@ -13,6 +13,7 @@ wikis = [
 	'camphalfbloodroleplay',
 	'clubpenguin',
 	'community',
+	'creepypasta',
 	'elderscrolls',
 	'gta',
 	'mlp',
