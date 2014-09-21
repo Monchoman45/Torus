@@ -421,7 +421,7 @@ Torus.ui.render_line = function(message) {
 					//talk.addEventListener('click', Torus.ui.click_link);
 					talk.addEventListener('click', function() { //FIXME: closure, also ccui is not required
 						Torus.ui.activate(Torus.ext.ccui);
-						Torus.ext.ccui.query(message.user);
+						Torus.ext.ccui.query(message.target);
 					});
 				line.appendChild(talk);
 				line.appendChild(document.createTextNode(') from ' + message.room.name));
