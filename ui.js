@@ -770,7 +770,7 @@ Torus.ui.unrender_popup = function() {
 }
 
 Torus.ui.ping = function(room) { //FIXME: highlight room name in red or something
-	Torus.ui.ids['tab-' + room.id].classList.add('torus-tab-ping');
+	if(room != Torus.ui.active) {Torus.ui.ids['tab-' + room.id].classList.add('torus-tab-ping');}
 
 	if(Torus.options['pings-general-enabled'] && Torus.ui.window.parentNode && Torus.data.pinginterval == 0) {
 		Torus.data.titleflash = document.title;
