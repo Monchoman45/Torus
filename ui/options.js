@@ -147,9 +147,15 @@ Torus.ext.options.render = function(group) {
 		Torus.ext.options.ui['group_' + Torus.ext.options.selected] = Torus.util.empty(Torus.ui.ids['window']);
 	}
 
+<<<<<<< HEAD:ui/options.js
 	for(var i = 0; i < Torus.ui.ids['sidebar'].children.length; i++) {
 		if(Torus.ui.ids['sidebar'].children[i].getAttribute('data-id') == group) {Torus.ui.ids['sidebar'].children[i].classList.add('torus-sidebar-button-selected');}
 		else {Torus.ui.ids['sidebar'].children[i].classList.remove('torus-sidebar-button-selected');}
+=======
+	for(var i = 0; i < Torus.ui.ids['sidebar'].children.length; i++) { //FIXME: what if options isn't active?
+		if(Torus.ui.ids['sidebar'].children[i].getAttribute('data-id') == group) {Torus.ui.ids['sidebar'].children[i].classList.add('torus-sidebar-li-link-selected');}
+		else {Torus.ui.ids['sidebar'].children[i].classList.remove('torus-sidebar-li-link-selected');}
+>>>>>>> logs extension:options.js
 	}
 
 	Torus.ui.ids['window'].appendChild(Torus.ext.options.ui['group_' + group]);
