@@ -135,7 +135,7 @@ Torus.classes.Chat.prototype.send_message = function(message, hist) {
 	}
 	Torus.data.histindex = 0;
 
-	message = {attrs: {msgType: 'chat', 'text': message}};
+	message = {attrs: {msgType: 'chat', 'text': message, 'name': wgUserName}};
 
 	var event = new Torus.classes.ChatEvent('send_message', this); //FIXME: does not call `me` events
 	event.message = message;
