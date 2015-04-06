@@ -86,6 +86,12 @@ Torus.ext.options.dir.misc = {
 			help: '', //TODO:
 		},
 	},
+	links: {
+		target: {
+			type: 'string',
+			help: '', //TODO:
+		},
+	},
 };
 
 Torus.ext.options.rebuild = function() { //FIXME: what if options is active?

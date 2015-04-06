@@ -1050,8 +1050,8 @@ Torus.options['pings-general-alert'] = 'Activity!';
 Torus.options['pings-general-interval'] = 500;
 Torus.options['pings-general-beep'] = true;
 Torus.options['pings-general-sound'] = 'http://images.wikia.com/monchbox/images/0/01/Beep-sound.ogg'; 
-Torus.options['pings-global-case_sensitive'] = '';
-Torus.options['pings-global-case_insensitive'] = wgUserName;
+Torus.options['pings-global-regex'] = '';
+Torus.options['pings-global-literal'] = wgUserName;
 
 Torus.options['messages-general-max'] = 200;
 Torus.options['messages-general-rejoins'] = false;
@@ -1063,6 +1063,7 @@ Torus.options['misc-user_colors-enabled'] = true;
 Torus.options['misc-user_colors-hue'] = 0;
 Torus.options['misc-user_colors-sat'] = .7;
 Torus.options['misc-user_colors-val'] = .6;
+Torus.options['misc-links-target'] = '_blank';
 
 {{MediaWiki:Torus.js/menu.js}}
 
