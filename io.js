@@ -48,21 +48,47 @@ Torus.io.unblock = function(user, callback) {
 	});
 }
 
-Torus.io.spider = function(callback) {
+Torus.io.key = function(callback) {
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET', '/wikia.php?controller=Chat&format=json&client=Torus&version=' + Torus.version, true);
 	xhr.responseType = 'json';
-	xhr.onreadystatechange = function() {
-		if(this.readyState == 4) {
-			if(this.status == 200) {
-				if(typeof callback == 'function') {callback.call(Torus, this.response);}
+	xhr.addEventListener('loadend', function() {
+		if(this.status == 200) {
+			if(typeof callback == 'function') {
+				if(typeof this.response.chatkey == 'string') {callback.call(Torus, this.response.chatkey);}
+				else {callback.call(Torus, false);}
 			}
-			else if(this.status == 404) { //wiki doesn't have chat
-				if(typeof callback == 'function') {callback.call(Torus, null);}
-			}
-			else {throw new Error('io.spider request returned HTTP ' + this.status + '.');}
 		}
-	};
+		else if(this.status == 404) { //wiki doesn't have chat
+			if(typeof callback == 'function') {callback.call(Torus, false);}
+		}
+		else {
+			if(typeof callback == 'function') {callback.call(Torus, {error: 'http', code: this.status});}
+			throw new Error('io.key: request returned HTTP ' + this.status + '.');
+		}
+	});
+	xhr.send();
+}
+
+Torus.io.spider = function(domain, callback) {
+	if(Torus.cache.data[domain]) {
+		if(typeof callback == 'function') {callback.call(Torus, Torus.cache.data[domain]);}
+		return;
+	}
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', 'http://cis-linux2.temple.edu/~tuf23151/torus.php?domain=' + domain + '&client=Torus&version=' + Torus.version, true);
+	xhr.responseType = 'json';
+	xhr.addEventListener('loadend', function() {
+		if(this.status == 200) {
+			if(!this.response.error) {Torus.cache.update(domain, this.response);}
+			if(typeof callback == 'function') {callback.call(Torus, this.response);}
+		}
+		else {
+			if(typeof callback == 'function') {callback.call(Torus, {error: 'http', code: this.status});}
+			throw new Error('io.spider: request returned HTTP ' + this.status + '.');
+		}
+	});
 	xhr.send();
 }
 
@@ -138,16 +164,18 @@ Torus.io.transports.websocket.prototype.close = function(silence) {
 	this.ws.close();
 }*/
 
-Torus.io.transports.polling = function(info) { //FIXME: stop building the url 20 times
+Torus.io.transports.polling = function(domain, info) { //FIXME: stop building the url 20 times
 	if(!(this instanceof Torus.io.transports.polling)) {throw new Error('Must create transport with `new`.');}
 
-	this.domain = info.domain;
+	this.open = false;
+	this.domain = domain;
+	this.host = info.host;
 	this.port = info.port;
 	this.server = info.server;
 	this.room = info.room;
 	this.key = info.key;
 	this.session = '';
-	this.url = 'http://' + this.domain + ':' + this.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + this.key + '&roomId=' + this.room + '&serverId=' + this.server + '&client=Torus&version=' + Torus.version;
+	this.url = 'http://' + this.host + ':' + this.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + this.key + '&roomId=' + this.room + '&serverId=' + this.server + '&client=Torus&version=' + Torus.version;
 	this.xhr = null;
 	this.ping_interval = 0;
 	this.iid = 0;
@@ -155,26 +183,41 @@ Torus.io.transports.polling = function(info) { //FIXME: stop building the url 20
 		'io': {},
 	};
 
-	if(!this.domain || !this.port || !this.server || !this.room || !this.key) {
+
+	if(!this.host || !this.port || !this.server || !this.room) {
 		var sock = this; //FIXME: this forces a closure scope
-		Torus.io.spider(function(data) {
-			if(data.chatkey.key === false) {throw new Error('Not logged in (transports.polling)');}
+		Torus.io.spider(this.domain, function(data) {
+			if(data.error == 'nochat') {
+				sock.close();
+				return;
+			}
+			else if(data.error) {throw new Error('transport: CORS proxy returned error `' + data.error + '`');}
 
-			if(!sock.domain) {sock.domain = data.nodeHostname;}
-			if(!sock.port) {sock.port = data.nodePort;}
-			if(!sock.server) {sock.server = data.nodeInstance;}
-			if(!sock.room) {sock.room = data.roomId;}
-			if(!sock.key) {sock.key = data.chatkey;}
-			sock.url = 'http://' + sock.domain + ':' + sock.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + sock.key + '&roomId=' + sock.room + '&serverId=' + sock.server + '&client=Torus&version=' + Torus.version;
+			if(!sock.host) {sock.host = data.host;}
+			if(!sock.port) {sock.port = data.port;}
+			if(!sock.server) {sock.server = data.server;}
+			if(!sock.room) {sock.room = data.room;}
+			sock.url = 'http://' + sock.host + ':' + sock.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + sock.key + '&roomId=' + sock.room + '&serverId=' + sock.server + '&client=Torus&version=' + Torus.version;
 
-			sock.poll();
+			if(sock.host && sock.port && sock.server && sock.room && sock.key && !sock.open) {sock.poll();} //FIXME: long
 		});
-		return;
 	}
 
-	this.poll();
+	if(!this.key) {
+		var sock = this; //FIXME: this forces a closure scope
+		Torus.io.key(function(key) {
+			if(!key) {throw new Error('transport: not logged in');}
+			sock.key = key;
+			sock.url = 'http://' + sock.host + ':' + sock.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + sock.key + '&roomId=' + sock.room + '&serverId=' + sock.server + '&client=Torus&version=' + Torus.version;
+			if(sock.host && sock.port && sock.server && sock.room && sock.key && !sock.open) {sock.poll();} //FIXME: long
+		});
+	}
+
+	if(this.host && this.port && this.server && this.room && this.key && !this.open) {this.poll();} //FIXME: long
 }
 Torus.io.transports.polling.prototype.poll = function() {
+	this.open = true;
+
 	this.xhr = new XMLHttpRequest();
 	this.xhr.open('GET', this.url, true);
 	this.xhr.sock = this;
@@ -203,7 +246,7 @@ Torus.io.transports.polling.prototype.poll = function() {
 						//we should only reach this once, hopefully
 						var data = JSON.parse(text.substring(1));
 						sock.session = data.sid;
-						sock.url = 'http://' + sock.domain + ':' + sock.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + sock.key + '&roomId=' + sock.room + '&sid=' + sock.session + '&serverId=' + sock.server + '&client=Torus&version=' + Torus.version;
+						sock.url = 'http://' + sock.host + ':' + sock.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + sock.key + '&roomId=' + sock.room + '&sid=' + sock.session + '&serverId=' + sock.server + '&client=Torus&version=' + Torus.version;
 						sock.ping_interval = data.pingTimeout / 2; //pingTimeout is the longest we can go without disconnecting
 						if(sock.iid) {clearInterval(sock.iid);}
 						sock.iid = setInterval(function() {sock.ping();}, sock.ping_interval); //FIXME: this forces a closure scope
@@ -327,10 +370,20 @@ Torus.io.transports.polling.prototype.ping = function() {
 }
 Torus.io.transports.polling.prototype.close = function(silence) {
 	if(silence) {
-		this.xhr.onabort = null;
+		if(this.xhr) {this.xhr.onabort = null;}
 		if(this.iid) {clearInterval(this.iid);}
 	}
-	this.xhr.abort();
+	else {
+		if(!this.xhr) { //closed before we opened, probably tried to go to a wiki with no chat
+			this.call_listeners({
+				type: 'io',
+				event: 'disconnect',
+				message: 'aborted',
+				sock: this
+			});
+		}
+		else {this.xhr.abort();}
+	}
 }
 Torus.io.transports.polling.prototype.add_listener = Torus.add_listener;
 Torus.io.transports.polling.prototype.remove_listener = Torus.remove_listener;
