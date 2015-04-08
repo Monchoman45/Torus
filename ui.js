@@ -294,7 +294,9 @@ Torus.ui.render_line = function(message) {
 			time.className = 'torus-message-timestamp';
 			time.textContent = '[' + Torus.util.timestamp(message.time) + ']';
 		line.appendChild(time);
-		if(Torus.ui.viewing.length > 0 || message.room.id == 0) {
+		var viewing = Torus.ui.viewing.length;
+		if(Torus.ui.viewing.indexOf(Torus.chats[0]) != -1) {viewing--;}
+		if(viewing > 0 || message.room.id == 0) {
 			line.appendChild(document.createTextNode(' '));
 			var room = document.createElement('span');
 				room.className = 'torus-message-room';
@@ -307,8 +309,8 @@ Torus.ui.render_line = function(message) {
 		switch(message.event) {
 			case 'me':
 			case 'message':
-				if(message.event == 'message') {line.appendChild(document.createTextNode('<'));}
-				else {line.appendChild(document.createTextNode('* '));}
+				if(message.event == 'message') {line.appendChild(document.createTextNode('  <'));}
+				else {line.appendChild(document.createTextNode('*  '));}
 				var user = document.createElement('span');
 					user.className = 'torus-message-usercolor';
 					user.style.color = Torus.util.color_hash(message.user);
@@ -779,15 +781,17 @@ Torus.ui.ping = function(room) { //FIXME: highlight room name in red or somethin
 	Torus.call_listeners(new Torus.classes.UIEvent('ping', room));
 }
 
-Torus.ui.fullscreen = function() { //FIXME: some kind of position:fixed thing
-	if(Torus.data.fullscreen) {return;}
-	if(Torus.ui.window.parentNode) {Torus.ui.window.parentNode.removeChild(Torus.ui.window);}
-	while(document.body.firstChild) {document.body.removeChild(document.body.firstChild);} //FIXME: bad. bad bad bad
-	document.body.appendChild(Torus.ui.window);
-	Torus.ui.window.style.height = document.getElementsByTagName('html')[0].clientHeight - 25 + 'px';
-	//TODO: change height with resize
-	Torus.data.fullscreen = true;
-	Torus.call_listeners(new Torus.classes.UIEvent('fullscreen'));
+Torus.ui.fullscreen = function() {
+	if(Torus.data.fullscreen) {
+		Torus.ui.window.classList.remove('fullscreen');
+		Torus.data.fullscreen = false;
+		//Torus.call_listeners(new Torus.classes.UIEvent('fullscreen'));
+	}
+	else {
+		Torus.ui.window.classList.add('fullscreen');
+		Torus.data.fullscreen = true;
+		Torus.call_listeners(new Torus.classes.UIEvent('fullscreen'));
+	}
 }
 
 Torus.ui.initial = function(event) {
