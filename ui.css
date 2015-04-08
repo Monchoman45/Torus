@@ -7,6 +7,7 @@
 	margin: 1em auto;
 	border: 1px solid #000;
 	font-size: 11px;
+	line-height: 1.5em;
 	color: #000;
 }
 
@@ -19,6 +20,7 @@
 	bottom: 0;
 	left: 0;
 	margin: 0;
+	z-index: 9999999;
 }
 
 #torus-tabs {
@@ -85,6 +87,10 @@
 	overflow-x: hidden;
 	overflow-y: scroll;
 }
+#torus-sidebar li {
+	line-height: 1.5em;
+	margin: 0;
+}
 #torus-sidebar li.torus-user {
 	padding-left: 1.5em;
 }
@@ -123,8 +129,9 @@
 	border: 1px solid #ccc;
 }
 #torus-popup-info {
-	height: 5em;
-	margin-left: 4.7em;
+	height: 4.5em;
+	margin-top: .5em;
+	margin-left: 5em;
 	padding-right: .5em;
 }
 #torus-popup-name,

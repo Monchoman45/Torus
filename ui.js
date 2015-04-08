@@ -33,7 +33,14 @@ Torus.ui.add_room = function(event) {
 	tab.setAttribute('data-id', event.room.domain);
 	tab.className = 'torus-tab';
 	tab.addEventListener('click', Torus.ui.tab_click);
-	if(event.room.id != 0) {tab.textContent = event.room.domain;}
+	if(event.room.id != 0) {
+		if(event.room.parent && event.room.priv_users.length == 2) {
+			for(var i = 0; i < event.room.priv_users.length; i++) {
+				if(event.room.priv_users[i] != wgUserName) {tab.textContent = 'PM: ' + event.room.priv_users[i]; break;}
+			}
+		}
+		else {tab.textContent = event.room.domain;}
+	}
 	else {tab.textContent = 'status';}
 	if(event.room.id > 0) {
 		var x = document.createElement('span');
@@ -783,11 +790,19 @@ Torus.ui.ping = function(room) { //FIXME: highlight room name in red or somethin
 
 Torus.ui.fullscreen = function() {
 	if(Torus.data.fullscreen) {
+		document.body.removeChild(Torus.ui.window);
+		Torus.data.old_parent.appendChild(Torus.ui.window);
+		Torus.data.old_parent = null;
+
 		Torus.ui.window.classList.remove('fullscreen');
 		Torus.data.fullscreen = false;
-		//Torus.call_listeners(new Torus.classes.UIEvent('fullscreen'));
+		Torus.call_listeners(new Torus.classes.UIEvent('fullscreen')); //FIXME:
 	}
 	else {
+		Torus.data.old_parent = Torus.ui.window.parentNode;
+		Torus.ui.window.parentNode.removeChild(Torus.ui.window);
+		document.body.appendChild(Torus.ui.window);
+
 		Torus.ui.window.classList.add('fullscreen');
 		Torus.data.fullscreen = true;
 		Torus.call_listeners(new Torus.classes.UIEvent('fullscreen'));
