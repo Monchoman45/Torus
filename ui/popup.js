@@ -81,10 +81,12 @@ Torus.ui.render_popup = function(name, room, coords) {
 		chatconnect.href = 'http://' + room.domain + '.wikia.com/wiki/Special:Log/chatconnect?user=' + encodeURIComponent(name);
 		//chatconnect.addEventListener('click', Torus.ui.click_link);
 		chatconnect.className += ' torus-fakelink';
-		chatconnect.addEventListener('click', function(event) { //FIXME: closure, also ccui is not required
+		chatconnect.setAttribute('data-user', name);
+		chatconnect.addEventListener('click', function(event) { //FIXME: ccui is not required
 			event.preventDefault();
 			Torus.ui.activate(Torus.ext.ccui);
-			Torus.ext.ccui.query(name);
+			Torus.ui.window.scrollTop = 0;
+			Torus.ext.ccui.query(this.getAttribute('data-user'));
 		});
 		chatconnect.textContent = 'chatconnect'; //FIXME: i18n
 		div.appendChild(chatconnect);
@@ -98,7 +100,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 			else {
 				priv.className = 'torus-popup-action';
 				priv.setAttribute('data-user', name);
-				priv.addEventListener('click', function() {room.open_private([this.getAttribute('data-user')]);}); //FIXME: closure
+				priv.addEventListener('click', function() {Torus.ui.active.open_private([this.getAttribute('data-user')]);});
 			}
 			priv.textContent = 'Private message'; //FIXME: i18n
 		actions.appendChild(priv);
@@ -126,7 +128,11 @@ Torus.ui.render_popup = function(name, room, coords) {
 				yes.id = 'torus-popup-modconfirm-yes';
 				yes.type = 'button';
 				yes.value = 'Yes'; //FIXME: i18n
-				yes.addEventListener('click', function() {room.mod(this.getAttribute('data-user'));}); //FIXME: closure
+				yes.addEventListener('click', function() {
+					event.stopPropagation();
+					this.parentNode.style.display = 'none';
+					Torus.ui.active.mod(this.getAttribute('data-user'));
+				});
 				yes.setAttribute('data-user', name);
 				confirm.appendChild(yes);
 
@@ -136,7 +142,10 @@ Torus.ui.render_popup = function(name, room, coords) {
 				no.id = 'torus-popup-modconfirm-no';
 				no.type = 'button';
 				no.value = 'No'; //FIXME: i18n
-				no.addEventListener('click', function() {this.parentNode.style.display = 'none';});
+				no.addEventListener('click', function() {
+					event.stopPropagation();
+					this.parentNode.style.display = 'none';
+				});
 				confirm.appendChild(no);
 			mod.appendChild(confirm);
 			mod.appendChild(document.createTextNode('Promote to mod')); //FIXME: i18n
@@ -152,7 +161,8 @@ Torus.ui.render_popup = function(name, room, coords) {
 		if((user.staff || user.givemod || (user.mod && !target.mod)) && !target.staff && !target.givemod) {
 			var kick = document.createElement('a');
 			kick.className = 'torus-popup-action';
-			kick.addEventListener('click', function() {room.kick(name);}); //FIXME: closure scope
+			kick.setAttribute('data-user', name);
+			kick.addEventListener('click', function() {Torus.ui.active.kick(this.getAttribute('data-user'));});
 			kick.textContent = 'Kick'; //FIXME: i18n
 			actions.appendChild(kick);
 
@@ -160,6 +170,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 			ban.className = 'torus-popup-action';
 			var modal = document.createElement('div');
 				modal.id = 'torus-popup-banmodal';
+				modal.setAttribute('data-user', name);
 				var div = document.createElement('div');
 					var expiry_label = document.createElement('label');
 					expiry_label.for = 'torus-popup-banexpiry';
@@ -172,10 +183,13 @@ Torus.ui.render_popup = function(name, room, coords) {
 					expiry.id = 'torus-popup-banexpiry';
 					expiry.type = 'text';
 					expiry.placeholder = '1 day'; //FIXME: i18n
-					expiry.addEventListener('keyup', function(event) { //FIXME: closure
+					expiry.addEventListener('keyup', function(event) {
 						if(event.keyCode == 13) {
-							if(this.value) {room.ban(name, Torus.util.expiry_to_seconds(this.value), this.parentNode.nextSibling.lastChild.value);}
-							else {room.ban(name, 60 * 60 * 24, this.parentNode.nextSibling.lastChild.value);}
+							var target = this.parentNode.parentNode.getAttribute('data-user');
+							var summary = this.parentNode.nextSibling.lastChild.value;
+							if(this.value) {var expiry = Torus.util.expiry_to_seconds(this.value);}
+							else {var expiry = 60 * 60 * 24;}
+							Torus.ui.active.ban(target, expiry, summary);
 						}
 					});
 					div.appendChild(expiry);
@@ -191,11 +205,14 @@ Torus.ui.render_popup = function(name, room, coords) {
 					var reason = document.createElement('input');
 					reason.id = 'torus-popup-banreason';
 					reason.placeholder = 'Misbehaving in chat'; //FIXME: i18n
-					reason.addEventListener('keyup', function(event) { //FIXME: closure
+					reason.addEventListener('keyup', function(event) {
 						if(event.keyCode == 13) {
+							var target = this.parentNode.parentNode.getAttribute('data-user');
 							var expiry = this.parentNode.previousSibling.lastChild.value;
-							if(expiry) {room.ban(name, Torus.util.expiry_to_seconds(expiry), this.value);}
-							else {room.ban(name, 60 * 60 * 24, this.value);}
+							var summary = this.value;
+							if(expiry) {expiry = Torus.util.expiry_to_seconds(expiry);}
+							else {expiry = 60 * 60 * 24;}
+							Torus.ui.active.ban(target, expiry, summary);
 						}
 					});
 					div.appendChild(reason);
@@ -205,10 +222,13 @@ Torus.ui.render_popup = function(name, room, coords) {
 					submit.id = 'torus-popup-banbutton';
 					submit.type = 'submit'
 					submit.value = 'Ban'; //FIXME: i18n
-					submit.addEventListener('click', function(event) { //FIXME: closure
+					submit.addEventListener('click', function(event) {
+						var target = this.parentNode.parentNode.getAttribute('data-user');
 						var expiry = this.parentNode.previousSibling.previousSibling.lastChild.value;
-						if(expiry) {room.ban(name, Torus.util.expiry_to_seconds(expiry), this.parentNode.previousSibling.lastChild.value);}
-						else {room.ban(name, 60 * 60 * 24, this.parentNode.previousSibling.previousSibling.lastChild.value);}
+						var summary = this.parentNode.previousSibling.lastChild.value;
+						if(expiry) {expiry = Torus.util.expiry_to_seconds(expiry);}
+						else {expiry = 60 * 60 * 24;}
+						Torus.ui.active.ban(target, expiry, summary);
 					});
 				modal.appendChild(div);
 			ban.appendChild(modal);

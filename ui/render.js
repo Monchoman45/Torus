@@ -164,10 +164,12 @@ Torus.ui.render_line = function(message) {
 					ccon.textContent = 'ccon';
 					//ccon.addEventListener('click', Torus.ui.click_link);
 					ccon.className = 'torus-fakelink';
-					ccon.addEventListener('click', function(event) { //FIXME: closure, also ccui is not required
+					ccon.setAttribute('data-user', message.target);
+					ccon.addEventListener('click', function(event) { //FIXME: ccui is not required
 						event.preventDefault();
 						Torus.ui.activate(Torus.ext.ccui);
-						Torus.ext.ccui.query(message.target);
+						Torus.ui.window.scrollTop = 0;
+						Torus.ext.ccui.query(this.getAttribute('data-user'));
 					});
 				line.appendChild(ccon);
 				line.appendChild(document.createTextNode(') from {' + message.room.name + '}'));
