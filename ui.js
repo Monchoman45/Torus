@@ -33,15 +33,7 @@ Torus.ui.add_room = function(event) {
 	tab.setAttribute('data-id', event.room.domain);
 	tab.className = 'torus-tab';
 	tab.addEventListener('click', Torus.ui.tab_click);
-	if(event.room.id != 0) {
-		if(event.room.parent && event.room.priv_users.length == 2) {
-			for(var i = 0; i < event.room.priv_users.length; i++) {
-				if(event.room.priv_users[i] != wgUserName) {tab.textContent = 'PM: ' + event.room.priv_users[i]; break;}
-			}
-		}
-		else {tab.textContent = event.room.domain;}
-	}
-	else {tab.textContent = 'status';}
+	tab.textContent = event.room.name;
 	if(event.room.id > 0) {
 		var x = document.createElement('span');
 		x.className = 'torus-tab-close';
@@ -55,6 +47,25 @@ Torus.ui.add_room = function(event) {
 	Torus.ui.ids['tabs'].appendChild(tab);
 
 	if(event.room.id > 0) {
+		event.room.add_listener('io', 'join', Torus.ui.update_user);
+		event.room.add_listener('io', 'update_user', Torus.ui.update_user);
+		event.room.add_listener('io', 'part', Torus.ui.remove_user);
+		event.room.add_listener('io', 'logout', Torus.ui.remove_user);
+		event.room.add_listener('io', 'ghost', Torus.ui.remove_user);
+
+		event.room.add_listener('io', 'message', Torus.ui.add_line);
+		event.room.add_listener('io', 'me', Torus.ui.add_line);
+		event.room.add_listener('io', 'join', Torus.ui.add_line);
+		event.room.add_listener('io', 'part', Torus.ui.add_line);
+		event.room.add_listener('io', 'logout', Torus.ui.add_line);
+		event.room.add_listener('io', 'ghost', Torus.ui.add_line);
+		event.room.add_listener('io', 'mod', Torus.ui.add_line);
+		event.room.add_listener('io', 'kick', Torus.ui.add_line);
+		event.room.add_listener('io', 'ban', Torus.ui.add_line);
+		event.room.add_listener('io', 'unban', Torus.ui.add_line);
+
+		event.room.add_listener('io', 'initial', Torus.ui.initial);
+
 		if(!event.room.parent && !Torus.options['pings-' + event.room.domain + '-enabled']) {
 			Torus.options['pings-' + event.room.domain + '-enabled'] = true;
 			Torus.options['pings-' + event.room.domain + '-literal'] = '';
@@ -270,7 +281,8 @@ Torus.ui.parse_message = function(event) {
 
 	if(pinged) {event.html = '<span class="torus-message-ping">' + event.html + '</span>';} //FIXME: set something on the li instead
 
-	event.html = Torus.util.parse_links(event.html, event.room.domain);
+	if(event.room.parent) {event.html = Torus.util.parse_links(event.html, event.room.parent.domain);}
+	else {event.html = Torus.util.parse_links(event.html, event.room.domain);}
 
 	while(event.html.indexOf('\n') != -1) {event.html = event.html.replace('\n', '<br />');}
 }
@@ -307,7 +319,7 @@ Torus.ui.render_line = function(message) {
 			line.appendChild(document.createTextNode(' '));
 			var room = document.createElement('span');
 				room.className = 'torus-message-room';
-				if(message.room.id != 0) {room.textContent = '(' + message.room.domain + ')';}
+				if(message.room.id != 0) {room.textContent = '(' + message.room.name + ')';}
 				else {room.textContent = '(status)';}
 			line.appendChild(room);
 		}
@@ -342,7 +354,7 @@ Torus.ui.render_line = function(message) {
 					user.style.color = Torus.util.color_hash(message.user);
 					user.textContent = message.user;
 				line.appendChild(user);
-				line.appendChild(document.createTextNode(' ' + message.event + 'ed ' + message.room.domain));
+				line.appendChild(document.createTextNode(' ' + message.event + 'ed ' + message.room.name));
 				break;
 			case 'part':
 				//FIXME: i18n
@@ -352,7 +364,7 @@ Torus.ui.render_line = function(message) {
 					user.style.color = Torus.util.color_hash(message.user);
 					user.textContent = message.user;
 				line.appendChild(user);
-				line.appendChild(document.createTextNode(' left ' + message.room.domain));
+				line.appendChild(document.createTextNode(' left ' + message.room.name));
 				break;
 			case 'logout':
 				//FIXME: i18n
@@ -433,7 +445,7 @@ Torus.ui.render_line = function(message) {
 						Torus.ext.ccui.query(message.target);
 					});
 				line.appendChild(talk);
-				line.appendChild(document.createTextNode(') from ' + domain));
+				line.appendChild(document.createTextNode(') from ' + message.room.name));
 				if(message.event == 'ban') {line.appendChild(document.createTextNode(' for ' + message.expiry));}
 				break;
 			default: throw new Error('Message type ' + message.event + ' is not rendered. (ui.render_line)');
@@ -832,7 +844,7 @@ Torus.ui.initial = function(event) {
 			if(!added) {log.unshift(event.messages[i]);}
 		}
 	}
-	//userlist is already taken care of because Chat.event_updateUser calls Chat.update_user which ui.update_user listens to
+	for(var i = 0; i < event.users.length; i++) {Torus.ui.update_user(event.users[i]);}
 	if(event.room == Torus.ui.active) {
 		Torus.util.empty(Torus.ui.ids['window']);
 		Torus.ui.render(Torus.ui.ids['window']);
@@ -940,20 +952,6 @@ Torus.ui.onload = function() {
 	if(domain.indexOf('preview.') == 0) {domain = domain.substring(8);}
 	if(!domain) {domain = 'localhost';}
 	Torus.local = domain;
-	/*Torus.io.spider(domain, function(data) {
-		if(data.error == 'nochat') {
-			Torus.alert('This wiki doesn\'t have chat enabled. You can only use Torus on a wiki with chat enabled - try [[w:c:monchbox:Special:Torus|monchbox]] or [[w:|Community Central]].'); //FIXME: i18n
-			Torus.local.room = 0;
-		}
-		else if(data.error) {
-			Torus.alert('Something went wrong trying to open chat. You may have more luck on a different wiki - try [[w:c:monchbox:Special:Torus|monchbox]] or [[w:|Community Central]].');
-			Torus.local.room = 0;
-		}
-		else {
-			Torus.local.room = data.room;
-		}
-		if(wgCanonicalNamespace == 'Special' && wgTitle == 'Torus' && Torus.options['misc-connection-local']) {(new Torus.classes.Chat(Torus.local.domain)).connect();}
-	});*/
 
 	Torus.logs.messages[0] = [];
 	Torus.ui.activate(Torus.chats[0]);
@@ -1138,25 +1136,6 @@ Torus.ui.window.addEventListener('mouseover', Torus.ui.window_mouseover);
 
 Torus.add_listener('chat', 'new', Torus.ui.add_room);
 Torus.add_listener('chat', 'close', Torus.ui.remove_room);
-
-Torus.add_listener('io', 'join', Torus.ui.update_user);
-Torus.add_listener('io', 'update_user', Torus.ui.update_user);
-Torus.add_listener('io', 'part', Torus.ui.remove_user);
-Torus.add_listener('io', 'logout', Torus.ui.remove_user);
-Torus.add_listener('io', 'ghost', Torus.ui.remove_user);
-
-Torus.add_listener('io', 'message', Torus.ui.add_line);
-Torus.add_listener('io', 'me', Torus.ui.add_line);
-Torus.add_listener('io', 'join', Torus.ui.add_line);
-Torus.add_listener('io', 'part', Torus.ui.add_line);
-Torus.add_listener('io', 'logout', Torus.ui.add_line);
-Torus.add_listener('io', 'ghost', Torus.ui.add_line);
-Torus.add_listener('io', 'mod', Torus.ui.add_line);
-Torus.add_listener('io', 'kick', Torus.ui.add_line);
-Torus.add_listener('io', 'ban', Torus.ui.add_line);
-Torus.add_listener('io', 'unban', Torus.ui.add_line);
-
-Torus.add_listener('io', 'initial', Torus.ui.initial);
 
 Torus.ui.add_room({room: Torus.chats[0]}); //the status room already exists
 

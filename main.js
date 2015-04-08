@@ -33,7 +33,7 @@ window.Torus = {
 
 			initial: [],
 			send_message: [],
-			send_me: [], //FIXME: never called
+			send_me: [],
 			setstatus: [],
 			logout: [],
 			givechatmod: [],
