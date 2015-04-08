@@ -13,8 +13,8 @@ window.Torus = {
 		room: 0,
 		domain: ''
 	},
-	version: 231,
-	pretty_version: '2.3.1',
+	version: 232,
+	pretty_version: '2.3.2',
 	chats: {},
 	listeners: {
 		window: {
