@@ -220,4 +220,4 @@ new Torus.classes.Chat(0);
 
 
 
-{{MediaWiki:Torus.js/ui.js}}
+{{MediaWiki:Torus.js/ui/main.js}}

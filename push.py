@@ -81,6 +81,7 @@ sock.request(
 pages = json.loads(sock.getresponse().read().decode('utf-8'))['query']['pages']
 
 for page in pages:
+	pages[page]['title'] = pages[page]['title'].replace(' ', '_')
 	print('Publishing: ' + pages[page]['title'] + ' ... ', end='\r')
 	sock.request(
 		'POST',
