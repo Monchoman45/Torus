@@ -80,7 +80,7 @@ Torus.classes.Chat.prototype.connect = function(transport) {
 	}
 	else {var info = {};}
 
-	Torus.alert('Connecting to ' + this.name + '...');
+	Torus.alert('Connecting to (' + this.name + ')...');
 
 	this.socket = new Torus.io.transports[transport](this.domain, info);
 	this.socket.chat = this;
@@ -98,7 +98,7 @@ Torus.classes.Chat.prototype.reconnect = function() {
 Torus.classes.Chat.prototype.disconnect = function(message) {
 	this.socket.close();
 
-	Torus.alert('Disconnected from ' + this.name + ': ' + message);
+	Torus.alert('Disconnected from (' + this.name + '): ' + message);
 	this.connecting = false;
 	this.connected = false;
 	var event = new Torus.classes.ChatEvent('close', this);
@@ -313,9 +313,19 @@ Torus.classes.Chat.prototype.event_kick = function(data) {
 Torus.classes.Chat.prototype.event_openPrivateRoom = function(data) {
 	var event = new Torus.classes.IOEvent('open_private', this);
 
-	if(!Torus.chats[data.attrs.roomId]) {(new Torus.classes.Chat(data.attrs.roomId * 1, this, data.attrs.users)).connect();}
-	event.private = Torus.chats[data.attrs.roomId];
 	event.users = data.attrs.users;
+	if(!Torus.chats[data.attrs.roomId]) {
+		var blocked = false;
+		for(var i = 0; i < data.attrs.users.length; i++) {
+			if(Torus.data.blocked.indexOf(data.attrs.users[i]) != -1) {blocked = true; break;}
+		}
+		if(blocked) {event.private = false;}
+		else {
+			(new Torus.classes.Chat(data.attrs.roomId * 1, this, data.attrs.users)).connect();
+			event.private = Torus.chats[data.attrs.roomId];
+		}
+	}
+	else {event.private = Torus.chats[data.attrs.roomId];}
 
 	return event;
 }

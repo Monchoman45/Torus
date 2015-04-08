@@ -59,10 +59,9 @@ Torus.ext.ccui.render = function() {
 			label.textContent = 'connections';
 		top.appendChild(label);
 		top.appendChild(document.createTextNode(' '));
-		var wait = document.createElement('img');
+		var wait = Torus.ui.img_loader();
 			wait.id = 'torus-ext-ccui-wait';
 			Torus.ui.ids['ext-ccui-wait'] = wait;
-			wait.src = 'http://slot1.images.wikia.nocookie.net/__cb1410215834/common/skins/common/images/ajax.gif';
 			if(Torus.ext.ccui.fetching) {wait.style.display = 'inline';}
 			else {wait.style.display = 'none';}
 		top.appendChild(wait);

@@ -2,7 +2,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 	var target = room.userlist[name];
 	var user = room.userlist[wgUserName];
 
-	while(Torus.ui.ids['popup'].firstChild) {Torus.ui.ids['popup'].removeChild(Torus.ui.ids['popup'].firstChild);}
+	Torus.util.empty(Torus.ui.ids['popup']);
 
 	var avatar = document.createElement('img');
 	avatar.id = 'torus-popup-avatar';
@@ -94,27 +94,26 @@ Torus.ui.render_popup = function(name, room, coords) {
 	var actions = document.createElement('div');
 	actions.id = 'torus-popup-actions';
 		var priv = document.createElement('a');
-		priv.className = 'torus-popup-action';
-		priv.addEventListener('click', function() {room.open_private([this.getAttribute('data-user')]);}); //FIXME: closure scope
-		priv.setAttribute('data-user', name);
-		priv.textContent = 'Private message'; //FIXME: i18n
+			if(Torus.data.blockedBy.indexOf(name) != -1) {priv.className = 'torus-popup-action-disabled';}
+			else {
+				priv.className = 'torus-popup-action';
+				priv.setAttribute('data-user', name);
+				priv.addEventListener('click', function() {room.open_private([this.getAttribute('data-user')]);}); //FIXME: closure
+			}
+			priv.textContent = 'Private message'; //FIXME: i18n
 		actions.appendChild(priv);
 
-		var blocked = false;
-		for(var i = 0; i < Torus.data.blocked.length; i++) {
-			if(Torus.data.blocked[i] == name) {blocked = true; break;}
-		}
 		var block = document.createElement('a');
-		block.className = 'torus-popup-action';
-		block.setAttribute('data-user', name);
-		if(blocked) {
-			block.addEventListener('click', function() {Torus.io.unblock(this.getAttribute('data-user'));});
-			block.textContent = 'Unblock PMs'; //FIXME: i18n
-		}
-		else {
-			block.addEventListener('click', function() {Torus.io.block(this.getAttribute('data-user'));});
-			block.textContent = 'Block PMs'; //FIXME: i18n
-		}
+			block.className = 'torus-popup-action';
+			block.setAttribute('data-user', name);
+			if(Torus.data.blocked.indexOf(name) != -1) {
+				block.addEventListener('click', Torus.ui.popup_unblock);
+				block.textContent = 'Unblock PMs'; //FIXME: i18n
+			}
+			else {
+				block.addEventListener('click', Torus.ui.popup_block);
+				block.textContent = 'Block PMs'; //FIXME: i18n
+			}
 		actions.appendChild(block);
 
 		if((user.givemod || user.staff) && !target.mod && !target.staff) {
@@ -127,7 +126,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 				yes.id = 'torus-popup-modconfirm-yes';
 				yes.type = 'button';
 				yes.value = 'Yes'; //FIXME: i18n
-				yes.addEventListener('click', function() {room.mod(this.getAttribute('data-user'));}); //FIXME: closure scope
+				yes.addEventListener('click', function() {room.mod(this.getAttribute('data-user'));}); //FIXME: closure
 				yes.setAttribute('data-user', name);
 				confirm.appendChild(yes);
 
@@ -137,7 +136,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 				no.id = 'torus-popup-modconfirm-no';
 				no.type = 'button';
 				no.value = 'No'; //FIXME: i18n
-				no.addEventListener('click', function() {this.parentNode.style.display = '';});
+				no.addEventListener('click', function() {this.parentNode.style.display = 'none';});
 				confirm.appendChild(no);
 			mod.appendChild(confirm);
 			mod.appendChild(document.createTextNode('Promote to mod')); //FIXME: i18n
@@ -173,7 +172,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 					expiry.id = 'torus-popup-banexpiry';
 					expiry.type = 'text';
 					expiry.placeholder = '1 day'; //FIXME: i18n
-					expiry.addEventListener('keyup', function(event) { //FIXME: closure scope
+					expiry.addEventListener('keyup', function(event) { //FIXME: closure
 						if(event.keyCode == 13) {
 							if(this.value) {room.ban(name, Torus.util.expiry_to_seconds(this.value), this.parentNode.nextSibling.lastChild.value);}
 							else {room.ban(name, 60 * 60 * 24, this.parentNode.nextSibling.lastChild.value);}
@@ -192,7 +191,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 					var reason = document.createElement('input');
 					reason.id = 'torus-popup-banreason';
 					reason.placeholder = 'Misbehaving in chat'; //FIXME: i18n
-					reason.addEventListener('keyup', function(event) { //FIXME: closure scope
+					reason.addEventListener('keyup', function(event) { //FIXME: closure
 						if(event.keyCode == 13) {
 							var expiry = this.parentNode.previousSibling.lastChild.value;
 							if(expiry) {room.ban(name, Torus.util.expiry_to_seconds(expiry), this.value);}
@@ -206,7 +205,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 					submit.id = 'torus-popup-banbutton';
 					submit.type = 'submit'
 					submit.value = 'Ban'; //FIXME: i18n
-					submit.addEventListener('click', function(event) { //FIXME: closure scope
+					submit.addEventListener('click', function(event) { //FIXME: closure
 						var expiry = this.parentNode.previousSibling.previousSibling.lastChild.value;
 						if(expiry) {room.ban(name, Torus.util.expiry_to_seconds(expiry), this.parentNode.previousSibling.lastChild.value);}
 						else {room.ban(name, 60 * 60 * 24, this.parentNode.previousSibling.previousSibling.lastChild.value);}
@@ -254,7 +253,29 @@ Torus.ui.unrender_popup = function() {
 	Torus.ui.ids['popup'].style.top = '';
 	Torus.ui.ids['popup'].style.right = '';
 	Torus.ui.ids['popup'].style.left = '';
-	Torus.ui.ids['popup'].innerHTML = '';
 	Torus.ui.ids['popup'].style.display = 'none';
+	Torus.util.empty(Torus.ui.ids['popup']);
 	Torus.call_listeners(new Torus.classes.UIEvent('unrender_popup'));
+}
+
+Torus.ui.popup_block = function() {
+	this.appendChild(Torus.ui.img_loader());
+	var el = this;
+	Torus.io.block(this.getAttribute('data-user'), function() { //FIXME: closure
+		Torus.util.empty(el);
+		el.removeEventListener(Torus.ui.popup_block);
+		el.addEventListener(Torus.ui.popup_unblock);
+		el.textContent = 'Unblock PMs';
+	});
+}
+
+Torus.ui.popup_unblock = function() {
+	this.appendChild(Torus.ui.img_loader());
+	var el = this;
+	Torus.io.unblock(this.getAttribute('data-user'), function() { //FIXME: closure
+		Torus.util.empty(el);
+		el.removeEventListener(Torus.ui.popup_unblock);
+		el.addEventListener(Torus.ui.popup_block);
+		el.textContent = 'Block PMs';
+	});
 }

@@ -119,6 +119,8 @@ Torus.ui.onload = function() {
 
 {{MediaWiki:Torus.js/ui/menu.js}}
 
+{{MediaWiki:Torus.js/ui/constructors.js}}
+
 {{MediaWiki:Torus.js/ui/util.js}}
 
 //(function() { //I really hate these but it's better then leaking temp variables everywhere //FIXME: iffy causes load order problems

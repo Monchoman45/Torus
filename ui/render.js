@@ -89,7 +89,7 @@ Torus.ui.render_line = function(message) {
 			case 'message':
 				if(message.event == 'message') {line.appendChild(document.createTextNode('  <'));}
 				else {line.appendChild(document.createTextNode('*  '));}
-				line.appendChild(Torus.ui.user_color(message.user));
+				line.appendChild(Torus.ui.span_user(message.user));
 				if(message.event == 'message') {line.appendChild(document.createTextNode('> '));}
 				else {line.appendChild(document.createTextNode(' '));}
 				line.innerHTML += message.html; //FIXME: innerHTML +=
@@ -104,28 +104,28 @@ Torus.ui.render_line = function(message) {
 				//FIXME: i18n - this shows up as "user joined room"
 				//FIXME: and ghost is only here because message.event + 'ed' is the correct tense
 				line.appendChild(document.createTextNode('== '));
-				line.appendChild(Torus.ui.user_color(message.user));
-				line.appendChild(document.createTextNode(' ' + message.event + 'ed ' + message.room.name));
+				line.appendChild(Torus.ui.span_user(message.user));
+				line.appendChild(document.createTextNode(' ' + message.event + 'ed (' + message.room.name + ')'));
 				break;
 			case 'part':
 				//FIXME: i18n
 				line.appendChild(document.createTextNode('== '));
-				line.appendChild(Torus.ui.user_color(message.user));
-				line.appendChild(document.createTextNode(' left ' + message.room.name));
+				line.appendChild(Torus.ui.span_user(message.user));
+				line.appendChild(document.createTextNode(' left (' + message.room.name + ')'));
 				break;
 			case 'logout':
 				//FIXME: i18n
 				line.appendChild(document.createTextNode('== '));
-				line.appendChild(Torus.ui.user_color(message.user));
+				line.appendChild(Torus.ui.span_user(message.user));
 				line.appendChild(document.createTextNode(' logged out'));
 				break;
 			case 'mod':
 				//FIXME: i18n
 				line.appendChild(document.createTextNode('== '));
-				line.appendChild(Torus.ui.user_color(message.performer));
+				line.appendChild(Torus.ui.span_user(message.performer));
 				line.appendChild(document.createTextNode(' promoted '));
-				line.appendChild(Torus.ui.user_color(message.target));
-				line.appendChild(document.createTextNode(' to chatmod'));
+				line.appendChild(Torus.ui.span_user(message.target));
+				line.appendChild(document.createTextNode(' to chatmod of (' + message.room.name + ')'));
 				break;
 			case 'kick':
 			case 'ban':
@@ -137,9 +137,9 @@ Torus.ui.render_line = function(message) {
 				else {var domain = message.room.domain;}
 
 				line.appendChild(document.createTextNode('== '));
-				line.appendChild(Torus.ui.user_color(message.performer));
+				line.appendChild(Torus.ui.span_user(message.performer));
 				line.appendChild(document.createTextNode(' ' + message.event + tense + ' '));
-				line.appendChild(Torus.ui.user_color(message.target));
+				line.appendChild(Torus.ui.span_user(message.target));
 				line.appendChild(document.createTextNode(' ('));
 				var talk = document.createElement('a');
 					talk.href = 'http://' + domain + '.wikia.com/wiki/User_talk:' + message.target;
@@ -170,19 +170,10 @@ Torus.ui.render_line = function(message) {
 						Torus.ext.ccui.query(message.target);
 					});
 				line.appendChild(ccon);
-				line.appendChild(document.createTextNode(') from ' + message.room.name));
+				line.appendChild(document.createTextNode(') from (' + message.room.name + ')'));
 				if(message.event == 'ban') {line.appendChild(document.createTextNode(' for ' + message.expiry));}
 				break;
 			default: throw new Error('Message type ' + message.event + ' is not rendered. (ui.render_line)');
 		}
 	return line;
-}
-
-Torus.ui.user_color = function(user) {
-	var color = Torus.util.color_hash(user, Torus.options['misc-user_colors-hue'], Torus.options['misc-user_colors-val'], Torus.options['misc-user_colors-sat']);
-	var span = document.createElement('span');
-		span.className = 'torus-message-usercolor';
-		span.style.color = color;
-		span.textContent = user;
-	return span;
 }
