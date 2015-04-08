@@ -34,10 +34,14 @@ Torus.ui.new_room = function(event) {
 	for(var i in Torus.logs) {
 		if(!Torus.logs[i][event.room.domain]) {Torus.logs[i][event.room.domain] = [];}
 	}
+
+	event.room.listeners.ui = {};
 }
 
 Torus.ui.add_room = function(event) {
-	event.room.listeners.ui = {};
+	for(var i = 0; i < Torus.ui.ids['tabs'].children; i++) {
+		if(Torus.ui.ids['tabs'][i].getAttribute('data-id') == event.room.domain) {return;}
+	}
 
 	var tab = document.createElement('span');
 	tab.id = 'torus-tab-' + event.room.domain;

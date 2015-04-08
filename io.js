@@ -3,7 +3,6 @@ Torus.io.ajax = function(method, post, callback) {
 	for(var i in post) {str += '&' + i + '=' + encodeURIComponent(post[i]);}
 	str = str.substring(1);
 	var xhr = new XMLHttpRequest();
-	xhr.responseType = 'json';
 	xhr.addEventListener('loadend', function() {
 		if(this.status == 200) {
 			if(typeof callback == 'function') {callback.call(Torus, this.response);}
@@ -11,6 +10,7 @@ Torus.io.ajax = function(method, post, callback) {
 		else {throw new Error('Request returned response ' + this.status + '. (io.ajax)');}
 	});
 	xhr.open('POST', '/index.php?action=ajax&rs=ChatAjax&method=' + method, true);
+	xhr.responseType = 'json';
 	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	xhr.send(str);
@@ -48,7 +48,6 @@ Torus.io.unblock = function(user, callback) {
 
 Torus.io.key = function(callback) {
 	var xhr = new XMLHttpRequest();
-	xhr.responseType = 'json';
 	xhr.addEventListener('loadend', function() {
 		if(this.status == 200) {
 			if(typeof callback == 'function') {
@@ -65,6 +64,7 @@ Torus.io.key = function(callback) {
 		}
 	});
 	xhr.open('GET', '/wikia.php?controller=Chat&format=json', true);
+	xhr.responseType = 'json';
 	xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	xhr.send();
 }
@@ -76,7 +76,6 @@ Torus.io.spider = function(domain, callback) {
 	}
 
 	var xhr = new XMLHttpRequest();
-	xhr.responseType = 'json';
 	xhr.addEventListener('loadend', function() {
 		if(this.status == 200) {
 			if(!this.response.error) {Torus.cache.update(domain, this.response);}
@@ -88,6 +87,7 @@ Torus.io.spider = function(domain, callback) {
 		}
 	});
 	xhr.open('GET', 'http://cis-linux2.temple.edu/~tuf23151/torus.php?domain=' + domain, true);
+	xhr.responseType = 'json';
 	xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	xhr.send();
 }

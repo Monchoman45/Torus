@@ -152,7 +152,7 @@ Torus.commands.help = {
 				if(typeof Torus.commands[i] != 'function' && typeof Torus.commands[i] != 'string') {coms += ', ' + i;}
 			}
 			coms = coms.substring(2);
-			return 'Commands:\n' + coms; //FIXME: i18n
+			return 'Commands:\n' + coms + '\nFull documentation: [[w:c:monchbox:Torus]]'; //FIXME: i18n
 		}
 	}
 };
