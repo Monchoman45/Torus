@@ -165,8 +165,8 @@ Torus.ui.activate = function(room) {
 		else {
 			Torus.ui.ids['info'].textContent = 'Private room of '; //FIXME: i18n
 			var a = document.createElement('a');
-				a.href = 'http://' + room.domain + '.wikia.com';
-				a.textContent = room.domain;
+				a.href = 'http://' + room.parent.domain + '.wikia.com';
+				a.textContent = room.parent.domain;
 				a.addEventListener('click', Torus.ui.click_link);
 			Torus.ui.ids['info'].appendChild(a);
 			Torus.ui.ids['info'].appendChild(document.createTextNode(', between ' + room.priv_users.slice(0, room.priv_users.length - 1).join(', ') + ' and ' + room.priv_users[room.priv_users.length - 1] + '.')); //FIXME: i18n
@@ -286,6 +286,7 @@ Torus.ui.add_line = function(event) {
 
 Torus.ui.render_line = function(message) {
 	if(message.type != 'io') {throw new Error('Event type must be `io`. (ui.render_line)');}
+
 	var line = document.createElement('div');
 		line.className = 'torus-message torus-room-' + message.room.domain;
 		if(message.room != Torus.ui.active) {line.classList.add('torus-message-inactive');}
@@ -293,12 +294,14 @@ Torus.ui.render_line = function(message) {
 			time.className = 'torus-message-timestamp';
 			time.textContent = '[' + Torus.util.timestamp(message.time) + ']';
 		line.appendChild(time);
-		line.appendChild(document.createTextNode(' '));
-		var room = document.createElement('span');
-			room.className = 'torus-message-room';
-			if(message.room.id != 0) {room.textContent = '(' + message.room.domain + ')';}
-			else {room.textContent = '(status)';}
-		line.appendChild(room);
+		if(Torus.ui.viewing.length > 0 || message.room.id == 0) {
+			line.appendChild(document.createTextNode(' '));
+			var room = document.createElement('span');
+				room.className = 'torus-message-room';
+				if(message.room.id != 0) {room.textContent = '(' + message.room.domain + ')';}
+				else {room.textContent = '(status)';}
+			line.appendChild(room);
+		}
 		line.appendChild(document.createTextNode(' '));
 
 		switch(message.event) {
@@ -374,50 +377,54 @@ Torus.ui.render_line = function(message) {
 				//FIXME: i18n
 				if(message.event != 'kick') {var tense = 'ned';} //curse you, english language
 				else {var tense = 'ed'}
+				if(message.room.parent) {var domain = message.room.parent.domain;}
+				else {var domain = message.room.domain;}
+
 				line.appendChild(document.createTextNode('== '));
 				var performer = document.createElement('span');
-					performer.className = 'torus-message-performercolor';
+					performer.className = 'torus-message-usercolor';
 					performer.style.color = Torus.util.color_hash(message.performer);
 					performer.textContent = message.performer;
 				line.appendChild(performer);
 				line.appendChild(document.createTextNode(' ' + message.event + tense + ' '));
 				var target = document.createElement('a');
 					target.className = 'torus-message-usercolor';
-					target.href = '/wiki/User:' + message.target;
+					target.href = 'http://' + domain + '.wikia.com/wiki/User:' + message.target;
 					target.style.color = Torus.util.color_hash(message.target);
 					target.textContent = message.target;
 					target.addEventListener('click', Torus.ui.click_link);
 				line.appendChild(target);
 				line.appendChild(document.createTextNode(' ('));
 				var talk = document.createElement('a');
-					talk.href = '/wiki/User_talk:' + message.target;
+					talk.href = 'http://' + domain + '.wikia.com/wiki/User_talk:' + message.target;
 					talk.textContent = 't';
 					talk.addEventListener('click', Torus.ui.click_link);
 				line.appendChild(talk);
 				line.appendChild(document.createTextNode('|'));
 				var talk = document.createElement('a');
-					talk.href = '/wiki/Special:Contributions/' + message.target;
+					talk.href = 'http://' + domain + '.wikia.com/wiki/Special:Contributions/' + message.target;
 					talk.textContent = 'c';
 					talk.addEventListener('click', Torus.ui.click_link);
 				line.appendChild(talk);
 				line.appendChild(document.createTextNode('|'));
 				var talk = document.createElement('a');
-					talk.href = '/wiki/Special:Log/chatban?page=User:' + message.target;
+					talk.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatban?page=User:' + message.target;
 					talk.textContent = 'log';
 					talk.addEventListener('click', Torus.ui.click_link);
 				line.appendChild(talk);
 				line.appendChild(document.createTextNode('|'));
 				var talk = document.createElement('a');
-					//talk.href = '/wiki/Special:Log/chatconnect?user=' + message.target;
+					talk.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatconnect?user=' + message.target;
 					talk.className = 'torus-fakelink';
 					talk.textContent = 'ccon';
 					//talk.addEventListener('click', Torus.ui.click_link);
 					talk.addEventListener('click', function() { //FIXME: closure, also ccui is not required
+						event.preventDefault();
 						Torus.ui.activate(Torus.ext.ccui);
 						Torus.ext.ccui.query(message.target);
 					});
 				line.appendChild(talk);
-				line.appendChild(document.createTextNode(') from ' + message.room.domain));
+				line.appendChild(document.createTextNode(') from ' + domain));
 				if(message.event == 'ban') {line.appendChild(document.createTextNode(' for ' + message.expiry));}
 				break;
 			default: throw new Error('Message type ' + message.event + ' is not rendered. (ui.render_line)');
@@ -589,7 +596,8 @@ Torus.ui.render_popup = function(name, room, coords) {
 	actions.id = 'torus-popup-actions';
 		var priv = document.createElement('a');
 		priv.className = 'torus-popup-action';
-		priv.addEventListener('click', function() {room.open_private([name]);}); //FIXME: closure scope
+		priv.addEventListener('click', function() {room.open_private([this.getAttribute('data-user')]);}); //FIXME: closure scope
+		priv.setAttribute('data-user', name);
 		priv.textContent = 'Private message'; //FIXME: i18n
 		actions.appendChild(priv);
 
@@ -597,20 +605,18 @@ Torus.ui.render_popup = function(name, room, coords) {
 		for(var i = 0; i < Torus.data.blocked.length; i++) {
 			if(Torus.data.blocked[i] == name) {blocked = true; break;}
 		}
+		var block = document.createElement('a');
+		block.className = 'torus-popup-action';
+		block.setAttribute('data-user', name);
 		if(blocked) {
-			var block = document.createElement('a');
-			block.className = 'torus-popup-action';
-			block.addEventListener('click', function() {Torus.io.unblock(name);}); //FIXME: closure scope
+			block.addEventListener('click', function() {Torus.io.unblock(this.getAttribute('data-user'));});
 			block.textContent = 'Unblock PMs'; //FIXME: i18n
-			actions.appendChild(block);
 		}
 		else {
-			var block = document.createElement('a');
-			block.className = 'torus-popup-action';
-			block.addEventListener('click', function() {Torus.io.block(name);}); //FIXME: closure scope
+			block.addEventListener('click', function() {Torus.io.block(this.getAttribute('data-user'));});
 			block.textContent = 'Block PMs'; //FIXME: i18n
-			actions.appendChild(block);
 		}
+		actions.appendChild(block);
 
 		if((user.givemod || user.staff) && !target.mod && !target.staff) {
 			var mod = document.createElement('a');
@@ -622,7 +628,8 @@ Torus.ui.render_popup = function(name, room, coords) {
 				yes.id = 'torus-popup-modconfirm-yes';
 				yes.type = 'button';
 				yes.value = 'Yes'; //FIXME: i18n
-				yes.addEventListener('click', function() {room.mod(name);}); //FIXME: closure scope
+				yes.addEventListener('click', function() {room.mod(this.getAttribute('data-user'));}); //FIXME: closure scope
+				yes.setAttribute('data-user', name);
 				confirm.appendChild(yes);
 
 				confirm.appendChild(document.createTextNode(' Are you sure? ')); //FIXME: i18n
@@ -889,9 +896,14 @@ Torus.ui.input = function(event) {
 }
 
 Torus.ui.click_link = function(event) {
-	if(!this.href) {return;}
+	if(!this.href) {
+		console.log('Torus.ui.click_link called on something with no href: ', this);
+		return;
+	}
 	event.preventDefault();
-	window.open(this.href, 'torus');
+
+	if(this.href.indexOf('.wikia.com/wiki/Special:Chat') != -1) {(new Torus.classes.Chat(this.href.substring(this.href.indexOf('://') + 3, this.href.indexOf('.wikia.com/wiki/Special:Chat')))).connect();}
+	else {window.open(this.href, 'torus');}
 }
 
 Torus.ui.tab_click = function(event) {

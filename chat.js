@@ -1,4 +1,4 @@
-Torus.classes.Chat = function(domain) {
+Torus.classes.Chat = function(domain, parent, users) {
 	if(!(this instanceof Torus.classes.Chat)) {throw new Error('Must call Torus.classes.Chat with `new`.');}
 	if(!domain && domain !== 0) {throw new Error('Torus.classes.Chat: Tried to create room with no domain.');}
 	if(Torus.chats[domain]) {throw new Error('Torus.classes.Chat: Tried to create room `' + name + '` but it already exists.');}
@@ -6,8 +6,15 @@ Torus.classes.Chat = function(domain) {
 
 	Torus.chats[domain] = this;
 	if(domain) { //this is a normal room
-		this.id = 1;
-		this.parent = false; //the source of a PM
+		if(parent) { //PM
+			this.id = domain * 1;
+			this.parent = parent;
+			this.priv_users = users;
+		}
+		else { //public
+			this.id = 1; //this'll get overwriten later
+			this.parent = false;
+		}
 		this.domain = domain;
 		//this.away_timeout = 0;
 		this.connected = false;
@@ -42,7 +49,7 @@ Torus.classes.Chat.socket_connect = function(event) {
 Torus.classes.Chat.socket_disconnect = function(event) {event.sock.chat.disconnect(event.message);}
 Torus.classes.Chat.socket_message = function(event) {
 	if(event.message.data) {data = JSON.parse(event.message.data);}
-	else {data = {};} //disableReconnect and probably forceReconnect dodomains
+	else {data = {};} //disableReconnect and probably forceReconnect do this
 
 	var e = event.sock.chat['event_' + event.message.event](data);
 	Torus.call_listeners(e);
@@ -52,19 +59,21 @@ Torus.classes.Chat.prototype.connect = function(transport) {
 	if(this.connected || this.connecting) {throw new Error('Tried to open ' + this.domain + ' which is already open. (Chat.connect)');}
 	if(!transport) {transport = 'polling';}
 
-	Torus.alert('Connecting to ' + this.domain + '...');
-
 	this.connecting = true;
 	if(this.parent) {
+		Torus.alert('Connecting to PM...');
 		var info = {
-			host: this.parent.socket.domain,
+			host: this.parent.socket.host,
 			port: this.parent.socket.port,
 			server: this.parent.socket.server,
 			room: this.id,
 			key: this.parent.socket.key
 		};
 	}
-	else {var info = {};}
+	else {
+		Torus.alert('Connecting to ' + this.domain + '...');
+		var info = {};
+	}
 
 	this.socket = new Torus.io.transports[transport](this.domain, info);
 	this.socket.chat = this;
@@ -73,14 +82,14 @@ Torus.classes.Chat.prototype.connect = function(transport) {
 	this.socket.add_listener('io', 'message', Torus.classes.Chat.socket_message);
 }
 Torus.classes.Chat.prototype.reconnect = function() {
-	this.socket.close(true);
+	this.socket.close();
 	this.connected = false;
 	this.connecting = false;
 	this.connect(this.socket.transport);
 	Torus.call_listeners(new Torus.classes.ChatEvent('reopen', this));
 }
 Torus.classes.Chat.prototype.disconnect = function(message) {
-	this.socket.close(true);
+	this.socket.close();
 
 	Torus.alert('Disconnected from ' + this.domain + ': ' + message);
 	this.connecting = false;
@@ -186,12 +195,7 @@ Torus.classes.Chat.prototype.open_private = function(users, callback, id) {
 	}
 
 	if(!Torus.chats[id]) {
-		var pm = new Torus.classes.Chat(id * 1);
-		pm.parent = this;
-		pm.id = id * 1;
-		pm.domain = pm.parent.domain;
-		pm.priv_users = users;
-		pm.connect();
+		(new Torus.classes.Chat(id * 1, this, users)).connect();
 		if(typeof callback == 'function') {pm.add_listener('chat', 'open', callback);}
 	}
 	else { //FIXME: everything
@@ -321,12 +325,7 @@ Torus.classes.Chat.prototype.event_kick = function(data) {
 Torus.classes.Chat.prototype.event_openPrivateRoom = function(data) {
 	var event = new Torus.classes.IOEvent('open_private', this);
 
-	if(!Torus.chats[data.attrs.roomId]) {
-		var pm = new Torus.classes.Chat(data.attrs.roomId, '' + data.attrs.roomId);
-		pm.parent = this;
-		pm.priv_users = data.attrs.users;
-		pm.connect();
-	}
+	if(!Torus.chats[data.attrs.roomId]) {(new Torus.classes.Chat(data.attrs.roomId * 1, this, data.attrs.users)).connect();}
 	event.private = Torus.chats[data.attrs.roomId];
 	event.users = data.attrs.users;
 
@@ -339,7 +338,7 @@ Torus.classes.Chat.prototype.event_forceReconnect = function(data) {
 Torus.classes.Chat.prototype.event_disableReconnect = function(data) {
 	var event = new Torus.classes.IOEvent('force_disconnect', this);
 	Torus.call_listeners(event); //FIXME: this will occur twice
-	this.disconnect('Server closed the connection');
+	//this.disconnect('Server closed the connection');
 	return event;
 }
 

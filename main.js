@@ -5,6 +5,8 @@
  *    https://github.com/Monchoman45/Torus     *
  ***********************************************/
 
+if(window.Torus) {throw new Error('Torus already loaded');}
+
 window.Torus = {
 	init: false,
 	local: {

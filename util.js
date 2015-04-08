@@ -23,7 +23,10 @@ Torus.util.parse_links = function (text, wiki) {
  
 	var ref = 0;
 	while(text.indexOf('http', ref) != -1) { //search for plain links
-		if(text.charAt(text.indexOf('http', ref) - 1) != '[' && (text.indexOf('http://', ref) == text.indexOf('http', ref) || text.indexOf('https://', ref) == text.indexOf('http', ref))) {
+		if(
+			text.charAt(text.indexOf('http', ref) - 1) != '[' &&
+			(text.indexOf('http://', ref) == text.indexOf('http', ref) || text.indexOf('https://', ref) == text.indexOf('http', ref))
+		) {
 			var start = text.indexOf('http', ref);
 			var space = text.indexOf(' ', start);
 			var line = text.indexOf('\n', start);
@@ -39,7 +42,7 @@ Torus.util.parse_links = function (text, wiki) {
 			var link = '<a href="' + url + '" onclick="Torus.ui.click_link.call(this, event);">' + url + '</a>';
 			text = text.substring(0, start) + link + text.substring(end);
 		}
-		ref = text.indexOf('http', ref) + (link ? link.length - 9 : 1);
+		ref = text.indexOf('http', ref) + (link ? link.length - 9 : 1); //FIXME: ternary
 	}
 
 	ref = 0;

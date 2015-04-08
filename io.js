@@ -164,7 +164,7 @@ Torus.io.transports.websocket.prototype.close = function(silence) {
 	this.ws.close();
 }*/
 
-Torus.io.transports.polling = function(domain, info) { //FIXME: stop building the url 20 times
+Torus.io.transports.polling = function(domain, info) {
 	if(!(this instanceof Torus.io.transports.polling)) {throw new Error('Must create transport with `new`.');}
 
 	this.open = false;
@@ -175,7 +175,7 @@ Torus.io.transports.polling = function(domain, info) { //FIXME: stop building th
 	this.room = info.room;
 	this.key = info.key;
 	this.session = '';
-	this.url = 'http://' + this.host + ':' + this.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + this.key + '&roomId=' + this.room + '&serverId=' + this.server + '&client=Torus&version=' + Torus.version;
+	this.url = 'error';
 	this.xhr = null;
 	this.ping_interval = 0;
 	this.iid = 0;
@@ -183,12 +183,18 @@ Torus.io.transports.polling = function(domain, info) { //FIXME: stop building th
 		'io': {},
 	};
 
+	this.add_listener('io', 'disconnect', this.close);
 
 	if(!this.host || !this.port || !this.server || !this.room) {
 		var sock = this; //FIXME: this forces a closure scope
 		Torus.io.spider(this.domain, function(data) {
 			if(data.error == 'nochat') {
-				sock.close();
+				sock.call_listeners({
+					type: 'io',
+					event: 'disconnect',
+					message: 'no chat',
+					sock: sock
+				});
 				return;
 			}
 			else if(data.error) {throw new Error('transport: CORS proxy returned error `' + data.error + '`');}
@@ -197,7 +203,6 @@ Torus.io.transports.polling = function(domain, info) { //FIXME: stop building th
 			if(!sock.port) {sock.port = data.port;}
 			if(!sock.server) {sock.server = data.server;}
 			if(!sock.room) {sock.room = data.room;}
-			sock.url = 'http://' + sock.host + ':' + sock.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + sock.key + '&roomId=' + sock.room + '&serverId=' + sock.server + '&client=Torus&version=' + Torus.version;
 
 			if(sock.host && sock.port && sock.server && sock.room && sock.key && !sock.open) {sock.poll();} //FIXME: long
 		});
@@ -208,7 +213,6 @@ Torus.io.transports.polling = function(domain, info) { //FIXME: stop building th
 		Torus.io.key(function(key) {
 			if(!key) {throw new Error('transport: not logged in');}
 			sock.key = key;
-			sock.url = 'http://' + sock.host + ':' + sock.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + sock.key + '&roomId=' + sock.room + '&serverId=' + sock.server + '&client=Torus&version=' + Torus.version;
 			if(sock.host && sock.port && sock.server && sock.room && sock.key && !sock.open) {sock.poll();} //FIXME: long
 		});
 	}
@@ -216,15 +220,14 @@ Torus.io.transports.polling = function(domain, info) { //FIXME: stop building th
 	if(this.host && this.port && this.server && this.room && this.key && !this.open) {this.poll();} //FIXME: long
 }
 Torus.io.transports.polling.prototype.poll = function() {
+	this.url = 'http://' + this.host + ':' + this.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + this.key + '&roomId=' + this.room + '&serverId=' + this.server + '&client=Torus&version=' + Torus.version;
+	if(this.session) {this.url += '&sid=' + this.session;}
 	this.open = true;
 
 	this.xhr = new XMLHttpRequest();
-	this.xhr.open('GET', this.url, true);
 	this.xhr.sock = this;
-	this.xhr.onreadystatechange = function() { //FIXME: hardcoded function
-		if(this.readyState == 4) {
-			this.onreadystatechange = null;
-			if(this.sock.xhr != this) {console.log('xhr returned and found itself orphaned:', this.sock);}
+	this.xhr.addEventListener('load', function() { //FIXME: hardcoded function
+		if(this.sock.xhr != this) {console.log('xhr returned and found itself orphaned:', this.sock);}
 		if(this.status == 200) {
 			//As far as I know all messages begin with a null byte (to tell socket.io that they are strings)
 			//after this is the length, encoded in the single most ridiculously stupid format ever created
@@ -234,7 +237,7 @@ Torus.io.transports.polling.prototype.poll = function() {
 			//to write the number in a format that provides no advantages and is literally always harder to parse
 			//following the asinine length is the number 4 (which means message)
 			//following that is the message type, and then immediately thereafter is the actual message content
-			//I swear to god they must have been high when they designed this
+			//I swear to god socket.io must have been high when they designed this
 
 			for(var ufffd = this.responseText.indexOf('\ufffd'); ufffd != -1; ufffd = this.responseText.indexOf('\ufffd', ufffd + 1)) {
 				var text = this.responseText.substring(ufffd + 1, ufffd + 1 + Torus.util.stupid_to_int(this.responseText.slice(1, ufffd)));
@@ -246,7 +249,6 @@ Torus.io.transports.polling.prototype.poll = function() {
 						//we should only reach this once, hopefully
 						var data = JSON.parse(text.substring(1));
 						sock.session = data.sid;
-						sock.url = 'http://' + sock.host + ':' + sock.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + sock.key + '&roomId=' + sock.room + '&sid=' + sock.session + '&serverId=' + sock.server + '&client=Torus&version=' + Torus.version;
 						sock.ping_interval = data.pingTimeout / 2; //pingTimeout is the longest we can go without disconnecting
 						if(sock.iid) {clearInterval(sock.iid);}
 						sock.iid = setInterval(function() {sock.ping();}, sock.ping_interval); //FIXME: this forces a closure scope
@@ -258,7 +260,6 @@ Torus.io.transports.polling.prototype.poll = function() {
 							message: 'Server closed the connection',
 							sock: sock
 						});
-						if(this.iid) {clearInterval(this.iid);}
 						return;
 					case 2: //ping
 						sock.ping();
@@ -281,7 +282,6 @@ Torus.io.transports.polling.prototype.poll = function() {
 									message: 'Server closed the connection',
 									sock: sock
 								});
-								if(this.iid) {clearInterval(this.iid);}
 								return;
 							case 2: //event
 								sock.call_listeners({
@@ -295,21 +295,20 @@ Torus.io.transports.polling.prototype.poll = function() {
 								sock.call_listeners({
 									type: 'io',
 									event: 'disconnect',
-									message: 'Protocol error: ' + text,
+									message: 'Protocol error: ' + JSON.parse(text.substring(2)),
 									sock: sock
 								});
-								if(this.iid) {clearInterval(this.iid);}
 								return;
 							case 3: //ack
 							case 5: //binary event
 							case 6: //binary ack
+								console.log('Unimplemented data type: ', text);
 								sock.call_listeners({
 									type: 'io',
 									event: 'disconnect',
-									message: 'Protocol error: Received unimplemented data type ' + text,
+									message: 'Protocol error: Received unimplemented data type ' + text.substring(2),
 									sock: sock
 								});
-								if(this.iid) {clearInterval(this.iid);}
 								return;
 						}
 						break;
@@ -340,19 +339,9 @@ Torus.io.transports.polling.prototype.poll = function() {
 			});
 			if(this.iid) {clearInterval(this.iid);}
 		}
-		else {console.log(this.sock);}
-		} //readyState == 4
-	}
-	this.xhr.onabort = function(event) {
-		console.log(event);
-		this.sock.call_listeners({
-			type: 'io',
-			event: 'disconnect',
-			message: 'aborted',
-			sock: this.sock
-		});
-		if(this.iid) {clearInterval(this.iid);}
-	}
+		else {console.log('HTTP status 0: ', this.sock);}
+	});
+	this.xhr.open('GET', this.url, true);
 	this.xhr.send();
 }
 Torus.io.transports.polling.prototype.send = function(message) {
@@ -368,21 +357,15 @@ Torus.io.transports.polling.prototype.ping = function() {
 	xhr.setRequestHeader('Content-Type', 'application/octet-stream');
 	xhr.send(new Blob(['\0', Torus.util.int_to_stupid(1), Torus.util.xFF, '2']));
 }
-Torus.io.transports.polling.prototype.close = function(silence) {
-	if(silence) {
-		if(this.xhr) {this.xhr.onabort = null;}
-		if(this.iid) {clearInterval(this.iid);}
+Torus.io.transports.polling.prototype.close = function() {
+	this.open = false;
+	if(this.xhr) {
+		this.xhr.abort();
+		this.xhr = null;
 	}
-	else {
-		if(!this.xhr) { //closed before we opened, probably tried to go to a wiki with no chat
-			this.call_listeners({
-				type: 'io',
-				event: 'disconnect',
-				message: 'aborted',
-				sock: this
-			});
-		}
-		else {this.xhr.abort();}
+	if(this.iid) {
+		clearInterval(this.iid);
+		this.iid = 0;
 	}
 }
 Torus.io.transports.polling.prototype.add_listener = Torus.add_listener;
