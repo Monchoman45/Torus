@@ -28,6 +28,7 @@ Torus.classes.Chat = function(domain, parent, users) {
 		//this.away_timeout = 0;
 		this.connected = false;
 		this.connecting = false;
+		this.socket = false;
 		this.users = 0;
 		this.userlist = {};
 		this.listeners = {
@@ -40,6 +41,7 @@ Torus.classes.Chat = function(domain, parent, users) {
 		this.name = 'status'
 		this.listeners = {
 			chat: {},
+			io: {},
 		};
 	}
 
@@ -53,7 +55,7 @@ Torus.classes.Chat.socket_connect = function(event) {
 	event.sock.chat.send_command('initquery');
 	Torus.alert('Connected.', event.sock.chat);
 	Torus.io.getBlockedPrivate();
-	Torus.call_listeners(new Torus.classes.ChatEvent('open', event.sock.chat));
+	Torus.call_listeners(new Torus.classes.ChatEvent('connected', event.sock.chat));
 }
 Torus.classes.Chat.socket_disconnect = function(event) {event.sock.chat.disconnect(event.message);}
 Torus.classes.Chat.socket_message = function(event) {
@@ -80,13 +82,15 @@ Torus.classes.Chat.prototype.connect = function(transport) {
 	}
 	else {var info = {};}
 
-	Torus.alert('Connecting to (' + this.name + ')...');
+	Torus.alert('Connecting to {' + this.name + '}...');
 
 	this.socket = new Torus.io.transports[transport](this.domain, info);
 	this.socket.chat = this;
 	this.socket.add_listener('io', 'connect', Torus.classes.Chat.socket_connect);
 	this.socket.add_listener('io', 'disconnect', Torus.classes.Chat.socket_disconnect);
 	this.socket.add_listener('io', 'message', Torus.classes.Chat.socket_message);
+
+	Torus.call_listeners(new Torus.classes.ChatEvent('open', this));
 }
 Torus.classes.Chat.prototype.reconnect = function() {
 	this.socket.close();
@@ -97,18 +101,17 @@ Torus.classes.Chat.prototype.reconnect = function() {
 }
 Torus.classes.Chat.prototype.disconnect = function(message) {
 	this.socket.close();
+	this.socket = false;
 
-	Torus.alert('Disconnected from (' + this.name + '): ' + message);
+	Torus.alert('Disconnected from {' + this.name + '}: ' + message);
 	this.connecting = false;
 	this.connected = false;
 	var event = new Torus.classes.ChatEvent('close', this);
 	event.message = message;
 	Torus.call_listeners(event);
 
-	//FIXME: this is probably bad
 	this.users = 0;
 	this.userlist = {};
-	delete Torus.chats[this.domain];
 }
 
 Torus.classes.Chat.prototype.send_message = function(text) {
@@ -172,9 +175,8 @@ Torus.classes.Chat.prototype.open_private = function(users, callback, id) {
 		return;
 	}
 
-	if(!Torus.chats[id]) {
-		var pm = new Torus.classes.Chat(id * 1, this, users)
-		pm.connect();
+	var pm = Torus.open(id * 1, this, users);
+	if(!pm.connected) {
 		if(typeof callback == 'function') {pm.add_listener('chat', 'open', callback);}
 	}
 	else { //FIXME: everything
@@ -313,19 +315,15 @@ Torus.classes.Chat.prototype.event_kick = function(data) {
 Torus.classes.Chat.prototype.event_openPrivateRoom = function(data) {
 	var event = new Torus.classes.IOEvent('open_private', this);
 
-	event.users = data.attrs.users;
-	if(!Torus.chats[data.attrs.roomId]) {
-		var blocked = false;
-		for(var i = 0; i < data.attrs.users.length; i++) {
-			if(Torus.data.blocked.indexOf(data.attrs.users[i]) != -1) {blocked = true; break;}
-		}
-		if(blocked) {event.private = false;}
-		else {
-			(new Torus.classes.Chat(data.attrs.roomId * 1, this, data.attrs.users)).connect();
-			event.private = Torus.chats[data.attrs.roomId];
-		}
+
+	var blocked = false;
+	for(var i = 0; i < data.attrs.users.length; i++) {
+		if(Torus.data.blocked.indexOf(data.attrs.users[i]) != -1) {blocked = true; break;}
 	}
-	else {event.private = Torus.chats[data.attrs.roomId];}
+	if(blocked) {event.private = false;}
+	else {event.private = Torus.open(data.attrs.roomId * 1, this, data.attrs.users);}
+
+	event.users = data.attrs.users;
 
 	return event;
 }

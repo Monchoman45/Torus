@@ -1,3 +1,41 @@
+Torus.ui.new_room = function(event) {
+	event.room.add_listener('io', 'alert', Torus.ui.add_line);
+	event.room.add_listener('io', 'initial', Torus.ui.initial);
+
+	event.room.add_listener('io', 'join', Torus.ui.update_user);
+	event.room.add_listener('io', 'update_user', Torus.ui.update_user);
+	event.room.add_listener('io', 'part', Torus.ui.remove_user);
+	event.room.add_listener('io', 'logout', Torus.ui.remove_user);
+	event.room.add_listener('io', 'ghost', Torus.ui.remove_user);
+
+	event.room.add_listener('io', 'message', Torus.ui.add_line);
+	event.room.add_listener('io', 'me', Torus.ui.add_line);
+	event.room.add_listener('io', 'join', Torus.ui.add_line);
+	event.room.add_listener('io', 'part', Torus.ui.add_line);
+	event.room.add_listener('io', 'logout', Torus.ui.add_line);
+	event.room.add_listener('io', 'ghost', Torus.ui.add_line);
+	event.room.add_listener('io', 'mod', Torus.ui.add_line);
+	event.room.add_listener('io', 'kick', Torus.ui.add_line);
+	event.room.add_listener('io', 'ban', Torus.ui.add_line);
+	event.room.add_listener('io', 'unban', Torus.ui.add_line);
+
+	if(!event.room.parent && !Torus.options['pings-' + event.room.domain + '-enabled']) {
+		Torus.options['pings-' + event.room.domain + '-enabled'] = true;
+		Torus.options['pings-' + event.room.domain + '-literal'] = '';
+		Torus.options['pings-' + event.room.domain + '-regex'] = '';
+
+		Torus.ext.options.dir.pings[event.room.domain] = {
+			enabled: {type: 'boolean'},
+			literal: {type: 'text', help: ''}, //FIXME: i18n something
+			regex: {type: 'text', help: ''}, //FIXME: i18n something
+		};
+	}
+
+	for(var i in Torus.logs) {
+		if(!Torus.logs[i][event.room.domain]) {Torus.logs[i][event.room.domain] = [];}
+	}
+}
+
 Torus.ui.add_room = function(event) {
 	event.room.listeners.ui = {};
 
@@ -13,63 +51,27 @@ Torus.ui.add_room = function(event) {
 		x.className = 'torus-tab-close';
 		x.addEventListener('click', function(event) {
 			event.stopPropagation();
-			Torus.chats[this.parentNode.getAttribute('data-id')].disconnect('closed');
+			Torus.ui.remove_room(Torus.chats[this.parentNode.getAttribute('data-id')]);
 		});
 		x.textContent = 'x';
 		tab.appendChild(x);
 	}
 	Torus.ui.ids['tabs'].appendChild(tab);
 
-	if(event.room.id > 0) {
-		event.room.add_listener('io', 'join', Torus.ui.update_user);
-		event.room.add_listener('io', 'update_user', Torus.ui.update_user);
-		event.room.add_listener('io', 'part', Torus.ui.remove_user);
-		event.room.add_listener('io', 'logout', Torus.ui.remove_user);
-		event.room.add_listener('io', 'ghost', Torus.ui.remove_user);
-
-		event.room.add_listener('io', 'alert', Torus.ui.add_line);
-		event.room.add_listener('io', 'message', Torus.ui.add_line);
-		event.room.add_listener('io', 'me', Torus.ui.add_line);
-		event.room.add_listener('io', 'join', Torus.ui.add_line);
-		event.room.add_listener('io', 'part', Torus.ui.add_line);
-		event.room.add_listener('io', 'logout', Torus.ui.add_line);
-		event.room.add_listener('io', 'ghost', Torus.ui.add_line);
-		event.room.add_listener('io', 'mod', Torus.ui.add_line);
-		event.room.add_listener('io', 'kick', Torus.ui.add_line);
-		event.room.add_listener('io', 'ban', Torus.ui.add_line);
-		event.room.add_listener('io', 'unban', Torus.ui.add_line);
-
-		event.room.add_listener('io', 'initial', Torus.ui.initial);
-
-		if(!event.room.parent && !Torus.options['pings-' + event.room.domain + '-enabled']) {
-			Torus.options['pings-' + event.room.domain + '-enabled'] = true;
-			Torus.options['pings-' + event.room.domain + '-literal'] = '';
-			Torus.options['pings-' + event.room.domain + '-regex'] = '';
-
-			Torus.ext.options.dir.pings[event.room.domain] = {
-				enabled: {type: 'boolean'},
-				literal: {type: 'text', help: ''}, //FIXME: i18n something
-				regex: {type: 'text', help: ''}, //FIXME: i18n something
-			};
-		}
-
-		for(var i in Torus.logs) {
-			if(!Torus.logs[i][event.room.domain]) {Torus.logs[i][event.room.domain] = [];}
-		}
-
-		Torus.ui.activate(event.room);
-	}
+	Torus.ui.activate(event.room);
 }
 
-Torus.ui.remove_room = function(event) {
-	if(event.room == Torus.ui.active) {
-		if(event.room.parent) {Torus.ui.activate(event.room.parent);}
-		else {Torus.ui.activate(Torus.chats[0]);}
-	}
-	if(event.room.viewing) {Torus.ui.show(event.room);}
+Torus.ui.remove_room = function(room) {
+	if(room.connecting || room.connected) {room.disconnect('closed');}
 
-	Torus.ui.ids['tabs'].removeChild(Torus.ui.ids['tab-' + event.room.domain]);
-	delete Torus.ui.ids['tab-' + event.room.domain];
+	if(room == Torus.ui.active) {
+		if(room.parent) {Torus.ui.activate(room.parent);}
+		else {Torus.ui.activate(Torus.chats[0]);} //FIXME: activate the next chat tab to the left
+	}
+	if(room.viewing) {Torus.ui.show(room);}
+
+	Torus.ui.ids['tabs'].removeChild(Torus.ui.ids['tab-' + room.domain]);
+	delete Torus.ui.ids['tab-' + room.domain];
 }
 
 Torus.ui.add_line = function(event) {
@@ -240,5 +242,5 @@ Torus.ui.parse_message = function(event) {
 	while(event.html.indexOf('\n') != -1) {event.html = event.html.replace('\n', '<br />');}
 }
 
-Torus.add_listener('chat', 'new', Torus.ui.add_room);
-Torus.add_listener('chat', 'close', Torus.ui.remove_room);
+Torus.add_listener('chat', 'new', Torus.ui.new_room);
+Torus.add_listener('chat', 'open', Torus.ui.add_room);

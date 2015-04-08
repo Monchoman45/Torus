@@ -79,7 +79,7 @@ Torus.ui.render_line = function(message) {
 			line.appendChild(document.createTextNode(' '));
 			var room = document.createElement('span');
 				room.className = 'torus-message-room';
-				room.textContent = '(' + message.room.name + ')' + indent;
+				room.textContent = '{' + message.room.name + '}' + indent;
 			line.appendChild(room);
 		}
 		line.appendChild(document.createTextNode(' '));
@@ -105,13 +105,13 @@ Torus.ui.render_line = function(message) {
 				//FIXME: and ghost is only here because message.event + 'ed' is the correct tense
 				line.appendChild(document.createTextNode('== '));
 				line.appendChild(Torus.ui.span_user(message.user));
-				line.appendChild(document.createTextNode(' ' + message.event + 'ed (' + message.room.name + ')'));
+				line.appendChild(document.createTextNode(' ' + message.event + 'ed {' + message.room.name + '}'));
 				break;
 			case 'part':
 				//FIXME: i18n
 				line.appendChild(document.createTextNode('== '));
 				line.appendChild(Torus.ui.span_user(message.user));
-				line.appendChild(document.createTextNode(' left (' + message.room.name + ')'));
+				line.appendChild(document.createTextNode(' left {' + message.room.name + '}'));
 				break;
 			case 'logout':
 				//FIXME: i18n
@@ -125,7 +125,7 @@ Torus.ui.render_line = function(message) {
 				line.appendChild(Torus.ui.span_user(message.performer));
 				line.appendChild(document.createTextNode(' promoted '));
 				line.appendChild(Torus.ui.span_user(message.target));
-				line.appendChild(document.createTextNode(' to chatmod of (' + message.room.name + ')'));
+				line.appendChild(document.createTextNode(' to chatmod of {' + message.room.name + '}'));
 				break;
 			case 'kick':
 			case 'ban':
@@ -170,7 +170,7 @@ Torus.ui.render_line = function(message) {
 						Torus.ext.ccui.query(message.target);
 					});
 				line.appendChild(ccon);
-				line.appendChild(document.createTextNode(') from (' + message.room.name + ')'));
+				line.appendChild(document.createTextNode(') from {' + message.room.name + '}'));
 				if(message.event == 'ban') {line.appendChild(document.createTextNode(' for ' + message.expiry));}
 				break;
 			default: throw new Error('Message type ' + message.event + ' is not rendered. (ui.render_line)');

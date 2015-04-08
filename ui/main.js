@@ -70,10 +70,6 @@ Torus.ui.onload = function() {
 	if(!domain) {domain = 'localhost';}
 	Torus.local = domain;
 
-	Torus.logs.messages[0] = [];
-	Torus.ui.activate(Torus.chats[0]);
-	Torus.ui.show(Torus.chats[0]);
-
 	if(wgCanonicalNamespace == 'Special' && wgTitle == 'Torus') {
 		document.title = 'Torus - It\'s a donut - ' + wgSiteName;
 		if(window.skin == 'oasis') {
@@ -95,11 +91,11 @@ Torus.ui.onload = function() {
 			return;
 		}
 
-		if(Torus.options['misc-connection-local']) {(new Torus.classes.Chat(Torus.local)).connect();}
+		if(Torus.options['misc-connection-local']) {Torus.open(Torus.local);}
 		if(Torus.options['misc-connection-default_rooms']) {
 			var rooms = Torus.options['misc-connection-default_rooms'].split('\n');
 			for(var i = 0; i < rooms.length; i++) {
-				if(!Torus.chats[rooms[i]]) {(new Torus.classes.Chat(rooms[i])).connect();} //could be Torus.local
+				if(!Torus.chats[rooms[i]]) {Torus.open(rooms[i]);} //could be Torus.local
 			}
 		}
 	}
@@ -187,7 +183,10 @@ Torus.ui.window.addEventListener('mouseover', Torus.ui.window_mouseover);
 
 Torus.add_listener('window', 'load', Torus.ui.onload);
 
-Torus.ui.add_room({room: Torus.chats[0]}); //the status room already exists
+Torus.chats[0].add_listener('io', 'alert', Torus.ui.add_line);
+for(var i in Torus.logs) {Torus.logs[i][0] = [];}
+Torus.ui.add_room({room: Torus.chats[0]});
+Torus.ui.show(Torus.chats[0]);
 
 
 

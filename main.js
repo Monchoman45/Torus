@@ -25,6 +25,7 @@ window.Torus = {
 			'new': [],
 
 			open: [],
+			connected: [],
 			close: [],
 			reopen: [],
 
@@ -132,6 +133,13 @@ Torus.call_listeners = function(event) {
 	return true;
 }
 
+Torus.open = function(domain, parent, users) {
+	if(Torus.chats[domain]) {var chat = Torus.chats[domain];}
+	else {var chat = new Torus.classes.Chat(domain, parent, users);}
+	if(!chat.connecting && !chat.connected) {chat.connect();}
+	return chat;
+}
+
 Torus.logout = function() {
 	for(var i in Torus.chats) {
 		if(i > 0) {
@@ -151,13 +159,15 @@ Torus.alert = function(text, room) {
 		for(var i = 0; i < spl.length; i++) {
 			var event = new Torus.classes.IOEvent('alert', room);
 			event.text = spl[i];
-			Torus.ui.add_line(event); //FIXME: ui
+			Torus.call_listeners(event);
+			//Torus.ui.add_line(event); //FIXME: ui
 		}
 	}
 	else {
 		var event = new Torus.classes.IOEvent('alert', room);
 		event.text = text;
-		Torus.ui.add_line(event); //FIXME: ui
+		Torus.call_listeners(event);
+		//Torus.ui.add_line(event); //FIXME: ui
 	}
 }
 

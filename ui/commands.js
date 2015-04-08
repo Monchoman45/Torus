@@ -7,8 +7,7 @@ Torus.commands.join = {
 			return;
 		}
 
-		if(Torus.chats[room]) {Torus.ui.activate(Torus.chats[room]);}
-		else {(new Torus.classes.Chat(room)).connect();}
+		Torus.open(room);
 	}
 };
 Torus.commands.part = {
@@ -16,8 +15,9 @@ Torus.commands.part = {
 	func: function(room) {
 		if(!room) {Torus.ui.active.disconnect('closed');}
 		else {
-			if(!Torus.chats[room]) {return 'Invalid room ' + room + '.';} //FIXME: i18n
-			else {Torus.chats[room].disconnect('closed');}
+			var chat = Torus.chats[room]
+			if(!chat || (!chat.connecting && !chat.connected)) {return 'Invalid room ' + room + '.';} //FIXME: i18n
+			else {chat.disconnect('closed');}
 		}
 	}
 };
