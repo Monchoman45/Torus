@@ -1,17 +1,21 @@
-Torus.classes.Chat = function(room, name) {
+Torus.classes.Chat = function(domain, parent, users) {
 	if(!(this instanceof Torus.classes.Chat)) {throw new Error('Must call Torus.classes.Chat with `new`.');}
-	if(room < 0) {throw new Error('Invalid negative room id. (Chat constructor)');}
-	if(!name) {throw new Error('Tried to create room with no name. (Chat constructor)');}
-	if(Torus.chats[name]) {throw new Error('Tried to create room ' + name + ' but it already exists. (Chat constructor)');}
+	if(!domain && domain !== 0) {throw new Error('Torus.classes.Chat: Tried to create room with no domain.');}
+	if(Torus.chats[domain]) {throw new Error('Torus.classes.Chat: Tried to create room `' + name + '` but it already exists.');}
 
-	Torus.chats[room] = this;
 
-	if(room > 0) {
-		Torus.chats[name] = this;
-
-		this.id = room;
-		this.parent = false; //the source of a PM
-		this.name = name;
+	Torus.chats[domain] = this;
+	if(domain) { //this is a normal room
+		if(parent) { //PM
+			this.id = domain * 1;
+			this.parent = parent;
+			this.priv_users = users;
+		}
+		else { //public
+			this.id = 1; //this'll get overwriten later
+			this.parent = false;
+		}
+		this.domain = domain;
 		//this.away_timeout = 0;
 		this.connected = false;
 		this.connecting = false;
@@ -23,8 +27,8 @@ Torus.classes.Chat = function(room, name) {
 		};
 	}
 	else { //this is the status room
-		this.id = room;
-		this.name = name;
+		this.id = 0;
+		this.domain = 0;
 		this.listeners = {
 			chat: {},
 		};
@@ -52,42 +56,42 @@ Torus.classes.Chat.socket_message = function(event) {
 }
 
 Torus.classes.Chat.prototype.connect = function(transport) {
-	if(this.connected || this.connecting) {throw new Error('Tried to open ' + this.name + ' which is already open. (Chat.connect)');}
+	if(this.connected || this.connecting) {throw new Error('Tried to open ' + this.domain + ' which is already open. (Chat.connect)');}
 	if(!transport) {transport = 'polling';}
 
-	Torus.alert('Connecting to ' + this.name + '...');
-
-	if(Torus.database[this.name]) {var info = Torus.database[this.name];}
-	else if(this.parent) {
+	this.connecting = true;
+	if(this.parent) {
+		Torus.alert('Connecting to PM...');
 		var info = {
-			domain: this.parent.socket.domain,
+			host: this.parent.socket.host,
 			port: this.parent.socket.port,
 			server: this.parent.socket.server,
 			room: this.id,
 			key: this.parent.socket.key
 		};
 	}
-	else if(this.name == Torus.local.domain) {var info = {};}
-	else {throw new Error('Can\'t connect to ' + this.name + ': connection info isn\'t in database and room is not local');}
+	else {
+		Torus.alert('Connecting to ' + this.domain + '...');
+		var info = {};
+	}
 
-	this.connecting = true;
-	this.socket = new Torus.io.transports[transport](info);
+	this.socket = new Torus.io.transports[transport](this.domain, info);
 	this.socket.chat = this;
 	this.socket.add_listener('io', 'connect', Torus.classes.Chat.socket_connect);
 	this.socket.add_listener('io', 'disconnect', Torus.classes.Chat.socket_disconnect);
 	this.socket.add_listener('io', 'message', Torus.classes.Chat.socket_message);
 }
 Torus.classes.Chat.prototype.reconnect = function() {
-	this.socket.close(true);
+	this.socket.close();
 	this.connected = false;
 	this.connecting = false;
 	this.connect(this.socket.transport);
 	Torus.call_listeners(new Torus.classes.ChatEvent('reopen', this));
 }
 Torus.classes.Chat.prototype.disconnect = function(message) {
-	this.socket.close(true);
+	this.socket.close();
 
-	Torus.alert('Disconnected from ' + this.name + ': ' + message);
+	Torus.alert('Disconnected from ' + this.domain + ': ' + message);
 	this.connecting = false;
 	this.connected = false;
 	var event = new Torus.classes.ChatEvent('close', this);
@@ -97,8 +101,7 @@ Torus.classes.Chat.prototype.disconnect = function(message) {
 	//FIXME: this is probably bad
 	this.users = 0;
 	this.userlist = {};
-	delete Torus.chats[this.id];
-	if(this.id != this.name) {delete Torus.chats[this.name];}
+	delete Torus.chats[this.domain];
 }
 
 Torus.classes.Chat.prototype.update_user = function(name, data) {
@@ -126,7 +129,7 @@ Torus.classes.Chat.prototype.remove_user = function(name) {
 }
 
 Torus.classes.Chat.prototype.send_message = function(message, hist) {
-	if(!this.connected) {throw new Error('Tried to send a message to room ' + this.id + ' before it finished connecting. (Chat.send_message)');}
+	if(!this.connected) {throw new Error('Tried to send a message to room ' + this.domain + ' before it finished connecting. (Chat.send_message)');}
 
 	message += '';
 	if((hist || hist == undefined) && Torus.data.history[1] != message) {
@@ -146,7 +149,7 @@ Torus.classes.Chat.prototype.send_message = function(message, hist) {
 }
 
 Torus.classes.Chat.prototype.send_command = function(command, args) {
-	if(!this.connected) {throw new Error('Tried to send a command to room ' + this.id + ' before it finished connecting. (Chat.send_command)');}
+	if(!this.connected) {throw new Error('Tried to send a command to room ' + this.domain + ' before it finished connecting. (Chat.send_command)');}
 
 	var message = {attrs: {msgType: 'command', command: command}};
 	for(var i in args) {message.attrs[i] = args[i];}
@@ -188,19 +191,16 @@ Torus.classes.Chat.prototype.open_private = function(users, callback, id) {
 		Torus.io.getPrivateId(users, function(id) {
 			return c.open_private(users, callback, id);
 		});
+		return;
 	}
-	else {
-		if(!Torus.chats[id]) {
-			var pm = new Torus.classes.Chat(id * 1, '' + id);
-			pm.parent = this;
-			pm.priv_users = users;
-			pm.connect();
-			if(typeof callback == 'function') {pm.add_listener('chat', 'open', callback);}
-		}
-		else { //FIXME: everything
-			//Torus.ui.activate(id); FIXME: ui
-			//if(typeof callback == 'function') {callback.call(Torus.chats[id]);} //FIXME: callback expects a ChatEvent('open')
-		}
+
+	if(!Torus.chats[id]) {
+		(new Torus.classes.Chat(id * 1, this, users)).connect();
+		if(typeof callback == 'function') {pm.add_listener('chat', 'open', callback);}
+	}
+	else { //FIXME: everything
+		//Torus.ui.activate(id); FIXME: ui
+		//if(typeof callback == 'function') {callback.call(Torus.chats[id]);} //FIXME: callback expects a ChatEvent('open')
 	}
 }
 
@@ -248,7 +248,7 @@ Torus.classes.Chat.prototype['event_chat:add'] = function(data) {
 			case 'chat-err-connected-from-another-browser':
 				//TODO: make this its own event
 				event.event = 'alert';
-				event.text = 'You are connected to ' + this.name + ' from another window.'; //FIXME: i18n
+				event.text = 'You are connected to ' + this.domain + ' from another window.'; //FIXME: i18n
 				break;
 			case 'chat-kick-cant-kick-moderator':
 				//TODO: figure out who we tried to kick
@@ -325,12 +325,7 @@ Torus.classes.Chat.prototype.event_kick = function(data) {
 Torus.classes.Chat.prototype.event_openPrivateRoom = function(data) {
 	var event = new Torus.classes.IOEvent('open_private', this);
 
-	if(!Torus.chats[data.attrs.roomId]) {
-		var pm = new Torus.classes.Chat(data.attrs.roomId, '' + data.attrs.roomId);
-		pm.parent = this;
-		pm.priv_users = data.attrs.users;
-		pm.connect();
-	}
+	if(!Torus.chats[data.attrs.roomId]) {(new Torus.classes.Chat(data.attrs.roomId * 1, this, data.attrs.users)).connect();}
 	event.private = Torus.chats[data.attrs.roomId];
 	event.users = data.attrs.users;
 
@@ -343,7 +338,7 @@ Torus.classes.Chat.prototype.event_forceReconnect = function(data) {
 Torus.classes.Chat.prototype.event_disableReconnect = function(data) {
 	var event = new Torus.classes.IOEvent('force_disconnect', this);
 	Torus.call_listeners(event); //FIXME: this will occur twice
-	this.disconnect('Server closed the connection');
+	//this.disconnect('Server closed the connection');
 	return event;
 }
 

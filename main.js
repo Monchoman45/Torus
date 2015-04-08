@@ -5,6 +5,8 @@
  *    https://github.com/Monchoman45/Torus     *
  ***********************************************/
 
+if(window.Torus) {throw new Error('Torus already loaded');}
+
 window.Torus = {
 	init: false,
 	local: {
@@ -133,9 +135,10 @@ Torus.call_listeners = function(event) {
 Torus.logout = function() {
 	for(var i in Torus.chats) {
 		if(i > 0) {
-			Torus.chats[i].send_command('logout');
-			Torus.call_listeners(new Torus.classes.ChatEvent('logout', i * 1));
-			Torus.chats[i * 1].disconnect('logout');
+			var chat = Torus.chats[i];
+			chat.send_command('logout');
+			Torus.call_listeners(new Torus.classes.ChatEvent('logout', chat));
+			chat.disconnect('logout');
 		}
 	}
 }
@@ -211,11 +214,9 @@ window.addEventListener('beforeunload', Torus.unload);
 
 {{MediaWiki:Torus.js/util.js}}
 
-new Torus.classes.Chat(0, 'status');
+{{MediaWiki:Torus.js/cache.js}}
 
-Torus.database = {
-{{MediaWiki:Torus.js/database.json}}
-};
+new Torus.classes.Chat(0);
 
 
 

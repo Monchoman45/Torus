@@ -6,9 +6,9 @@ Torus.commands.join = {
 			Torus.logout();
 			return;
 		}
-		if(!Torus.database[room]) {return 'Unable to look up ' + room + ' in database. Try [[w:c:' + room + ':Special:Torus]], or [https://github.com/Monchoman45/Torus/issues/new?labels=database-addition ask to get it added to the database].\n';} //FIXME: i18n
 
-		(new Torus.classes.Chat(Torus.database[room].room, room)).connect();
+		if(Torus.chats[room]) {Torus.ui.activate(Torus.chats[room]);}
+		else {(new Torus.classes.Chat(room)).connect();}
 	}
 };
 Torus.commands.part = {
@@ -112,7 +112,7 @@ Torus.commands.status = {
 		Torus.ui.active.send_message('* ' + wgUserName + str, false);
 	}
 };*/
-Torus.commands.db = '/database';
+/*Torus.commands.db = '/database';
 Torus.commands.database = {
 	help: 'Look up domains and room ids in the database.', //FIXME: i18n
 	func: function(room) {
@@ -125,7 +125,7 @@ Torus.commands.database = {
 		}
 		else {return '[[w:c:' + room + '|' + room + ']]: ' + Torus.database[room].room;}
 	}
-};
+};*/
 Torus.commands.options = {
 	help: 'View options.', //FIXME: i18n
 	func: function() {Torus.ui.activate(Torus.ext.options);}

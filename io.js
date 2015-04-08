@@ -3,18 +3,16 @@ Torus.io.ajax = function(method, post, callback) {
 	for(var i in post) {str += '&' + i + '=' + encodeURIComponent(post[i]);}
 	str = str.substring(1);
 	var xhr = new XMLHttpRequest();
-	xhr.open('POST', '/index.php?action=ajax&rs=ChatAjax&method=' + method + '&client=Torus&version=' + Torus.version, true);
-	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	xhr.responseType = 'json';
-	xhr.onreadystatechange = function() {
-		if(this.readyState == 4) {
-			this.onreadystatechange = null;
-			if(this.status == 200) {
-				if(typeof callback == 'function') {callback.call(Torus, this.response);}
-			}
-			else {throw new Error('Request returned response ' + this.status + '. (io.ajax)');}
+	xhr.addEventListener('loadend', function() {
+		if(this.status == 200) {
+			if(typeof callback == 'function') {callback.call(Torus, this.response);}
 		}
-	}
+		else {throw new Error('Request returned response ' + this.status + '. (io.ajax)');}
+	});
+	xhr.open('POST', '/index.php?action=ajax&rs=ChatAjax&method=' + method, true);
+	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	xhr.send(str);
 }
 
@@ -48,40 +46,51 @@ Torus.io.unblock = function(user, callback) {
 	});
 }
 
-Torus.io.spider = function(callback) {
+Torus.io.key = function(callback) {
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '/wikia.php?controller=Chat&format=json&client=Torus&version=' + Torus.version, true);
 	xhr.responseType = 'json';
-	xhr.onreadystatechange = function() {
-		if(this.readyState == 4) {
-			if(this.status == 200) {
-				if(typeof callback == 'function') {callback.call(Torus, this.response);}
+	xhr.addEventListener('loadend', function() {
+		if(this.status == 200) {
+			if(typeof callback == 'function') {
+				if(typeof this.response.chatkey == 'string') {callback.call(Torus, this.response.chatkey);}
+				else {callback.call(Torus, false);}
 			}
-			else if(this.status == 404) { //wiki doesn't have chat
-				if(typeof callback == 'function') {callback.call(Torus, null);}
-			}
-			else {throw new Error('io.spider request returned HTTP ' + this.status + '.');}
 		}
-	};
+		else if(this.status == 404) { //wiki doesn't have chat
+			if(typeof callback == 'function') {callback.call(Torus, false);}
+		}
+		else {
+			if(typeof callback == 'function') {callback.call(Torus, {error: 'http', code: this.status});}
+			throw new Error('io.key: request returned HTTP ' + this.status + '.');
+		}
+	});
+	xhr.open('GET', '/wikia.php?controller=Chat&format=json', true);
+	xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	xhr.send();
 }
 
-/*Torus.io.session = function(transport, room, key, server, port, callback) {
-	if(!transport || !room || !key || !server || !port) {throw new Error('Bad call to io.session');}
+Torus.io.spider = function(domain, callback) {
+	if(Torus.cache.data[domain]) {
+		if(typeof callback == 'function') {callback.call(Torus, Torus.cache.data[domain]);}
+		return;
+	}
 
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', 'http://chat.wikia-services.com:' + port + '/socket.io/?EIO=2&transport=' + transport + '&name=' + encodeURIComponent(wgUserName) + '&key=' + key + '&roomId=' + room + '&serverId=' + server + '&client=Torus&version=' + Torus.version, true);
-	xhr.onreadystatechange = function() {
-		if(this.readyState == 4) {
-			this.onreadystatechange = null;
-			if(this.status == 200) {
-				if(typeof callback == 'function') {callback.call(Torus, JSON.parse(this.responseText.substring(5)).sid);}
-			}
-			else {throw new Error('Request returned response ' + this.status + '. (io.session)');}
+	xhr.responseType = 'json';
+	xhr.addEventListener('loadend', function() {
+		if(this.status == 200) {
+			if(!this.response.error) {Torus.cache.update(domain, this.response);}
+			if(typeof callback == 'function') {callback.call(Torus, this.response);}
 		}
-	}
+		else {
+			if(typeof callback == 'function') {callback.call(Torus, {error: 'http', code: this.status});}
+			throw new Error('io.spider: request returned HTTP ' + this.status + '.');
+		}
+	});
+	xhr.open('GET', 'http://cis-linux2.temple.edu/~tuf23151/torus.php?domain=' + domain, true);
+	xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	xhr.send();
-}*/
+}
 
 /*Torus.io.transports.websocket = function(room, key, server, port, session) {
 	if(!(this instanceof Torus.io.transports.websocket)) {throw new Error('Must create transport with `new`.');}
@@ -138,16 +147,18 @@ Torus.io.transports.websocket.prototype.close = function(silence) {
 	this.ws.close();
 }*/
 
-Torus.io.transports.polling = function(info) { //FIXME: stop building the url 20 times
+Torus.io.transports.polling = function(domain, info) {
 	if(!(this instanceof Torus.io.transports.polling)) {throw new Error('Must create transport with `new`.');}
 
-	this.domain = info.domain;
+	this.open = false;
+	this.domain = domain;
+	this.host = info.host;
 	this.port = info.port;
 	this.server = info.server;
 	this.room = info.room;
 	this.key = info.key;
 	this.session = '';
-	this.url = 'http://' + this.domain + ':' + this.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + this.key + '&roomId=' + this.room + '&serverId=' + this.server + '&client=Torus&version=' + Torus.version;
+	this.url = '';
 	this.xhr = null;
 	this.ping_interval = 0;
 	this.iid = 0;
@@ -155,33 +166,51 @@ Torus.io.transports.polling = function(info) { //FIXME: stop building the url 20
 		'io': {},
 	};
 
-	if(!this.domain || !this.port || !this.server || !this.room || !this.key) {
+	this.add_listener('io', 'disconnect', this.close);
+
+	if(!this.host || !this.port || !this.server || !this.room) {
 		var sock = this; //FIXME: this forces a closure scope
-		Torus.io.spider(function(data) {
-			if(data.chatkey.key === false) {throw new Error('Not logged in (transports.polling)');}
+		Torus.io.spider(this.domain, function(data) {
+			if(data.error == 'nochat') {
+				sock.call_listeners({
+					type: 'io',
+					event: 'disconnect',
+					message: 'no chat',
+					sock: sock
+				});
+				return;
+			}
+			else if(data.error) {throw new Error('transport: CORS proxy returned error `' + data.error + '`');}
 
-			if(!sock.domain) {sock.domain = data.nodeHostname;}
-			if(!sock.port) {sock.port = data.nodePort;}
-			if(!sock.server) {sock.server = data.nodeInstance;}
-			if(!sock.room) {sock.room = data.roomId;}
-			if(!sock.key) {sock.key = data.chatkey;}
-			sock.url = 'http://' + sock.domain + ':' + sock.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + sock.key + '&roomId=' + sock.room + '&serverId=' + sock.server + '&client=Torus&version=' + Torus.version;
+			if(!sock.host) {sock.host = data.host;}
+			if(!sock.port) {sock.port = data.port;}
+			if(!sock.server) {sock.server = data.server;}
+			if(!sock.room) {sock.room = data.room;}
 
-			sock.poll();
+			if(sock.host && sock.port && sock.server && sock.room && sock.key && !sock.open) {sock.poll();} //FIXME: long
 		});
-		return;
 	}
 
-	this.poll();
+	if(!this.key) {
+		var sock = this; //FIXME: this forces a closure scope
+		Torus.io.key(function(key) {
+			if(!key) {throw new Error('transport: not logged in');}
+			sock.key = key;
+			if(sock.host && sock.port && sock.server && sock.room && sock.key && !sock.open) {sock.poll();} //FIXME: long
+		});
+	}
+
+	if(this.host && this.port && this.server && this.room && this.key && !this.open) {this.poll();} //FIXME: long
 }
 Torus.io.transports.polling.prototype.poll = function() {
+	this.url = 'http://' + this.host + ':' + this.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + this.key + '&roomId=' + this.room + '&serverId=' + this.server;
+	if(this.session) {this.url += '&sid=' + this.session;}
+	this.open = true;
+
 	this.xhr = new XMLHttpRequest();
-	this.xhr.open('GET', this.url, true);
 	this.xhr.sock = this;
-	this.xhr.onreadystatechange = function() { //FIXME: hardcoded function
-		if(this.readyState == 4) {
-			this.onreadystatechange = null;
-			if(this.sock.xhr != this) {console.log('xhr returned and found itself orphaned:', this.sock);}
+	this.xhr.addEventListener('load', function() { //FIXME: hardcoded function
+		if(this.sock.xhr != this) {console.log('xhr returned and found itself orphaned:', this.sock);}
 		if(this.status == 200) {
 			//As far as I know all messages begin with a null byte (to tell socket.io that they are strings)
 			//after this is the length, encoded in the single most ridiculously stupid format ever created
@@ -191,7 +220,7 @@ Torus.io.transports.polling.prototype.poll = function() {
 			//to write the number in a format that provides no advantages and is literally always harder to parse
 			//following the asinine length is the number 4 (which means message)
 			//following that is the message type, and then immediately thereafter is the actual message content
-			//I swear to god they must have been high when they designed this
+			//I swear to god socket.io must have been high when they designed this
 
 			for(var ufffd = this.responseText.indexOf('\ufffd'); ufffd != -1; ufffd = this.responseText.indexOf('\ufffd', ufffd + 1)) {
 				var text = this.responseText.substring(ufffd + 1, ufffd + 1 + Torus.util.stupid_to_int(this.responseText.slice(1, ufffd)));
@@ -203,8 +232,7 @@ Torus.io.transports.polling.prototype.poll = function() {
 						//we should only reach this once, hopefully
 						var data = JSON.parse(text.substring(1));
 						sock.session = data.sid;
-						sock.url = 'http://' + sock.domain + ':' + sock.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + sock.key + '&roomId=' + sock.room + '&sid=' + sock.session + '&serverId=' + sock.server + '&client=Torus&version=' + Torus.version;
-						sock.ping_interval = data.pingTimeout / 2; //pingTimeout is the longest we can go without disconnecting
+						sock.ping_interval = Math.floor(data.pingTimeout * 3 / 4); //pingTimeout is the longest we can go without disconnecting
 						if(sock.iid) {clearInterval(sock.iid);}
 						sock.iid = setInterval(function() {sock.ping();}, sock.ping_interval); //FIXME: this forces a closure scope
 						break;
@@ -215,7 +243,6 @@ Torus.io.transports.polling.prototype.poll = function() {
 							message: 'Server closed the connection',
 							sock: sock
 						});
-						if(this.iid) {clearInterval(this.iid);}
 						return;
 					case 2: //ping
 						sock.ping();
@@ -238,7 +265,6 @@ Torus.io.transports.polling.prototype.poll = function() {
 									message: 'Server closed the connection',
 									sock: sock
 								});
-								if(this.iid) {clearInterval(this.iid);}
 								return;
 							case 2: //event
 								sock.call_listeners({
@@ -252,21 +278,20 @@ Torus.io.transports.polling.prototype.poll = function() {
 								sock.call_listeners({
 									type: 'io',
 									event: 'disconnect',
-									message: 'Protocol error: ' + text,
+									message: 'Protocol error: ' + JSON.parse(text.substring(2)),
 									sock: sock
 								});
-								if(this.iid) {clearInterval(this.iid);}
 								return;
 							case 3: //ack
 							case 5: //binary event
 							case 6: //binary ack
+								console.log('Unimplemented data type: ', text);
 								sock.call_listeners({
 									type: 'io',
 									event: 'disconnect',
-									message: 'Protocol error: Received unimplemented data type ' + text,
+									message: 'Protocol error: Received unimplemented data type ' + text.substring(2),
 									sock: sock
 								});
-								if(this.iid) {clearInterval(this.iid);}
 								return;
 						}
 						break;
@@ -297,40 +322,38 @@ Torus.io.transports.polling.prototype.poll = function() {
 			});
 			if(this.iid) {clearInterval(this.iid);}
 		}
-		else {console.log(this.sock);}
-		} //readyState == 4
-	}
-	this.xhr.onabort = function(event) {
-		console.log(event);
-		this.sock.call_listeners({
-			type: 'io',
-			event: 'disconnect',
-			message: 'aborted',
-			sock: this.sock
-		});
-		if(this.iid) {clearInterval(this.iid);}
-	}
+		else {console.log('HTTP status 0: ', this.sock);}
+	});
+	this.xhr.open('GET', this.url, true);
+	//this.xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	this.xhr.send();
 }
 Torus.io.transports.polling.prototype.send = function(message) {
+	var data = '42["message",' + JSON.stringify(message) + ']';
+
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', this.url, true);
 	xhr.setRequestHeader('Content-Type', 'application/octet-stream'); //socket.io is literally the worst
-	var data = '42["message",' + JSON.stringify(message) + ']';
+	//xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	xhr.send(new Blob(['\0', Torus.util.int_to_stupid(data.length), Torus.util.xFF, data])); //no actually though
 }
 Torus.io.transports.polling.prototype.ping = function() {
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', this.url, true);
 	xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+	//xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	xhr.send(new Blob(['\0', Torus.util.int_to_stupid(1), Torus.util.xFF, '2']));
 }
-Torus.io.transports.polling.prototype.close = function(silence) {
-	if(silence) {
-		this.xhr.onabort = null;
-		if(this.iid) {clearInterval(this.iid);}
+Torus.io.transports.polling.prototype.close = function() {
+	this.open = false;
+	if(this.xhr) {
+		this.xhr.abort();
+		this.xhr = null;
 	}
-	this.xhr.abort();
+	if(this.iid) {
+		clearInterval(this.iid);
+		this.iid = 0;
+	}
 }
 Torus.io.transports.polling.prototype.add_listener = Torus.add_listener;
 Torus.io.transports.polling.prototype.remove_listener = Torus.remove_listener;
