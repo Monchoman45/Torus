@@ -315,12 +315,21 @@ Torus.ui.render_line = function(message) {
 		line.appendChild(time);
 		var viewing = Torus.ui.viewing.length;
 		if(Torus.ui.viewing.indexOf(Torus.chats[0]) != -1) {viewing--;}
-		if(viewing > 0 || message.room.id == 0) {
+		if(Torus.ui.viewing.indexOf(Torus.ui.active) != -1) {viewing--;}
+		if(viewing > 0) {
+			var max = message.room.name.length;
+			for(var i = 0; i < Torus.ui.viewing.length; i++) {
+				if(max < Torus.ui.viewing[i].name.length) {max = Torus.ui.viewing[i].name.length;}
+			}
+			if(max < Torus.ui.active.name.length) {max = Torus.ui.active.name.length;}
+			max -= message.room.name.length;
+			var indent = '';
+			for(var i = 0; i < max; i++) {indent += ' ';}
+
 			line.appendChild(document.createTextNode(' '));
 			var room = document.createElement('span');
 				room.className = 'torus-message-room';
-				if(message.room.id != 0) {room.textContent = '(' + message.room.name + ')';}
-				else {room.textContent = '(status)';}
+				room.textContent = '(' + message.room.name + ')' + indent;
 			line.appendChild(room);
 		}
 		line.appendChild(document.createTextNode(' '));
@@ -330,11 +339,7 @@ Torus.ui.render_line = function(message) {
 			case 'message':
 				if(message.event == 'message') {line.appendChild(document.createTextNode('  <'));}
 				else {line.appendChild(document.createTextNode('*  '));}
-				var user = document.createElement('span');
-					user.className = 'torus-message-usercolor';
-					user.style.color = Torus.util.color_hash(message.user);
-					user.textContent = message.user;
-				line.appendChild(user);
+				line.appendChild(Torus.ui.user_color(message.user));
 				if(message.event == 'message') {line.appendChild(document.createTextNode('> '));}
 				else {line.appendChild(document.createTextNode(' '));}
 				line.innerHTML += message.html; //FIXME: innerHTML +=
@@ -349,47 +354,27 @@ Torus.ui.render_line = function(message) {
 				//FIXME: i18n - this shows up as "user joined room"
 				//FIXME: and ghost is only here because message.event + 'ed' is the correct tense
 				line.appendChild(document.createTextNode('== '));
-				var user = document.createElement('span');
-					user.className = 'torus-message-usercolor';
-					user.style.color = Torus.util.color_hash(message.user);
-					user.textContent = message.user;
-				line.appendChild(user);
+				line.appendChild(Torus.ui.user_color(message.user));
 				line.appendChild(document.createTextNode(' ' + message.event + 'ed ' + message.room.name));
 				break;
 			case 'part':
 				//FIXME: i18n
 				line.appendChild(document.createTextNode('== '));
-				var user = document.createElement('span');
-					user.className = 'torus-message-usercolor';
-					user.style.color = Torus.util.color_hash(message.user);
-					user.textContent = message.user;
-				line.appendChild(user);
+				line.appendChild(Torus.ui.user_color(message.user));
 				line.appendChild(document.createTextNode(' left ' + message.room.name));
 				break;
 			case 'logout':
 				//FIXME: i18n
 				line.appendChild(document.createTextNode('== '));
-				var user = document.createElement('span');
-					user.className = 'torus-message-usercolor';
-					user.style.color = Torus.util.color_hash(message.user);
-					user.textContent = message.user;
-				line.appendChild(user);
+				line.appendChild(Torus.ui.user_color(message.user));
 				line.appendChild(document.createTextNode(' logged out'));
 				break;
 			case 'mod':
 				//FIXME: i18n
 				line.appendChild(document.createTextNode('== '));
-				var performer = document.createElement('span');
-					performer.className = 'torus-message-usercolor';
-					performer.style.color = Torus.util.color_hash(message.performer);
-					performer.textContent = message.performer;
-				line.appendChild(performer);
+				line.appendChild(Torus.ui.user_color(message.performer));
 				line.appendChild(document.createTextNode(' promoted '));
-				var target = document.createElement('span');
-					target.className = 'torus-message-usercolor';
-					target.style.color = Torus.util.color_hash(message.target);
-					target.textContent = message.target;
-				line.appendChild(target);
+				line.appendChild(Torus.ui.user_color(message.target));
 				line.appendChild(document.createTextNode(' to chatmod'));
 				break;
 			case 'kick':
@@ -402,19 +387,9 @@ Torus.ui.render_line = function(message) {
 				else {var domain = message.room.domain;}
 
 				line.appendChild(document.createTextNode('== '));
-				var performer = document.createElement('span');
-					performer.className = 'torus-message-usercolor';
-					performer.style.color = Torus.util.color_hash(message.performer);
-					performer.textContent = message.performer;
-				line.appendChild(performer);
+				line.appendChild(Torus.ui.user_color(message.performer));
 				line.appendChild(document.createTextNode(' ' + message.event + tense + ' '));
-				var target = document.createElement('a');
-					target.className = 'torus-message-usercolor';
-					target.href = 'http://' + domain + '.wikia.com/wiki/User:' + message.target;
-					target.style.color = Torus.util.color_hash(message.target);
-					target.textContent = message.target;
-					target.addEventListener('click', Torus.ui.click_link);
-				line.appendChild(target);
+				line.appendChild(Torus.ui.user_color(message.target));
 				line.appendChild(document.createTextNode(' ('));
 				var talk = document.createElement('a');
 					talk.href = 'http://' + domain + '.wikia.com/wiki/User_talk:' + message.target;
@@ -422,35 +397,44 @@ Torus.ui.render_line = function(message) {
 					talk.addEventListener('click', Torus.ui.click_link);
 				line.appendChild(talk);
 				line.appendChild(document.createTextNode('|'));
-				var talk = document.createElement('a');
-					talk.href = 'http://' + domain + '.wikia.com/wiki/Special:Contributions/' + message.target;
-					talk.textContent = 'c';
-					talk.addEventListener('click', Torus.ui.click_link);
-				line.appendChild(talk);
+				var contribs = document.createElement('a');
+					contribs.href = 'http://' + domain + '.wikia.com/wiki/Special:Contributions/' + message.target;
+					contribs.textContent = 'c';
+					contribs.addEventListener('click', Torus.ui.click_link);
+				line.appendChild(contribs);
 				line.appendChild(document.createTextNode('|'));
-				var talk = document.createElement('a');
-					talk.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatban?page=User:' + message.target;
-					talk.textContent = 'log';
-					talk.addEventListener('click', Torus.ui.click_link);
-				line.appendChild(talk);
+				var ban = document.createElement('a');
+					ban.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatban?page=User:' + message.target;
+					ban.textContent = 'log';
+					ban.addEventListener('click', Torus.ui.click_link);
+				line.appendChild(ban);
 				line.appendChild(document.createTextNode('|'));
-				var talk = document.createElement('a');
-					talk.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatconnect?user=' + message.target;
-					talk.className = 'torus-fakelink';
-					talk.textContent = 'ccon';
-					//talk.addEventListener('click', Torus.ui.click_link);
-					talk.addEventListener('click', function() { //FIXME: closure, also ccui is not required
+				var ccon = document.createElement('a');
+					ccon.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatconnect?user=' + message.target;
+					ccon.textContent = 'ccon';
+					//ccon.addEventListener('click', Torus.ui.click_link);
+					ccon.className = 'torus-fakelink';
+					ccon.addEventListener('click', function() { //FIXME: closure, also ccui is not required
 						event.preventDefault();
 						Torus.ui.activate(Torus.ext.ccui);
 						Torus.ext.ccui.query(message.target);
 					});
-				line.appendChild(talk);
+				line.appendChild(ccon);
 				line.appendChild(document.createTextNode(') from ' + message.room.name));
 				if(message.event == 'ban') {line.appendChild(document.createTextNode(' for ' + message.expiry));}
 				break;
 			default: throw new Error('Message type ' + message.event + ' is not rendered. (ui.render_line)');
 		}
 	return line;
+}
+
+Torus.ui.user_color = function(user) {
+	var color = Torus.util.color_hash(user, Torus.options['misc-user_colors-hue'], Torus.options['misc-user_colors-val'], Torus.options['misc-user_colors-sat']);
+	var span = document.createElement('span');
+		span.className = 'torus-message-usercolor';
+		span.style.color = color;
+		span.textContent = user;
+	return span;
 }
 
 Torus.ui.update_user = function(event) {
@@ -607,7 +591,13 @@ Torus.ui.render_popup = function(name, room, coords) {
 		var chatconnect = document.createElement('a');
 		chatconnect.className = 'torus-popup-userlink';
 		chatconnect.href = 'http://' + room.domain + '.wikia.com/wiki/Special:Log/chatconnect?user=' + encodeURIComponent(name);
-		chatconnect.addEventListener('click', Torus.ui.click_link);
+		//chatconnect.addEventListener('click', Torus.ui.click_link);
+		chatconnect.className += ' torus-fakelink';
+		chatconnect.addEventListener('click', function() { //FIXME: closure, also ccui is not required
+			event.preventDefault();
+			Torus.ui.activate(Torus.ext.ccui);
+			Torus.ext.ccui.query(message.target);
+		});
 		chatconnect.textContent = 'chatconnect'; //FIXME: i18n
 		div.appendChild(chatconnect);
 	userlinks.appendChild(div);
@@ -1019,16 +1009,14 @@ Torus.util.empty = function(el) {
 	return frag;
 }
 
-Torus.util.color_hash = function(str) {
+Torus.util.color_hash = function(str, hue, sat, val) {
 	if(str === undefined) {throw new Error('Not enough parameters. (util.color_hash)');}
-	str += ''; //cast to string
-	var hue = 0;
-	var val = Torus.options['misc-user_colors-val'];
-	var sat = Torus.options['misc-user_colors-sat'];
-	for(var i = 0; i < str.length; i++) {
-		hue = 31 * hue + str.charCodeAt(i); //same hash algorithm as webchat, except this is case sensitive
-	}
-	hue = (hue + Torus.options['misc-user_colors-hue']) % 360;
+	str += '';
+	if(!hue) {hue = 0;}
+	if(!sat) {sat = .7;}
+	if(!val) {val = .6;}
+	for(var i = 0; i < str.length; i++) {hue = 31 * hue + str.charCodeAt(i);} //same hash algorithm as webchat, except this is case sensitive
+	hue %= 360;
 
 	//1 letter variables are fun don't you love mathematicians
 	var c = val * sat;
