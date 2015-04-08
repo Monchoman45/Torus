@@ -149,7 +149,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 			actions.appendChild(mod);
 		}
 
-		if(user.staff || user.givemod || (user.mod && !target.givemod && !target.staff)) {
+		if((user.staff || user.givemod || (user.mod && !target.mod)) && !target.staff && !target.givemod) {
 			var kick = document.createElement('a');
 			kick.className = 'torus-popup-action';
 			kick.addEventListener('click', function() {room.kick(name);}); //FIXME: closure scope
