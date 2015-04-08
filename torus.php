@@ -18,7 +18,10 @@ define(CACHE_MAX, 128);
 
 //CORS
 $headers = getallheaders();
-if(array_key_exists('Origin', $headers)) {header('Access-Control-Allow-Origin: ' . $headers['Origin']);}
+if(array_key_exists('Origin', $headers)) {
+	header('Access-Control-Allow-Origin: ' . $headers['Origin']);
+	header('Access-Control-Allow-Headers: ' . $headers['Access-Control-Request-Headers']);
+}
 
 //load cache
 $cache = json_decode(file_get_contents('cache.json'), true);

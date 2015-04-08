@@ -3,18 +3,16 @@ Torus.io.ajax = function(method, post, callback) {
 	for(var i in post) {str += '&' + i + '=' + encodeURIComponent(post[i]);}
 	str = str.substring(1);
 	var xhr = new XMLHttpRequest();
-	xhr.open('POST', '/index.php?action=ajax&rs=ChatAjax&method=' + method + '&client=Torus&version=' + Torus.version, true);
-	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	xhr.responseType = 'json';
-	xhr.onreadystatechange = function() {
-		if(this.readyState == 4) {
-			this.onreadystatechange = null;
-			if(this.status == 200) {
-				if(typeof callback == 'function') {callback.call(Torus, this.response);}
-			}
-			else {throw new Error('Request returned response ' + this.status + '. (io.ajax)');}
+	xhr.addEventListener('loadend', function() {
+		if(this.status == 200) {
+			if(typeof callback == 'function') {callback.call(Torus, this.response);}
 		}
-	}
+		else {throw new Error('Request returned response ' + this.status + '. (io.ajax)');}
+	});
+	xhr.open('POST', '/index.php?action=ajax&rs=ChatAjax&method=' + method, true);
+	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	xhr.send(str);
 }
 
@@ -50,7 +48,6 @@ Torus.io.unblock = function(user, callback) {
 
 Torus.io.key = function(callback) {
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '/wikia.php?controller=Chat&format=json&client=Torus&version=' + Torus.version, true);
 	xhr.responseType = 'json';
 	xhr.addEventListener('loadend', function() {
 		if(this.status == 200) {
@@ -67,6 +64,8 @@ Torus.io.key = function(callback) {
 			throw new Error('io.key: request returned HTTP ' + this.status + '.');
 		}
 	});
+	xhr.open('GET', '/wikia.php?controller=Chat&format=json', true);
+	xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	xhr.send();
 }
 
@@ -77,7 +76,6 @@ Torus.io.spider = function(domain, callback) {
 	}
 
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', 'http://cis-linux2.temple.edu/~tuf23151/torus.php?domain=' + domain + '&client=Torus&version=' + Torus.version, true);
 	xhr.responseType = 'json';
 	xhr.addEventListener('loadend', function() {
 		if(this.status == 200) {
@@ -89,25 +87,10 @@ Torus.io.spider = function(domain, callback) {
 			throw new Error('io.spider: request returned HTTP ' + this.status + '.');
 		}
 	});
+	xhr.open('GET', 'http://cis-linux2.temple.edu/~tuf23151/torus.php?domain=' + domain, true);
+	xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	xhr.send();
 }
-
-/*Torus.io.session = function(transport, room, key, server, port, callback) {
-	if(!transport || !room || !key || !server || !port) {throw new Error('Bad call to io.session');}
-
-	var xhr = new XMLHttpRequest();
-	xhr.open('GET', 'http://chat.wikia-services.com:' + port + '/socket.io/?EIO=2&transport=' + transport + '&name=' + encodeURIComponent(wgUserName) + '&key=' + key + '&roomId=' + room + '&serverId=' + server + '&client=Torus&version=' + Torus.version, true);
-	xhr.onreadystatechange = function() {
-		if(this.readyState == 4) {
-			this.onreadystatechange = null;
-			if(this.status == 200) {
-				if(typeof callback == 'function') {callback.call(Torus, JSON.parse(this.responseText.substring(5)).sid);}
-			}
-			else {throw new Error('Request returned response ' + this.status + '. (io.session)');}
-		}
-	}
-	xhr.send();
-}*/
 
 /*Torus.io.transports.websocket = function(room, key, server, port, session) {
 	if(!(this instanceof Torus.io.transports.websocket)) {throw new Error('Must create transport with `new`.');}
@@ -175,7 +158,7 @@ Torus.io.transports.polling = function(domain, info) {
 	this.room = info.room;
 	this.key = info.key;
 	this.session = '';
-	this.url = 'error';
+	this.url = '';
 	this.xhr = null;
 	this.ping_interval = 0;
 	this.iid = 0;
@@ -220,7 +203,7 @@ Torus.io.transports.polling = function(domain, info) {
 	if(this.host && this.port && this.server && this.room && this.key && !this.open) {this.poll();} //FIXME: long
 }
 Torus.io.transports.polling.prototype.poll = function() {
-	this.url = 'http://' + this.host + ':' + this.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + this.key + '&roomId=' + this.room + '&serverId=' + this.server + '&client=Torus&version=' + Torus.version;
+	this.url = 'http://' + this.host + ':' + this.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + this.key + '&roomId=' + this.room + '&serverId=' + this.server;
 	if(this.session) {this.url += '&sid=' + this.session;}
 	this.open = true;
 
@@ -249,7 +232,7 @@ Torus.io.transports.polling.prototype.poll = function() {
 						//we should only reach this once, hopefully
 						var data = JSON.parse(text.substring(1));
 						sock.session = data.sid;
-						sock.ping_interval = data.pingTimeout / 2; //pingTimeout is the longest we can go without disconnecting
+						sock.ping_interval = Math.floor(data.pingTimeout * 3 / 4); //pingTimeout is the longest we can go without disconnecting
 						if(sock.iid) {clearInterval(sock.iid);}
 						sock.iid = setInterval(function() {sock.ping();}, sock.ping_interval); //FIXME: this forces a closure scope
 						break;
@@ -342,19 +325,23 @@ Torus.io.transports.polling.prototype.poll = function() {
 		else {console.log('HTTP status 0: ', this.sock);}
 	});
 	this.xhr.open('GET', this.url, true);
+	//this.xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	this.xhr.send();
 }
 Torus.io.transports.polling.prototype.send = function(message) {
+	var data = '42["message",' + JSON.stringify(message) + ']';
+
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', this.url, true);
 	xhr.setRequestHeader('Content-Type', 'application/octet-stream'); //socket.io is literally the worst
-	var data = '42["message",' + JSON.stringify(message) + ']';
+	//xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	xhr.send(new Blob(['\0', Torus.util.int_to_stupid(data.length), Torus.util.xFF, data])); //no actually though
 }
 Torus.io.transports.polling.prototype.ping = function() {
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', this.url, true);
 	xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+	//xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	xhr.send(new Blob(['\0', Torus.util.int_to_stupid(1), Torus.util.xFF, '2']));
 }
 Torus.io.transports.polling.prototype.close = function() {
