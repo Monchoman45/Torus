@@ -87,6 +87,10 @@ Torus.ext.options.dir.misc = {
 		},
 	},
 	links: {
+		chats: {
+			type: 'boolean',
+			help: '', //TODO:
+		},
 		target: {
 			type: 'string',
 			help: '', //TODO:

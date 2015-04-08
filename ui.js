@@ -906,8 +906,8 @@ Torus.ui.click_link = function(event) {
 	}
 	event.preventDefault();
 
-	if(this.href.indexOf('.wikia.com/wiki/Special:Chat') != -1) {(new Torus.classes.Chat(this.href.substring(this.href.indexOf('://') + 3, this.href.indexOf('.wikia.com/wiki/Special:Chat')))).connect();}
-	else {window.open(this.href, 'torus');}
+	if(this.href.indexOf('.wikia.com/wiki/Special:Chat') != -1 && Torus.options['misc-links-chat']) {(new Torus.classes.Chat(this.href.substring(this.href.indexOf('://') + 3, this.href.indexOf('.wikia.com/wiki/Special:Chat')))).connect();}
+	else {window.open(this.href, Torus.options['misc-links-target']);}
 }
 
 Torus.ui.tab_click = function(event) {
@@ -1054,6 +1054,7 @@ Torus.options['misc-user_colors-enabled'] = true;
 Torus.options['misc-user_colors-hue'] = 0;
 Torus.options['misc-user_colors-sat'] = .7;
 Torus.options['misc-user_colors-val'] = .6;
+Torus.options['misc-links-chat'] = true;
 Torus.options['misc-links-target'] = '_blank';
 
 {{MediaWiki:Torus.js/menu.js}}
