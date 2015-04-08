@@ -83,7 +83,7 @@ Torus.io.spider = function(domain, callback) {
 		}
 		else {
 			if(typeof callback == 'function') {callback.call(Torus, {error: 'http', code: this.status});}
-			throw new Error('io.spider: request returned HTTP ' + this.status + '.');
+			throw new Error('io.spider: CORS proxy returned HTTP ' + this.status + '.');
 		}
 	});
 	xhr.open('GET', 'http://cis-linux2.temple.edu/~tuf23151/torus.php?domain=' + domain, true);
@@ -91,61 +91,6 @@ Torus.io.spider = function(domain, callback) {
 	xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	xhr.send();
 }
-
-/*Torus.io.transports.websocket = function(room, key, server, port, session) {
-	if(!(this instanceof Torus.io.transports.websocket)) {throw new Error('Must create transport with `new`.');}
-	if(!room || room <= 0 || !key || !server || !port || !session) {throw new Error('Invalid transport parameters. (io.transports.websocket)');}
-
-	this.ws = new WebSocket('ws://chat.wikia-services.com:' + port + '/socket.io/?EIO=2&transport=websocket&name=' + encodeURIComponent(wgUserName) + '&key=' + key + '&roomId=' + room + '&sid=' + session + '&serverId=' + server + '&client=Torus&version=' + Torus.version);
-	this.ws.onmessage = function(event) { //FIXME: this forces a closure scope
-		if(event.data.substring(0, 3) != '2::') {Torus.logs.socket[room].push({id: (new Date()).getTime(), message: event.data});} //FIXME: ui
-		switch(event.data.substring(0, 3)) {
-			case '0::': //disconnect
-				Torus.chats[room].disconnect('Server closed the connection');
-				break;
-			case '1::': //connect
-				if(!Torus.chats[room]) {throw new Error('Missing room on successful connect');}
-				Torus.chats[room].connecting = false;
-				Torus.chats[room].connected = true;
-				Torus.chats[room].send_command('initquery');
-				Torus.alert('Connected.', Torus.chat[room]);
-				Torus.io.getBlockedPrivate();
-				Torus.call_listeners(new Torus.classes.IOEvent('open', Torus.chats[room]));
-				break;
-			case '2::': //heartbeat
-				this.send('2::');
-				break;
-			case '4::': //json
-				Torus.chats[room].receive(JSON.parse(event.data.substring(4)));
-				break;
-			case '7::': //error
-				if(event.data.substring(4) == '1+0') {Torus.chats[room].reconnect();}
-				else {Torus.chats[room].disconnect('Protocol error: ' + event.data.substring(4));}
-				break;
-			case '3::': //message
-			case '5::': //event
-			case '6::': //ack
-			case '8::': //noop
-				Torus.chats[room].disconnect('Protocol error: Received unimplemented data type ' + event.data);
-				break;
-		}
-	}
-	this.ws.onerror = this.ws.onclose = function(event) {
-		if(!Torus.chats[room].connected) {
-			//Torus.alert('Websocket rejected, failing over to HTTP...', room);
-			Torus.chats[room].transport = 'polling';
-			Torus.chats[room].connecting = false;
-			Torus.open(room); //FIXME: Torus.open
-		}
-		else if(event.reason) {Torus.chats[room].disconnect(event.reason);}
-		else {Torus.chats[room].disconnect('Socket error (websocket)');}
-	}
-}
-Torus.io.transports.websocket.prototype.send = function(message) {this.ws.send('3:::' + message);}
-Torus.io.transports.websocket.prototype.close = function(silence) {
-	if(silence) {this.ws.onclose = null;}
-	this.ws.close();
-}*/
 
 Torus.io.transports.polling = function(domain, info) {
 	if(!(this instanceof Torus.io.transports.polling)) {throw new Error('Must create transport with `new`.');}
@@ -313,6 +258,10 @@ Torus.io.transports.polling.prototype.poll = function() {
 			this.sock.poll();
 		} //status == 200
 		else if(this.status == 404) {this.sock.poll();} //this apparently happens a lot
+		else if(this.status == 400) {
+			this.sock.session = '';
+			this.sock.poll();
+		}
 		else if(this.status != 0) {
 			this.sock.call_listeners({
 				type: 'io',

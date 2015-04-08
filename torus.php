@@ -52,7 +52,7 @@ if(array_key_exists('cacheinfo', $_GET)) {
 	));
 	exit();
 }
-else if(!array_key_exists('domain', $_GET)) {
+else if(!array_key_exists('domain', $_GET) || !$_GET['domain']) {
 	echo json_encode(array('error' => 'nodomain'));
 	exit();
 }

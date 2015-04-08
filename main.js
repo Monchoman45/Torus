@@ -9,17 +9,14 @@ if(window.Torus) {throw new Error('Torus already loaded');}
 
 window.Torus = {
 	init: false,
-	local: {
-		room: 0,
-		domain: ''
-	},
+	local: '',
 	version: 232,
 	pretty_version: '2.3.2',
 	chats: {},
 	listeners: {
 		window: {
 			load: [],
-			unload: []
+			unload: [],
 		},
 		chat: {
 			'new': [],
@@ -41,7 +38,7 @@ window.Torus = {
 			kick: [],
 			ban: [],
 			unban: [], //FIXME: never called
-			openprivate: []
+			openprivate: [],
 		},
 		io: {
 			initial: [],
@@ -60,7 +57,7 @@ window.Torus = {
 			unban: [],
 			open_private: [],
 			force_reconnect: [],
-			force_disconnect: []
+			force_disconnect: [],
 		},
 		ext: {
 			'new': [],
@@ -86,9 +83,9 @@ window.Torus = {
 		tabtext: '',
 		tabindex: 0,
 		tabpos: 0,
-		fullscreen: false
+		fullscreen: false,
 	},
-	options: {}
+	options: {},
 }
 
 //Function for adding an event listener

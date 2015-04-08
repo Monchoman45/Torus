@@ -185,6 +185,7 @@ Torus.add_listener('window', 'load', Torus.ui.onload);
 
 Torus.chats[0].add_listener('io', 'alert', Torus.ui.add_line);
 for(var i in Torus.logs) {Torus.logs[i][0] = [];}
+Torus.chats[0].listeners.ui = {};
 Torus.ui.add_room({room: Torus.chats[0]});
 Torus.ui.show(Torus.chats[0]);
 

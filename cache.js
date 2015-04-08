@@ -28,6 +28,7 @@ Torus.cache.update = function(domain, entry) {
 		for(var i in Torus.cache.data) {delete Torus.cache.data[i];} //TODO: some kind of "clear your browser cache" message
 	}
 	Torus.cache.data[domain] = entry;
+	Torus.cache.save();
 }
 
 Torus.add_listener('window', 'load', Torus.cache.load);

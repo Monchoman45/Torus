@@ -128,7 +128,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 				yes.id = 'torus-popup-modconfirm-yes';
 				yes.type = 'button';
 				yes.value = 'Yes'; //FIXME: i18n
-				yes.addEventListener('click', function() {
+				yes.addEventListener('click', function(event) {
 					event.stopPropagation();
 					this.parentNode.style.display = 'none';
 					Torus.ui.active.mod(this.getAttribute('data-user'));
@@ -142,7 +142,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 				no.id = 'torus-popup-modconfirm-no';
 				no.type = 'button';
 				no.value = 'No'; //FIXME: i18n
-				no.addEventListener('click', function() {
+				no.addEventListener('click', function(event) {
 					event.stopPropagation();
 					this.parentNode.style.display = 'none';
 				});
