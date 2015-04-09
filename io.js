@@ -215,8 +215,8 @@ Torus.io.transports.polling.prototype.poll = function() {
 								try {var message = JSON.parse(text.substring(2))[1];}
 								catch(error) {
 									var bytes = [];
-									for(var i = 0; i < message.length; i++) {bytes[i] = message.charCodeAt(i);}
-									console.log('JSON.parse failed: `' + text + '`, ', bytes);
+									for(var i = 0; i < this.responseText.length; i++) {bytes[i] = this.responseText.charCodeAt(i);}
+									console.log('JSON.parse failed: `' + this.responseText + '`, ', bytes);
 									throw error;
 								}
 								sock.call_listeners({

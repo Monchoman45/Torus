@@ -429,7 +429,10 @@ Torus.ext.ccui.ajax = function(user, limit, callback) {
 			this.onreadystatechange = null;
 			if(this.status == 200 && typeof callback == 'function') {
 				var ul = this.response.getElementById('mw-content-text').getElementsByTagName('ul')[0]
-				if(!ul) {callback.call(Torus, [], user);} //this happens when there are no entries for the user
+				if(!ul) { //this happens when there are no entries for the user
+					callback.call(Torus, [], user);
+					return;
+				}
 
 				var li = ul.getElementsByTagName('li');
 				var data = [];

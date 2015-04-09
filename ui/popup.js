@@ -85,7 +85,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 		chatconnect.addEventListener('click', function(event) { //FIXME: ccui is not required
 			event.preventDefault();
 			Torus.ui.activate(Torus.ext.ccui);
-			Torus.ui.window.scrollTop = 0;
+			Torus.ui.ids['window'].scrollTop = 0;
 			Torus.ext.ccui.query(this.getAttribute('data-user'));
 		});
 		chatconnect.textContent = 'chatconnect'; //FIXME: i18n

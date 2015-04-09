@@ -183,7 +183,7 @@ Torus.ui.render_line = function(message) {
 					ccon.addEventListener('click', function(event) { //FIXME: ccui is not required
 						event.preventDefault();
 						Torus.ui.activate(Torus.ext.ccui);
-						Torus.ui.window.scrollTop = 0;
+						Torus.ui.ids['window'].scrollTop = 0;
 						Torus.ext.ccui.query(this.getAttribute('data-user'));
 					});
 				line.appendChild(ccon);
