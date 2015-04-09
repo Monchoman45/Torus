@@ -54,7 +54,7 @@ Torus.ui.render = function(el) {
 }
 
 Torus.ui.render_line = function(message) {
-	if(message.type != 'io') {throw new Error('Event type must be `io`. (ui.render_line)');}
+	if(message.type != 'io') {throw new Error('Torus.ui.render_line: Event type must be `io`.');}
 
 	var line = document.createElement('div');
 		line.className = 'torus-message torus-room-' + message.room.domain;
@@ -87,11 +87,24 @@ Torus.ui.render_line = function(message) {
 		switch(message.event) {
 			case 'me':
 			case 'message':
-				if(message.event == 'message') {line.appendChild(document.createTextNode('  <'));}
-				else {line.appendChild(document.createTextNode('*  '));}
-				line.appendChild(Torus.ui.span_user(message.user));
-				if(message.event == 'message') {line.appendChild(document.createTextNode('> '));}
-				else {line.appendChild(document.createTextNode(' '));}
+				if(message.event == 'message') {
+					var span = document.createElement('span'); //this is arguably one of the dumber things i've ever done
+					span.className = 'torus-whitespace'; //it works though
+					span.textContent = '  '; //#yolo
+					line.appendChild(span);
+					line.appendChild(document.createTextNode('<'));
+					line.appendChild(Torus.ui.span_user(message.user));
+					line.appendChild(document.createTextNode('> '));
+				}
+				else {
+					line.appendChild(document.createTextNode('*'));
+					var span = document.createElement('span'); //this is arguably one of the dumber things i've ever done
+					span.className = 'torus-whitespace'; //it works though
+					span.textContent = '  '; //#yolo
+					line.appendChild(span);
+					line.appendChild(Torus.ui.span_user(message.user));
+					line.appendChild(document.createTextNode(' '));
+				}
 				line.innerHTML += message.html; //FIXME: innerHTML +=
 				break;
 			case 'alert':

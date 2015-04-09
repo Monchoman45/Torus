@@ -242,7 +242,6 @@
 	overflow-x: hidden;
 	list-style: none;
 	font-family: monospace;
-	white-space: pre;
 	word-wrap: break-word;
 }
 #torus-window div.torus-message-inactive {
@@ -250,6 +249,9 @@
 }
 #torus-window span.torus-message-ping {
 	color: red;
+}
+#torus-window span.torus-whitespace {
+	white-space: pre;
 }
 #torus-input {
 	position: absolute;
