@@ -51,26 +51,24 @@
 	background-color: #fff;
 	font-weight: bold;
 }
+#torus-tabs span.torus-tab-alert {color: #909;}
+#torus-tabs span.torus-tab-message {color: #ff0;}
+#torus-tabs span.torus-tab-ping {color: red;}
 #torus-tabs span.torus-tab-close {
 	font-size: .65em;
 	margin-left: .6em;
 	vertical-align: top;
 	line-height: .8em;
+	font-weight: bold;
+	color: #000;
 }
-#torus-tabs span.torus-tab-close:hover {
-	color: red;
-}
-#torus-tabs span.torus-tab-ping {
-	color: red;
-}
+#torus-tabs span.torus-tab-close:hover {color: red;}
 #torus-tabs #torus-tab--1 { /*#id #id is dumb but without this #torus-tabs span.torus-tab overrides this*/
 	position: absolute;
 	top: .2em;
 	right: 0;
 }
-#torus-tab--1 img {
-	vertical-align: top;
-}
+#torus-tab--1 img {vertical-align: top;}
 
 #torus-sidebar {
 	position: absolute;
@@ -91,9 +89,7 @@
 	line-height: 1.5em;
 	margin: 0;
 }
-#torus-sidebar li.torus-user {
-	padding-left: 1.5em;
-}
+#torus-sidebar li.torus-user {padding-left: 1.5em;}
 #torus-sidebar span.torus-user-away {
 	color: #666;
 	font-style: italic;
@@ -108,9 +104,7 @@
 	margin-top: .1em;
 	vertical-align: baseline;
 }
-#torus-sidebar img.torus-user-icon-staff {
-	margin-top: .2em;
-}
+#torus-sidebar img.torus-user-icon-staff {margin-top: .2em;}
 
 #torus-popup {
 	min-width: 15em;
@@ -145,9 +139,7 @@
 	font-size: 1.5em;
 	font-weight: bold;
 }
-#torus-popup-status-state {
-	font-size: larger;
-}
+#torus-popup-status-state {font-size: larger;}
 #torus-popup-status-message {
 	line-height: 1em;
 	font-style: italic;
@@ -167,9 +159,7 @@
 	display: inline-block;
 	width: 50%;
 }
-#torus-popup-userlinks div:last-child a.torus-popup-userlink {
-	border-top: 0;
-}
+#torus-popup-userlinks div:last-child a.torus-popup-userlink {border-top: 0;}
 #torus-popup a.torus-popup-action,
 #torus-popup a.torus-popup-action-disabled {
 	margin-top: .5em;
@@ -207,12 +197,8 @@
 	bottom: auto;
 	margin-top: -.5em;
 }
-#torus-popup-banbutton {
-	cursor: pointer;
-}
-#torus-popup a.torus-popup-action:hover #torus-popup-banmodal {
-	display: block;
-}
+#torus-popup-banbutton {cursor: pointer;}
+#torus-popup a.torus-popup-action:hover #torus-popup-banmodal {display: block;}
 
 #torus-info {
 	position: absolute;
@@ -244,15 +230,9 @@
 	font-family: monospace;
 	word-wrap: break-word;
 }
-#torus-window div.torus-message-inactive {
-	color: #666;
-}
-#torus-window span.torus-message-ping {
-	color: red;
-}
-#torus-window span.torus-whitespace {
-	white-space: pre;
-}
+#torus-window div.torus-message-inactive {color: #666;}
+#torus-window span.torus-message-ping {color: red;}
+#torus-window span.torus-whitespace {white-space: pre;}
 #torus-input {
 	position: absolute;
 	bottom: 0;

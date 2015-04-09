@@ -84,13 +84,17 @@ Torus.ui.add_line = function(event) {
 	Torus.logs.messages[event.room.domain].push(event);
 	//Torus.logs.plain[event.room.domain].push(event); //TODO: this is supposed to be like just text right?
 
-	if(event.room == Torus.ui.active || (event.room.viewing && Torus.ui.active.id >= 0)) {
+	if(event.room == Torus.ui.active || (event.room.viewing && Torus.ui.active != Torus.chats[0])) {
 		var scroll = false;
 		if(Torus.ui.ids['window'].offsetHeight + Torus.ui.ids['window'].scrollTop >= Torus.ui.ids['window'].scrollHeight) {scroll = true;}
 		Torus.ui.ids['window'].appendChild(Torus.ui.render_line(event));
 		if(scroll) {Torus.ui.ids['window'].scrollTop = Torus.ui.ids['window'].scrollHeight;}
 
 		if(Torus.ui.ids['window'].children.length > Torus.options['messages-general-max']) {Torus.ui.ids['window'].removeChild(Torus.ui.ids['window'].children[0]);}
+	}
+	else {
+		if(event.event == 'message' || event.event == 'me') {Torus.ui.ids['tab-' + event.room.domain].classList.add('torus-tab-message');}
+		else {Torus.ui.ids['tab-' + event.room.domain].classList.add('torus-tab-alert');}
 	}
 }
 

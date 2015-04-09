@@ -13,6 +13,8 @@ Torus.ui.activate = function(room) {
 	if(room.id >= 0) {
 		Torus.ui.ids['tab-' + room.domain].classList.add('torus-tab-active');
 		Torus.ui.ids['tab-' + room.domain].classList.remove('torus-tab-ping');
+		Torus.ui.ids['tab-' + room.domain].classList.remove('torus-tab-message');
+		Torus.ui.ids['tab-' + room.domain].classList.remove('torus-tab-alert');
 	}
 	else {Torus.ui.ids['tab--1'].classList.add('torus-tab-active');}
 

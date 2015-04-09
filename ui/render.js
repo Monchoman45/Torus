@@ -3,11 +3,13 @@ Torus.ui.render = function(el) {
 	var rooms = [];
 	var indexes = [];
 	var active = false;
-	for(var i = 0; i < Torus.ui.viewing.length; i++) {
-		if(Torus.ui.viewing[i] == Torus.ui.active) {active = true;}
-		if(Torus.logs.messages[Torus.ui.viewing[i].domain].length > 0) {
-			rooms.push(Torus.logs.messages[Torus.ui.viewing[i].domain]);
-			indexes.push(Torus.logs.messages[Torus.ui.viewing[i].domain].length - 1);
+	if(Torus.ui.active != Torus.chats[0]) {
+		for(var i = 0; i < Torus.ui.viewing.length; i++) {
+			if(Torus.ui.viewing[i] == Torus.ui.active) {active = true;}
+			if(Torus.logs.messages[Torus.ui.viewing[i].domain].length > 0) {
+				rooms.push(Torus.logs.messages[Torus.ui.viewing[i].domain]);
+				indexes.push(Torus.logs.messages[Torus.ui.viewing[i].domain].length - 1);
+			}
 		}
 	}
 	if(!active && Torus.logs.messages[Torus.ui.active.domain].length > 0) {

@@ -24,8 +24,8 @@ Torus.logs = {
 	socket: {},
 };
 
-Torus.ui.ping = function(room) { //FIXME: highlight room name in red or something
-	if(room != Torus.ui.active) {Torus.ui.ids['tab-' + room.domain].classList.add('torus-tab-ping');}
+Torus.ui.ping = function(room) {
+	if(room == Torus.ui.active || (room.viewing && Torus.ui.active.id >= 0)) {Torus.ui.ids['tab-' + room.domain].classList.add('torus-tab-ping');}
 
 	if(Torus.options['pings-general-enabled'] && Torus.ui.window.parentNode && Torus.data.pinginterval == 0) {
 		Torus.data.titleflash = document.title;
