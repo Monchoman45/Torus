@@ -212,10 +212,17 @@ Torus.io.transports.polling.prototype.poll = function() {
 								});
 								return;
 							case 2: //event
+								try {var message = JSON.parse(text.substring(2))[1];}
+								catch(error) {
+									var bytes = [];
+									for(var i = 0; i < message.length; i++) {bytes[i] = message.charCodeAt(i);}
+									console.log('JSON.parse failed: `' + text + '`, ', bytes);
+									throw error;
+								}
 								sock.call_listeners({
 									type: 'io',
 									event: 'message',
-									message: JSON.parse(text.substring(2))[1],
+									message: message,
 									sock: sock
 								});
 								break;
