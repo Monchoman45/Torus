@@ -167,15 +167,23 @@ Torus.io.transports.polling.prototype.poll = function() {
 			//following that is the message type, and then immediately thereafter is the actual message content
 			//I swear to god socket.io must have been high when they designed this
 
-			for(var ufffd = this.responseText.indexOf('\ufffd'); ufffd != -1; ufffd = this.responseText.indexOf('\ufffd', ufffd + 1)) {
-				var text = this.responseText.substring(ufffd + 1, ufffd + 1 + Torus.util.stupid_to_int(this.responseText.slice(1, ufffd)));
-				var packet_type = this.responseText.charAt(ufffd + 1) * 1;
+			var data = this.responseText;
+			while(data.length > 0) {
+			//for(var ufffd = this.responseText.indexOf('\ufffd'); ufffd != -1; ufffd = this.responseText.indexOf('\ufffd', ufffd + 1)) {
+				var ufffd = data.indexOf('\ufffd');
+				var end = 1 + ufffd + Torus.util.stupid_to_int(data.substring(1, ufffd));
+				var text = data.substring(1 + ufffd, end);
+				data = data.substring(end);
+				var packet_type = text.charAt(0) * 1;
+				text = text.substring(1);
+				
 
 				var sock = this.sock;
+
 				switch(packet_type) {
 					case 0: //connect
 						//we should only reach this once, hopefully
-						var data = JSON.parse(text.substring(1));
+						var data = JSON.parse(text);
 						sock.session = data.sid;
 						sock.ping_interval = Math.floor(data.pingTimeout * 3 / 4); //pingTimeout is the longest we can go without disconnecting
 						if(sock.iid) {clearInterval(sock.iid);}
@@ -193,7 +201,8 @@ Torus.io.transports.polling.prototype.poll = function() {
 						sock.ping();
 						break;
 					case 4: //message
-						var message_type = this.responseText.charAt(ufffd + 2) * 1;
+						var message_type = text.charAt(0) * 1;
+						text = text.substring(1);
 						//Torus.logs.socket[sock.room].push({id: (new Date()).getTime(), type: message_type, message: text}); //FIXME: ui
 						switch(message_type) { //yep, there are two of these
 							case 0: //connect
@@ -212,17 +221,10 @@ Torus.io.transports.polling.prototype.poll = function() {
 								});
 								return;
 							case 2: //event
-								try {var message = JSON.parse(text.substring(2))[1];}
-								catch(error) {
-									var bytes = [];
-									for(var i = 0; i < this.responseText.length; i++) {bytes[i] = this.responseText.charCodeAt(i);}
-									console.log('JSON.parse failed: `' + this.responseText + '`, ', bytes);
-									throw error;
-								}
 								sock.call_listeners({
 									type: 'io',
 									event: 'message',
-									message: message,
+									message: JSON.parse(text),
 									sock: sock
 								});
 								break;
@@ -230,18 +232,18 @@ Torus.io.transports.polling.prototype.poll = function() {
 								sock.call_listeners({
 									type: 'io',
 									event: 'disconnect',
-									message: 'Protocol error: ' + JSON.parse(text.substring(2)),
+									message: 'Protocol error: ' + JSON.parse(text),
 									sock: sock
 								});
 								return;
 							case 3: //ack
 							case 5: //binary event
 							case 6: //binary ack
-								console.log('Unimplemented data type: ', text);
+								console.log('Unimplemented data type: ' + this.responseText);
 								sock.call_listeners({
 									type: 'io',
 									event: 'disconnect',
-									message: 'Protocol error: Received unimplemented data type ' + text.substring(2),
+									message: 'Protocol error: Received unimplemented data type `' + message_type + '`',
 									sock: sock
 								});
 								return;
@@ -252,13 +254,13 @@ Torus.io.transports.polling.prototype.poll = function() {
 						break;
 					case 5: //upgrade
 					default:
+						console.log('Unimplemented data type: ' + this.responseText);
 						sock.call_listeners({
 							type: 'io',
 							event: 'disconnect',
-							message: 'Protocol error: Received unimplemented data type ' + text,
+							message: 'Protocol error: Received unimplemented data type `' + packet_type + '`',
 							sock: sock
 						});
-						if(this.iid) {clearInterval(this.iid);}
 						return;
 				}
 			}
@@ -275,7 +277,6 @@ Torus.io.transports.polling.prototype.poll = function() {
 				message: 'Socket error (polling): HTTP status ' + this.status,
 				sock: this.sock
 			});
-			if(this.iid) {clearInterval(this.iid);}
 		}
 		else {console.log('HTTP status 0: ', this.sock);}
 	});
