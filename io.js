@@ -154,7 +154,7 @@ Torus.io.transports.polling.prototype.poll = function() {
 
 	this.xhr = new XMLHttpRequest();
 	this.xhr.sock = this;
-	this.xhr.addEventListener('load', function() { //FIXME: hardcoded function
+	this.xhr.addEventListener('loadend', function() { //FIXME: hardcoded function
 		if(this.sock.xhr != this) {console.log('xhr returned and found itself orphaned:', this.sock);}
 		if(this.status == 200) {
 			//As far as I know all messages begin with a null byte (to tell socket.io that they are strings)
@@ -257,8 +257,7 @@ Torus.io.transports.polling.prototype.poll = function() {
 			}
 			this.sock.poll();
 		} //status == 200
-		else if(this.status == 404) {this.sock.poll();} //this apparently happens a lot
-		else if(this.status == 400) {
+		else if(this.status == 400 || this.status == 404) {
 			this.sock.session = '';
 			this.sock.poll();
 		}
