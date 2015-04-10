@@ -1,3 +1,27 @@
+Torus.ui.ping = function(room) {
+	if(!Torus.ui.pings.dir['#global'].enabled || !Torus.ui.window.parentNode) {return;}
+
+	if((room != Torus.ui.active && !room.viewing) || Torus.ui.active.id <= 0) {Torus.ui.ids['tab-' + room.domain].classList.add('torus-tab-ping');}
+
+	if(room.parent) {var domain = room.parent.domain;}
+	else {var domain = room.domain;}
+
+	if(Torus.data.pinginterval == 0) {
+		Torus.data.titleflash = document.title;
+		document.title = Torus.ui.pings.dir[domain].alert;
+		Torus.data.pinginterval = setInterval(function() {
+			if(document.title != Torus.ui.pings.dir[domain].alert) {document.title = Torus.ui.pings.dir[domain].alert;}
+			else {document.title = Torus.data.titleflash;}
+		}, Torus.ui.pings.dir[domain].interval);
+		if(Torus.ui.pings.dir[domain].beep) {
+			var beep = document.createElement('audio');
+			beep.src = Torus.ui.pings.dir[domain].sound;
+			beep.play();
+		}
+	}
+	Torus.call_listeners(new Torus.classes.UIEvent('ping', room));
+}
+
 //basically a more specific version of options.js
 
 Torus.ui.pings = new Torus.classes.Extension('pings', -3);

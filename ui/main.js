@@ -24,27 +24,6 @@ Torus.logs = {
 	socket: {},
 };
 
-Torus.ui.ping = function(room) {
-	if(!Torus.ui.pings.dir['#global'].enabled || !Torus.ui.window.parentNode) {return;}
-
-	if((room != Torus.ui.active && !room.viewing) || Torus.ui.active.id <= 0) {Torus.ui.ids['tab-' + room.domain].classList.add('torus-tab-ping');}
-
-	if(Torus.data.pinginterval == 0) {
-		Torus.data.titleflash = document.title;
-		document.title = Torus.ui.pings.dir[room.domain].alert;
-		Torus.data.pinginterval = setInterval(function() {
-			if(document.title != Torus.ui.pings.dir[room.domain].alert) {document.title = Torus.ui.pings.dir[room.domain].alert;}
-			else {document.title = Torus.data.titleflash;}
-		}, Torus.ui.pings.dir[room.domain].interval);
-		if(Torus.ui.pings.dir[room.domain].beep) {
-			var beep = document.createElement('audio');
-			beep.src = Torus.ui.pings.dir[room.domain].sound;
-			beep.play();
-		}
-	}
-	Torus.call_listeners(new Torus.classes.UIEvent('ping', room));
-}
-
 Torus.ui.fullscreen = function() {
 	if(Torus.data.fullscreen) {
 		document.body.removeChild(Torus.ui.window);

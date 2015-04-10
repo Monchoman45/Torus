@@ -100,7 +100,9 @@ Torus.ui.render_popup = function(name, room, coords) {
 			else {
 				priv.className = 'torus-popup-action';
 				priv.setAttribute('data-user', name);
-				priv.addEventListener('click', function() {Torus.ui.active.open_private([this.getAttribute('data-user')]);});
+				priv.addEventListener('click', function() {
+					Torus.ui.active.open_private([this.getAttribute('data-user')], function(event) {Torus.ui.activate(event.room);});
+				});
 			}
 			priv.textContent = 'Private message'; //FIXME: i18n
 		actions.appendChild(priv);
