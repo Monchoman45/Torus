@@ -25,18 +25,20 @@ Torus.logs = {
 };
 
 Torus.ui.ping = function(room) {
+	if(!Torus.ui.pings.dir['#global'].enabled || !Torus.ui.window.parentNode) {return;}
+
 	if((room != Torus.ui.active && !room.viewing) || Torus.ui.active.id <= 0) {Torus.ui.ids['tab-' + room.domain].classList.add('torus-tab-ping');}
 
-	if(Torus.options['pings-general-enabled'] && Torus.ui.window.parentNode && Torus.data.pinginterval == 0) {
+	if(Torus.data.pinginterval == 0) {
 		Torus.data.titleflash = document.title;
-		document.title = Torus.options['pings-general-alert'];
+		document.title = Torus.ui.pings.dir[room.domain].alert;
 		Torus.data.pinginterval = setInterval(function() {
-			if(document.title != Torus.options['pings-general-alert']) {document.title = Torus.options['pings-general-alert'];}
+			if(document.title != Torus.ui.pings.dir[room.domain].alert) {document.title = Torus.ui.pings.dir[room.domain].alert;}
 			else {document.title = Torus.data.titleflash;}
-		}, Torus.options['pings-general-interval']);
-		if(Torus.options['pings-general-beep']) {
+		}, Torus.ui.pings.dir[room.domain].interval);
+		if(Torus.ui.pings.dir[room.domain].beep) {
 			var beep = document.createElement('audio');
-			beep.src = Torus.options['pings-general-sound'];
+			beep.src = Torus.ui.pings.dir[room.domain].sound;
 			beep.play();
 		}
 	}
@@ -109,11 +111,13 @@ Torus.ui.onload = function() {
 
 {{MediaWiki:Torus.js/ui/popup.js}}
 
+{{MediaWiki:Torus.js/ui/menu.js}}
+
+{{MediaWiki:Torus.js/ui/pings.js}}
+
 {{MediaWiki:Torus.js/ui/chat_listeners.js}}
 
 {{MediaWiki:Torus.js/ui/dom_listeners.js}}
-
-{{MediaWiki:Torus.js/ui/menu.js}}
 
 {{MediaWiki:Torus.js/ui/constructors.js}}
 

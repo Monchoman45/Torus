@@ -11,7 +11,7 @@ window.Torus = {
 	init: false,
 	local: '',
 	version: 232,
-	pretty_version: '2.3.2',
+	pretty_version: '2.4.0',
 	chats: {},
 	listeners: {
 		window: {
@@ -193,18 +193,15 @@ Torus.save_options = function() {
 
 Torus.load_options = function() {
 	var load = JSON.parse(window.localStorage.getItem('torus-options'));
-	if(!load) {return;}
-	if(load.version < 231) {
-		window.localStorage.removeItem('torus-options');
-		load.data = {};
+	if(!load) {
+		if(load.version < 231) {
+			window.localStorage.removeItem('torus-options');
+			load.data = {};
+		}
+
+		for(var i in load.data) {Torus.options[i] = load.data[i];}
 	}
-	var event = new Torus.classes.ExtEvent('load_options');
-	event.options = load;
-	Torus.call_listeners(event);
-
-	for(var i in load.data) {Torus.options[i] = load.data[i];}
-
-	Torus.call_listeners(new Torus.classes.ExtEvent('after_load_options'));
+	Torus.call_listeners(new Torus.classes.ExtEvent('load_options'));
 	return Torus.options;
 }
 

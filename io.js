@@ -224,7 +224,7 @@ Torus.io.transports.polling.prototype.poll = function() {
 								sock.call_listeners({
 									type: 'io',
 									event: 'message',
-									message: JSON.parse(text),
+									message: JSON.parse(text)[1],
 									sock: sock
 								});
 								break;
@@ -232,7 +232,7 @@ Torus.io.transports.polling.prototype.poll = function() {
 								sock.call_listeners({
 									type: 'io',
 									event: 'disconnect',
-									message: 'Protocol error: ' + JSON.parse(text),
+									message: 'Protocol error: ' + JSON.parse(text)[1],
 									sock: sock
 								});
 								return;

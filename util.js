@@ -193,6 +193,14 @@ Torus.util.seconds_to_expiry = function(seconds) {
 	return str.substring(0, str.length - 2);
 }
 
+Torus.util.parse_regex = function(regex) {
+	if(!regex || regex.charAt(0) != '/') {return false;}
+	var pattern = regex.substring(1, regex.lastIndexOf('/'));
+	var mode = regex.substring(regex.lastIndexOf('/') + 1);
+	try {return new RegExp(pattern, mode);}
+	catch(err) {return false;}
+}
+
 Torus.util.int_to_stupid = function(num) { //i still cannot believe they thought this was a good idea
 	var b_stupid = ''; //build backwards
 	for(num; num != 0; num = Math.floor(num / 10)) {b_stupid += String.fromCharCode(num % 10);}

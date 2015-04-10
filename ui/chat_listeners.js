@@ -19,16 +19,12 @@ Torus.ui.new_room = function(event) {
 	event.room.add_listener('io', 'ban', Torus.ui.add_line);
 	event.room.add_listener('io', 'unban', Torus.ui.add_line);
 
-	if(!event.room.parent && !Torus.options['pings-' + event.room.domain + '-enabled']) {
-		Torus.options['pings-' + event.room.domain + '-enabled'] = true;
-		Torus.options['pings-' + event.room.domain + '-literal'] = '';
-		Torus.options['pings-' + event.room.domain + '-regex'] = '';
-
-		Torus.ext.options.dir.pings[event.room.domain] = {
-			enabled: {type: 'boolean'},
-			literal: {type: 'text', help: ''}, //FIXME: i18n something
-			regex: {type: 'text', help: ''}, //FIXME: i18n something
-		};
+	if(!event.room.parent && !Torus.ui.pings.dir[event.room.domain]) {
+		Torus.ui.pings.dir[event.room.domain] = Torus.ui.pings.dir['#global'];
+		Torus.ui.pings.dir[event.room.domain].enabled = true;
+		Torus.ui.pings.dir[event.room.domain].literal = [];
+		Torus.ui.pings.dir[event.room.domain].regex = [];
+		Torus.ui.pings.rebuild();
 	}
 
 	for(var i in Torus.logs) {
@@ -211,32 +207,31 @@ Torus.ui.parse_message = function(event) {
 	event.html = event.text;
 
 	var pinged = false;
-	if(event.user != wgUserName && !event.room.parent) {
-		var pings = Torus.options['pings-global-literal'];
-		pings += '\n' + Torus.options['pings-' + event.room.domain + '-literal'];
+	if(event.user != wgUserName && !event.room.parent && event.room != Torus.chats[0] && Torus.ui.pings.dir['#global'].enabled) {
+		var text = event.text.toLowerCase();
+		var global = Torus.ui.pings.dir['#global'];
+		var local = Torus.ui.pings.dir[event.room.domain];
 
-		pings = pings.toLowerCase().split('\n');
-		for(var i = 0; i < pings.length; i++) {
-			if(!pings[i]) {continue;}
-			if(event.text.toLowerCase().indexOf(pings[i]) != -1) {
-				pinged = true;
-				break;
+		for(var i = 0; i < global.literal.length; i++) {
+			if(text.indexOf(global.literal[i]) != -1) {pinged = true; break;}
+		}
+		if(!pinged && local.enabled) {
+			for(var i = 0; i < local.literal.length; i++) {
+				if(text.indexOf(local.literal[i]) != -1) {pinged = true; break;}
 			}
 		}
-
 		if(!pinged) {
-			//FIXME: precompile these instead of recompiling them every time a message is received
-			pings = Torus.options['pings-global-regex'];
-			pings += '\n' + Torus.options['pings-' + event.room.domain + '-regex'];
-
-			pings = pings.split('\n');
-			for(var i = 0; i < pings.length; i++) {
-				if(!pings[i]) {continue;}
-				var ping = new RegExp(pings[i], 'ig');
-				if(ping.test(event.text)) {
-					pinged = true;
-					break;
-				}
+			for(var i = 0; i < global.regex.length; i++) {
+				var test = global.regex[i].test(text)
+				global.regex[i].lastIndex = 0;
+				if(test) {pinged = true; break;}
+			}
+		}
+		if(!pinged && local.enabled) {
+			for(var i = 0; i < local.regex.length; i++) {
+				var test = local.regex[i].test(text);
+				local.regex[i].lastIndex = 0;
+				if(test) {pinged = true; break;}
 			}
 		}
 	}

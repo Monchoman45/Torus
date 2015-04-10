@@ -28,7 +28,7 @@ Torus.ui.input = function(event) {
 				else if(result != undefined) {Torus.alert('' + result);}
 			}
 		}
-		if(this.value) {
+		if(this.value && Torus.ui.active.id > 0) {
 			if(this.value.indexOf('./') == 0) {Torus.ui.active.send_message(this.value.substring(1), false);}
 			else {Torus.ui.active.send_message(this.value, false);}
 			this.value = '';

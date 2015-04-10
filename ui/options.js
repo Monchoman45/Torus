@@ -1,12 +1,4 @@
 //FIXME: some kind of defaults, with option to restore defaults
-Torus.options['pings-general-enabled'] = true;
-Torus.options['pings-general-alert'] = 'Activity!';
-Torus.options['pings-general-interval'] = 500;
-Torus.options['pings-general-beep'] = true;
-Torus.options['pings-general-sound'] = 'http://images.wikia.com/monchbox/images/0/01/Beep-sound.ogg'; 
-Torus.options['pings-global-regex'] = '';
-Torus.options['pings-global-literal'] = wgUserName;
-
 Torus.options['messages-general-max'] = 200;
 Torus.options['messages-general-rejoins'] = false;
 Torus.options['messages-general-timezone'] = 0;
@@ -26,44 +18,11 @@ Torus.ext.options.text = 'Options';
 Torus.ext.options.ui = {
 	sidebar: document.createDocumentFragment()
 };
-//FIXME: fill ext.options.ui with elements from a for i in Torus.options
-Torus.ext.options.selected = 'pings';
+//FIXME: fill ext.options.dir with elements from a for i in Torus.options
+Torus.ext.options.selected = 'messages';
 Torus.ext.options.dir = {};
 Torus.ext.options.types = {};
 
-Torus.ext.options.dir.pings = {
-	general: {
-		enabled: {
-			type: 'boolean',
-		},
-		alert: {
-			type: 'string',
-			help: '', //TODO:
-		},
-		interval: {
-			type: 'number',
-			help: '', //TODO:
-		},
-		beep: {
-			type: 'boolean',
-			help: '', //TODO:
-		},
-		sound: {
-			type: 'string',
-			help: '', //TODO:
-		},
-	},
-	global: {
-		literal: {
-			type: 'text',
-			help: '', //TODO:
-		},
-		regex: {
-			type: 'text',
-			help: '', //TODO:
-		},
-	},
-};
 Torus.ext.options.dir.messages = {
 	general: {
 		max: {
@@ -120,12 +79,13 @@ Torus.ext.options.dir.misc = {
 	},
 };
 
-Torus.ext.options.rebuild = function() { //FIXME: what if options is active?
+Torus.ext.options.rebuild = function() {
+	Torus.ext.options.ui = {};
 	Torus.ext.options.ui.sidebar = document.createDocumentFragment();
 	for(var i in Torus.ext.options.dir) {
 		var li = document.createElement('li');
-			li.className = 'torus-option-group';
-			if(i == Torus.ext.options.selected) {li.classList.add('torus-option-group-selected');}
+			li.className = 'torus-sidebar-button';
+			if(i == Torus.ext.options.selected) {li.classList.add('torus-sidebar-button-selected');}
 			li.setAttribute('data-id', i);
 			li.textContent = Torus.util.cap(i);
 			li.addEventListener('click', Torus.ext.options.click_sidebar);
@@ -172,16 +132,24 @@ Torus.ext.options.rebuild = function() { //FIXME: what if options is active?
 		}
 		Torus.ext.options.ui['group_' + i] = frag;
 	}
+
+	if(Torus.ui.active == Torus.ext.options) {
+		Torus.util.empty(Torus.ui.ids['sidebar']);
+		Torus.util.empty(Torus.ui.ids['window']);
+		Torus.ext.options.render(Torus.ext.options.selected);
+	}
 }
 
 Torus.ext.options.render = function(group) {
+	if(!group || typeof group == 'object') {group = Torus.ext.options.selected;} //group == object when ui.activate fires
+
 	if(Torus.ui.ids['window'].firstChild) { //an options group is already rendered, put it back
 		Torus.ext.options.ui['group_' + Torus.ext.options.selected] = Torus.util.empty(Torus.ui.ids['window']);
 	}
 
-	for(var i = 0; i < Torus.ui.ids['sidebar'].children.length; i++) { //FIXME: what if options isn't active?
-		if(Torus.ui.ids['sidebar'].children[i].getAttribute('data-id') == group) {Torus.ui.ids['sidebar'].children[i].classList.add('torus-option-group-selected');}
-		else {Torus.ui.ids['sidebar'].children[i].classList.remove('torus-option-group-selected');}
+	for(var i = 0; i < Torus.ui.ids['sidebar'].children.length; i++) {
+		if(Torus.ui.ids['sidebar'].children[i].getAttribute('data-id') == group) {Torus.ui.ids['sidebar'].children[i].classList.add('torus-sidebar-button-selected');}
+		else {Torus.ui.ids['sidebar'].children[i].classList.remove('torus-sidebar-button-selected');}
 	}
 
 	Torus.ui.ids['window'].appendChild(Torus.ext.options.ui['group_' + group]);
@@ -194,6 +162,7 @@ Torus.ext.options.render = function(group) {
 Torus.ext.options.unrender = function(event) {
 	Torus.ext.options.ui.sidebar = event.old_sidebar;
 	Torus.ext.options.ui['group_' + Torus.ext.options.selected] = event.old_window;
+	Torus.save_options();
 }
 
 Torus.ext.options.types['text'] = function(option) {
@@ -248,10 +217,7 @@ Torus.ext.options.click_boolean = function () {Torus.options[this.getAttribute('
 
 Torus.ext.options.click_sidebar = function() {Torus.ext.options.render(this.getAttribute('data-id'));}
 
-Torus.ext.options.add_listener('ui', 'activate', function() {Torus.ext.options.render(Torus.ext.options.selected);});
-Torus.ext.options.add_listener('ui', 'deactivate', function(event) {
-	Torus.ext.options.unrender(event);
-	Torus.save_options();
-});
+Torus.ext.options.add_listener('ui', 'activate', Torus.ext.options.render);
+Torus.ext.options.add_listener('ui', 'deactivate', Torus.ext.options.unrender);
 
-Torus.add_listener('ext', 'after_load_options', Torus.ext.options.rebuild);
+Torus.add_listener('ext', 'load_options', Torus.ext.options.rebuild);

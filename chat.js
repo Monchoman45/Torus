@@ -38,7 +38,7 @@ Torus.classes.Chat = function(domain, parent, users) {
 	}
 	else { //this is the status room
 		this.id = 0;
-		this.name = 'status'
+		this.name = '#status'
 		this.listeners = {
 			chat: {},
 			io: {},
