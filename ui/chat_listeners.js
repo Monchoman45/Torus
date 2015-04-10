@@ -62,7 +62,7 @@ Torus.ui.add_room = function(event) {
 	}
 	Torus.ui.ids['tabs'].appendChild(tab);
 
-	Torus.ui.activate(event.room);
+	if(!event.room.parent) {Torus.ui.activate(event.room);}
 }
 
 Torus.ui.remove_room = function(room) {
@@ -93,8 +93,12 @@ Torus.ui.add_line = function(event) {
 		if(Torus.ui.ids['window'].children.length > Torus.options['messages-general-max']) {Torus.ui.ids['window'].removeChild(Torus.ui.ids['window'].children[0]);}
 	}
 	else {
-		if(event.event == 'message' || event.event == 'me') {Torus.ui.ids['tab-' + event.room.domain].classList.add('torus-tab-message');}
+		if(event.event == 'message' || event.event == 'me') {
+			Torus.ui.ids['tab-' + event.room.domain].classList.add('torus-tab-message');
+			if(event.room.parent) {Torus.ui.ping(event.room);}
+		}
 		else {Torus.ui.ids['tab-' + event.room.domain].classList.add('torus-tab-alert');}
+
 	}
 }
 
@@ -200,14 +204,14 @@ Torus.ui.initial = function(event) {
 		Torus.ui.render(Torus.ui.ids['window']);
 	}
 
-	if(event.room.parent) {Torus.ui.ping(event.room);}
+	if(event.room.parent && event.room != Torus.ui.active) {Torus.ui.ping(event.room);}
 }
 
 Torus.ui.parse_message = function(event) {
 	event.html = event.text;
 
 	var pinged = false;
-	if(event.user != wgUserName) {
+	if(event.user != wgUserName && !event.room.parent) {
 		var pings = Torus.options['pings-global-literal'];
 		pings += '\n' + Torus.options['pings-' + event.room.domain + '-literal'];
 
@@ -215,7 +219,6 @@ Torus.ui.parse_message = function(event) {
 		for(var i = 0; i < pings.length; i++) {
 			if(!pings[i]) {continue;}
 			if(event.text.toLowerCase().indexOf(pings[i]) != -1) {
-				Torus.ui.ping(event.room);
 				pinged = true;
 				break;
 			}
@@ -231,7 +234,6 @@ Torus.ui.parse_message = function(event) {
 				if(!pings[i]) {continue;}
 				var ping = new RegExp(pings[i], 'ig');
 				if(ping.test(event.text)) {
-					Torus.ui.ping(event.room);
 					pinged = true;
 					break;
 				}
@@ -242,7 +244,10 @@ Torus.ui.parse_message = function(event) {
 	while(event.html.indexOf('<') != -1) {event.html = event.html.replace('<', '&lt;');}
 	while(event.html.indexOf('>') != -1) {event.html = event.html.replace('>', '&gt;');}
 
-	if(pinged) {event.html = '<span class="torus-message-ping">' + event.html + '</span>';} //FIXME: set something on the li instead
+	if(pinged) { //FIXME: set something on the li instead
+		Torus.ui.ping(event.room);
+		event.html = '<span class="torus-message-ping">' + event.html + '</span>';
+	}
 
 	if(event.room.parent) {event.html = Torus.util.parse_links(event.html, event.room.parent.domain);}
 	else {event.html = Torus.util.parse_links(event.html, event.room.domain);}

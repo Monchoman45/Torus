@@ -283,8 +283,8 @@ Torus.ui.popup_block = function() {
 	var el = this;
 	Torus.io.block(this.getAttribute('data-user'), function() { //FIXME: closure
 		Torus.util.empty(el);
-		el.removeEventListener(Torus.ui.popup_block);
-		el.addEventListener(Torus.ui.popup_unblock);
+		el.removeEventListener('click', Torus.ui.popup_block);
+		el.addEventListener('click', Torus.ui.popup_unblock);
 		el.textContent = 'Unblock PMs';
 	});
 }
@@ -294,8 +294,8 @@ Torus.ui.popup_unblock = function() {
 	var el = this;
 	Torus.io.unblock(this.getAttribute('data-user'), function() { //FIXME: closure
 		Torus.util.empty(el);
-		el.removeEventListener(Torus.ui.popup_unblock);
-		el.addEventListener(Torus.ui.popup_block);
+		el.removeEventListener('click', Torus.ui.popup_unblock);
+		el.addEventListener('click', Torus.ui.popup_block);
 		el.textContent = 'Block PMs';
 	});
 }

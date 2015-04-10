@@ -25,7 +25,7 @@ Torus.logs = {
 };
 
 Torus.ui.ping = function(room) {
-	if(room == Torus.ui.active || (room.viewing && Torus.ui.active.id >= 0)) {Torus.ui.ids['tab-' + room.domain].classList.add('torus-tab-ping');}
+	if((room != Torus.ui.active && !room.viewing) || Torus.ui.active.id <= 0) {Torus.ui.ids['tab-' + room.domain].classList.add('torus-tab-ping');}
 
 	if(Torus.options['pings-general-enabled'] && Torus.ui.window.parentNode && Torus.data.pinginterval == 0) {
 		Torus.data.titleflash = document.title;
