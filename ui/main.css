@@ -277,6 +277,8 @@
 	resize: none;
 }
 
+#torus a.torus-fakelink {cursor: pointer;}
+
 {{MediaWiki:Torus.js/ui/menu.css}}
 
 {{MediaWiki:Torus.js/ext/ccui.css}}
