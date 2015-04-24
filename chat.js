@@ -203,7 +203,7 @@ Torus.classes.Chat.prototype['event_chat:add'] = function(data) {
 	if(!data.attrs.isInlineAlert) {
 		if(data.attrs.text.indexOf('/me') == 0) {
 			event.event = 'me';
-			event.text = data.attrs.text.substring(4);
+			event.text = data.attrs.text.substring(3).trim();
 		}
 		else {
 			event.event = 'message';

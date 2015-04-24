@@ -123,6 +123,7 @@ Torus.util.parse_links = function (text, wiki) {
 }
 
 Torus.util.normalize_pagename = function(page) {
+	if(!page) {return '';}
 	if(page.indexOf(':') != -1) { //Namespace:Title
 		var namespace = page.substring(0, page.indexOf(':'));
 		var title = page.substring(page.indexOf(':') + 1);

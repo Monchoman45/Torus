@@ -75,7 +75,7 @@ Torus.ui.remove_room = function(room) {
 }
 
 Torus.ui.add_line = function(event) {
-	if(event.text && !event.html) {Torus.ui.parse_message(event);}
+	if(typeof event.text == 'string' && !event.html) {Torus.ui.parse_message(event);}
 
 	Torus.logs.messages[event.room.domain].push(event);
 	//Torus.logs.plain[event.room.domain].push(event); //TODO: this is supposed to be like just text right?
