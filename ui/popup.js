@@ -2,6 +2,11 @@ Torus.ui.render_popup = function(name, room, coords) {
 	var target = room.userlist[name];
 	var user = room.userlist[wgUserName];
 
+	var domain = room.domain;
+	if(room.parent) {
+		domain = room.parent.domain;
+	}
+
 	Torus.util.empty(Torus.ui.ids['popup']);
 
 	var avatar = document.createElement('img');
@@ -15,7 +20,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 		var info_name = document.createElement('span');
 		info_name.id = 'torus-popup-name';
 		var userpage = document.createElement('a');
-			userpage.href = 'http://' + room.domain + '.wikia.com/wiki/User:' + encodeURIComponent(name);
+			userpage.href = 'http://' + domain + '.wikia.com/wiki/User:' + encodeURIComponent(name);
 			userpage.textContent = name;
 			userpage.addEventListener('click', Torus.ui.click_link);
 		info_name.appendChild(userpage);
@@ -56,14 +61,14 @@ Torus.ui.render_popup = function(name, room, coords) {
 	var div = document.createElement('div');
 		var talk = document.createElement('a');
 		talk.className = 'torus-popup-userlink';
-		talk.href = 'http://' + room.domain + '.wikia.com/wiki/User_talk:' + encodeURIComponent(name);
+		talk.href = 'http://' + domain + '.wikia.com/wiki/User_talk:' + encodeURIComponent(name);
 		talk.addEventListener('click', Torus.ui.click_link);
 		talk.textContent = 'talk'; //FIXME: i18n
 		div.appendChild(talk);
 
 		var contribs = document.createElement('a');
 		contribs.className = 'torus-popup-userlink';
-		contribs.href = 'http://' + room.domain + '.wikia.com/wiki/Special:Contributions/' + encodeURIComponent(name);
+		contribs.href = 'http://' + domain + '.wikia.com/wiki/Special:Contributions/' + encodeURIComponent(name);
 		contribs.addEventListener('click', Torus.ui.click_link);
 		contribs.textContent = 'contribs'; //FIXME: i18n
 		div.appendChild(contribs);
@@ -71,14 +76,14 @@ Torus.ui.render_popup = function(name, room, coords) {
 	div = document.createElement('div');
 		var chatban = document.createElement('a');
 		chatban.className = 'torus-popup-userlink';
-		chatban.href = 'http://' + room.domain + '.wikia.com/wiki/Special:Log/chatban?page=User:' + encodeURIComponent(name);
+		chatban.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatban?page=User:' + encodeURIComponent(name);
 		chatban.addEventListener('click', Torus.ui.click_link);
 		chatban.textContent = 'ban history'; //FIXME: i18n
 		div.appendChild(chatban);
 
 		var chatconnect = document.createElement('a');
 		chatconnect.className = 'torus-popup-userlink';
-		chatconnect.href = 'http://' + room.domain + '.wikia.com/wiki/Special:Log/chatconnect?user=' + encodeURIComponent(name);
+		chatconnect.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatconnect?user=' + encodeURIComponent(name);
 		//chatconnect.addEventListener('click', Torus.ui.click_link);
 		chatconnect.className += ' torus-fakelink';
 		chatconnect.setAttribute('data-user', name);
