@@ -152,6 +152,16 @@ Torus.classes.Chat.prototype.set_status = function(state, message) {
 	this.send_command('setstatus', {statusState: state, statusMessage: message});
 }
 
+Torus.classes.Chat.prototype.ctcp = function(target, proto, data) {
+	if(!target) {target = '';} //everyone
+	if(!proto) {proto = 'version';}
+	if(data === undefined) {data = '';}
+	var state = this.userlist[wgUserName].status_state;
+	var message = this.userlist[wgUserName].status_message;
+	this.send_command('setstatus', {statusState: 'CTCP|' + target + '|' + proto, statusMessage: data});
+	this.send_command('setstatus', {statusState: state, statusMessage: message});
+}
+
 Torus.classes.Chat.prototype.mod = function(user) {this.send_command('givechatmod', {userToPromote: user});}
 
 Torus.classes.Chat.prototype.kick = function(user) {this.send_command('kick', {userToKick: user});}
@@ -262,8 +272,22 @@ Torus.classes.Chat.prototype.event_updateUser = function(data) {
 		givemod: data.attrs.isCanGiveChatMod,
 		status_state: data.attrs.statusState,
 		status_message: data.attrs.statusMessage,
-		edits: data.attrs.editCount
+		edits: data.attrs.editCount,
 	};
+
+	if(event.data.status_state.indexOf('CTCP|') == 0) {
+		var split = event.data.status_state.split('|');
+		var target = split[1].trim();
+		var proto = split[2].trim().toLowerCase();
+		if(event.user == wgUserName || target == wgUserName || target === '') {
+			event.event = 'ctcp';
+			event.target = target;
+			event.proto = proto;
+			event.data = event.data.status_message;
+			if(event.user != wgUserName && proto == 'version' && event.data == '') {this.ctcp(event.user, 'version', 'Torus/' + Torus.version);}
+			return event;
+		}
+	}
 
 	if(!this.userlist[data.attrs.name]) {
 		this.users++;

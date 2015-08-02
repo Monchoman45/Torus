@@ -129,6 +129,14 @@ Torus.commands.status = {
 		Torus.ui.active.set_status(state, message);
 	}
 };
+Torus.commands.ctcp = {
+	help: 'Usage: /ctcp <target> <proto> <message>\n'
+	    + 'Client to client protocol. Other users with Torus implement at least the <proto> "version".\n'
+	    + 'If the target user has spaces in their name, you must surround their name with quotes.\n'
+	    + '<target> defaults to an empty string (meaning everyone). <proto> defaults to "version". <message> defaults to an empty string.\n'
+	    + 'This means that just "/ctcp" is equivalent to sending everyone in the room a "/ctcp <name> version".',
+	func: function(target, proto, message) {Torus.ui.active.ctcp(target, proto, message);}
+};
 /*Torus.commands.me = { //XXX: right now /me is implemented by literally sending /me
 	help: 'Usage: /me <message>\n' //FIXME: i18n
 	    + 'Emote yourself.',
@@ -175,6 +183,18 @@ Torus.commands.help = {
 Torus.commands.eval = function(str, prop) {
 	if(typeof str != 'string') {return false;}
 	var com = str.split(' ');
+	for(var i = 0; i < com.length; i++) {
+		if(com[i].charAt(0) == '"') {
+			com[i] = com[i].substring(1);
+			if(com[i].charAt(com[i].length - 1) == '"') {com[i] = com[i].substring(0, com[i].length - 1);}
+			else {
+				var j = i + 1;
+				for(j; j < com.length && com[j].charAt(com[j].length - 1) != '"'; j++) {com[i] += ' ' + com[j];}
+				com[i] += ' ' + com[j].substring(0, com[j].length - 1);
+				com.splice(i + 1, j - i);
+			}
+		}
+	}
 	var ref = Torus.commands;
 	var i = 0;
 	var cont = true;

@@ -134,6 +134,18 @@ Torus.ui.render_line = function(message) {
 				line.appendChild(Torus.ui.span_user(message.user));
 				line.appendChild(document.createTextNode(' logged out'));
 				break;
+			case 'ctcp':
+				//FIXME: i18n
+				if(message.user == wgUserName) {line.appendChild(document.createTextNode(' >'));}
+				else {line.appendChild(document.createTextNode(' <'));}
+				var span = document.createElement('span'); //this is arguably one of the dumber things i've ever done
+				span.className = 'torus-whitespace'; //it works though
+				span.textContent = '  '; //#yolo
+				line.appendChild(span);
+				line.appendChild(Torus.ui.span_user(message.user));
+				if(!message.data) {line.appendChild(document.createTextNode(' CTCP|' + message.target + '|' + message.proto));}
+				else {line.appendChild(document.createTextNode(' CTCP|' + message.target + '|' + message.proto + ': ' + message.data));}
+				break;
 			case 'mod':
 				//FIXME: i18n
 				line.appendChild(document.createTextNode('== '));

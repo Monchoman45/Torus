@@ -1,5 +1,4 @@
 Torus.ui.new_room = function(event) {
-	event.room.add_listener('io', 'alert', Torus.ui.add_line);
 	event.room.add_listener('io', 'initial', Torus.ui.initial);
 
 	event.room.add_listener('io', 'join', Torus.ui.update_user);
@@ -8,12 +7,14 @@ Torus.ui.new_room = function(event) {
 	event.room.add_listener('io', 'logout', Torus.ui.remove_user);
 	event.room.add_listener('io', 'ghost', Torus.ui.remove_user);
 
+	event.room.add_listener('io', 'alert', Torus.ui.add_line);
 	event.room.add_listener('io', 'message', Torus.ui.add_line);
 	event.room.add_listener('io', 'me', Torus.ui.add_line);
 	event.room.add_listener('io', 'join', Torus.ui.add_line);
 	event.room.add_listener('io', 'part', Torus.ui.add_line);
 	event.room.add_listener('io', 'logout', Torus.ui.add_line);
 	event.room.add_listener('io', 'ghost', Torus.ui.add_line);
+	event.room.add_listener('io', 'ctcp', Torus.ui.add_line);
 	event.room.add_listener('io', 'mod', Torus.ui.add_line);
 	event.room.add_listener('io', 'kick', Torus.ui.add_line);
 	event.room.add_listener('io', 'ban', Torus.ui.add_line);
