@@ -1,0 +1,104 @@
+/*** Default theme ***/
+
+#torus-preview-default .bg1 {background-color: #66f;}
+#torus-preview-default .bg2 {background-color: #99f;}
+#torus-preview-default .bg3 {background-color: #ccf;}
+#torus-preview-default .bg4 {background-color: #def;}
+#torus-preview-default .bg5 {background-color: #fff;}
+#torus-preview-default .border1 {border: 1px solid #000;}
+#torus-preview-default .border2 {border: 1px solid #ccc;}
+#torus-preview-default .text1 {color: #000;}
+#torus-preview-default .text2 {color: #666;}
+#torus-preview-default .text3 {color: #f00;}
+
+#torus.theme-default {
+	color: #000;
+}
+
+#torus.theme-default #torus-tabs {
+	background-color: #66f;
+}
+#torus.theme-default #torus-tabs span.torus-tab {
+	background-color: #99f;
+	border: 1px solid #ccc;
+}
+#torus.theme-default #torus-tabs span.torus-tab-viewing,
+#torus.theme-default #torus-tabs span.torus-tab:hover {
+	background-color: #def;
+}
+#torus.theme-default #torus-tabs span.torus-tab-active,
+#torus.theme-default #torus-tabs span.torus-tab-active:hover {
+	background-color: #fff;
+}
+#torus.theme-default #torus-tabs span.torus-tab-alert {color: #909;}
+#torus.theme-default #torus-tabs span.torus-tab-message {color: #ff0;}
+#torus.theme-default #torus-tabs span.torus-tab-ping {color: #f00;}
+#torus.theme-default #torus-tabs span.torus-tab-close {color: #000;}
+#torus.theme-default #torus-tabs span.torus-tab-close:hover {color: #f00;}
+
+#torus.theme-default #torus-info {
+	background-color: #dde;
+	border-top: 1px solid #000;
+	border-right: 1px solid #000;
+}
+
+#torus.theme-default #torus-window {
+	background-color: #ccf;
+	border-top: 1px solid #000;
+	border-right: 1px solid #000;
+}
+#torus.theme-default #torus-window div.torus-message-inactive {color: #666;}
+#torus.theme-default #torus-window span.torus-message-ping {color: #f00;}
+
+#torus.theme-default #torus-sidebar {
+	background-color: #66f;
+	border-top: 1px solid #000;
+}
+#torus.theme-default #torus-sidebar span.torus-user-away {color: #666;}
+#torus.theme-default #torus-sidebar li.torus-sidebar-button {background-color: #99f;}
+#torus.theme-default #torus-sidebar li.torus-sidebar-button:hover {background-color: #def;}
+#torus.theme-default #torus-sidebar li.torus-sidebar-button-selected,
+#torus.theme-default #torus-sidebar li.torus-sidebar-button-selected:hover {background-color: #fff;}
+
+#torus.theme-default #torus-popup {
+	background-color: #66f;
+	border: 1px solid #000;
+}
+#torus.theme-default #torus-popup-avatar {
+	border: 1px solid #ccc;
+}
+#torus.theme-default #torus-popup-name,
+#torus.theme-default #torus-popup-name a {
+	color: #000;
+}
+#torus.theme-default #torus-popup-access {
+	color: #0f0;
+}
+#torus.theme-default #torus-popup a.torus-popup-userlink,
+#torus.theme-default #torus-popup a.torus-popup-action,
+#torus.theme-default #torus-popup a.torus-popup-action-disabled {
+	border-top: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+	background-color: #99f;
+}
+#torus.theme-default #torus-popup a.torus-popup-userlink:hover,
+#torus.theme-default #torus-popup a.torus-popup-action:hover {
+	background-color: #def;
+}
+#torus.theme-default #torus-popup a.torus-popup-action-disabled,
+#torus.theme-default #torus-popup a.torus-popup-action-disabled:hover {
+	background-color: #ddd;
+	color: #999;
+}
+#torus.theme-default #torus-popup-modconfirm,
+#torus.theme-default #torus-popup-banmodal {
+	background-color: #66f;
+	border: 1px solid #000;
+	border-right: 1px solid #555;
+	color: #000;
+}
+
+#torus.theme-default #torus-input {
+	background-color: #66f;
+	border-top: 1px solid #000;
+}
