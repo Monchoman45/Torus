@@ -26,15 +26,22 @@ dirnames = ['']
 while len(dirs):
 	dir = dirs[0]
 	dirname = dirnames[0]
-	if len(dirname): dirname += '/'
+	if len(dirname) != 0 and not dirname.endswith('\\'): dirname += '/'
 	dirs = dirs[1:]
 	dirnames = dirnames[1:]
 	for file in dir:
 		if file[0] == '.': continue
-		if file.endswith('.js') or file.endswith('.css'):
+		elif file == '*':
+			if len(dirname) != 0: 
+				dirs.append(os.listdir(dirname))
+				dirnames.append(dirname)
+			else:
+				dirs.append(os.listdir('.'))
+				dirnames.append('')
+		elif file.endswith('.js') or file.endswith('.css'):
 			with open(dirname + file, 'r') as f: files['MediaWiki:Torus.js/' + dirname + file] = f.read()
 			print('\t' + dirname + file + ': ' + str(len(files['MediaWiki:Torus.js/' + dirname + file])))
-		elif not file.endswith('.py') and not file.endswith('.php'):
+		elif not file.endswith('.py') and not file.endswith('.php'): #is a directory
 			dirs.append(os.listdir(dirname + file))
 			dirnames.append(dirname + file)
 
@@ -81,7 +88,7 @@ sock.request(
 pages = json.loads(sock.getresponse().read().decode('utf-8'))['query']['pages']
 
 for page in pages:
-	pages[page]['title'] = pages[page]['title'].replace(' ', '_')
+	pages[page]['title'] = pages[page]['title'].replace(' ', '_').replace('\\', '/')
 	print('Publishing: ' + pages[page]['title'] + ' ... ', end='\r')
 	sock.request(
 		'POST',
