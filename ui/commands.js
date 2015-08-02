@@ -41,39 +41,27 @@ Torus.commands.kick = {
 	}
 };
 Torus.commands.ban = {
-	help: 'Usage: /ban <user> <expiry>\n' //FIXME: i18n
+	help: 'Usage: /ban <user> <expiry> <summary>\n' //FIXME: i18n
 	    + 'Ban or reban <user> from the current room. If <user>\'s name includes spaces, you must put quotes around their name. If <user>\'s name includes quotes, you must precede them with a backslash (\\).\n'
 	    + 'For example:\n'
-	    + '`/ban Troll 1 day`: Bans the user `Troll` for 1 day.\n'
-	    + '`/ban "A big troll" 3 years`: Bans the user `A big troll` for 3 years.\n'
+	    + '`/ban Troll "1 day" trolling`: Bans the user `Troll` for 1 day with the summary `trolling`.\n'
+	    + '`/ban "A big troll" "3 years" "super trolling"`: Bans the user `A big troll` for 3 years with the summary `super trolling`.\n'
 	    + '`/ban "A \\"big\\" troll" infinite`: Bans the user `A "big" troll` forever.',
-	func: function(expiry) {
-		var user = '';
-		for(var i = 1; i < arguments.length; i++) {user += ' ' + arguments[i];}
-		user = user.substring(1);
-		Torus.ui.active.ban(user, expiry * 1, 'Misbehaving in chat'); //FIXME: ?action=query&meta=allmessages
+	func: function(user, expiry, summary) {
+		if(!summary) {summary = 'Misbehaving in chat';} //FIXME: ?action=query&meta=allmessages
+		Torus.ui.active.ban(user, expiry, summary);
 	}
 };
 Torus.commands.unban = {
 	help: 'Usage: /unban <user>\n' //FIXME: i18n
 	    + 'Unban <user> from the current room.',
-	func: function() {
-		var user = '';
-		for(var i = 0; i < arguments.length; i++) {user += ' ' + arguments[i];}
-		user = user.substring(1);
-		Torus.ui.active.ban(user, 0, 'undo'); //FIXME: ?action=query&meta=allmessages
-	}
+	func: function(user) {Torus.ui.active.ban(user, 0, 'undo');} //FIXME: ?action=query&meta=allmessages
 };
 Torus.commands.mod = '/givemod';
 Torus.commands.givemod = {
 	help: 'Usage: /givemod <user>\n' //FIXME: i18n
 	    + 'Promote <user> to chatmod in the current room.',
-	func: function() {
-		var user = '';
-		for(var i = 0; i < arguments.length; i++) {user += ' ' + arguments[i];}
-		user = user.substring(1);
-		Torus.ui.active.mod(user);
-	}
+	func: function(user) {Torus.ui.active.mod(user);}
 };
 Torus.commands.pm = '/private';
 Torus.commands.query = '/private';
@@ -86,20 +74,12 @@ Torus.commands.private = {
 	    + '`/private "Cool guy"`: PM the user `Cool guy`.\n'
 	    + '`/private "\\"Cool\\" guy"`: PM the user `"Cool" guy`.\n'
 	    + '`/private "\\"Cool\\" guy" "Some mod" Admin`: Open a multi-user private room with `"Cool" guy`, `Some mod`, and `Admin`.',
-	func: function() {
-		var users = '';
-		for(var i = 0; i < arguments.length; i++) {users += ' ' + arguments[i];}
-		users = users.substring(1).split(', ');
-		Torus.ui.active.open_private(users);
-	}
+	func: function() {Torus.ui.active.open_private(Array.prototype.slice.call(arguments));}
 };
 Torus.commands.away = {
 	help: 'Usage: /away <message>\n' //FIXME: i18n
 	    + 'Toggle your away status for the current room. If <message> is specified, your status message will be set to that.',
-	func: function() {
-		var message = '';
-		for(var i = 0; i < arguments.length; i++) {message += ' ' + arguments[i];}
-		message = message.substring(1);
+	func: function(message) {
 		var user = Torus.ui.active.userlist[wgUserName];
 
 		if(user.status_state == 'away') {
@@ -123,11 +103,7 @@ Torus.commands.status = {
 	    + 'Two status states are special:\n'
 	    + '`here`: used to denote active users. `/back` will set your status state to this.\n'
 	    + '`away`: user to denote inactive users. `/away` will set your status state to this.',
-	func: function(state) {
-		var message = '';
-		for(var i = 1; i < arguments.length; i++) {message += ' ' + arguments[i];}
-		Torus.ui.active.set_status(state, message);
-	}
+	func: function(state, message) {Torus.ui.active.set_status(state, message);}
 };
 Torus.commands.ctcp = {
 	help: 'Usage: /ctcp <target> <proto> <message>\n'
