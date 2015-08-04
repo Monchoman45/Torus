@@ -8,12 +8,12 @@
 #torus-preview-default .border1 {border: 1px solid #000;}
 #torus-preview-default .border2 {border: 1px solid #ccc;}
 #torus-preview-default .text1 {color: #000;}
-#torus-preview-default .text2 {color: #666;}
-#torus-preview-default .text3 {color: #f00;}
+#torus-preview-default .text2 {color: #03c;}
+#torus-preview-default .text3 {color: #666;}
+#torus-preview-default .text4 {color: #f00;}
 
-#torus.theme-default {
-	color: #000;
-}
+#torus.theme-default {color: #000;}
+#torus.theme-default a {color: #03c;}
 
 #torus.theme-default #torus-tabs {
 	background-color: #66f;

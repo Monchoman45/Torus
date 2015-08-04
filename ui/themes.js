@@ -14,48 +14,68 @@ Torus.ui.themes.selected = 'default';
 Torus.ui.themes.html = document.createDocumentFragment();
 
 Torus.ui.themes.rebuild = function() {
+	var table = document.createElement('table');
+	table.id = 'torus-themes-table';
+	Torus.ui.ids['themes-table'] = table;
 	for(var i in Torus.ui.themes.dir) {
 		if(!Torus.ui.themes.dir[i].loaded) {
 			Torus.util.load_css(Torus.ui.themes.dir[i].url);
 			Torus.ui.themes.dir[i].loaded = true;
 		}
 
-		var theme = document.createElement('div');
-			var radio = document.createElement('input');
-				radio.id = 'torus-theme-' + i;
-				Torus.ui.ids['theme-' + i] = radio;
-				radio.type = 'radio';
-				radio.name = 'torus-theme';
-				radio.value = i;
-				radio.addEventListener('click', Torus.ui.themes.click_theme);
-			theme.appendChild(radio);
-			var label = document.createElement('label');
-				label.for = 'torus-theme-' + i;
-				label.textContent = Torus.ui.themes.dir[i].name;
-			theme.appendChild(label);
-			var preview = document.createElement('table');
-				for(var j = 1; j <= 5; j++) {
-					var cell = document.createElement('td');
-						cell.className = 'torus-theme-cell bg' + j;
-						if(j <= 3) {cell.className += ' border1';}
-						else {cell.className += ' border2';}
-						var text1 = document.createElement('div');
-							text1.className = 'text1';
-							text1.textContent = 'text'; //FIXME: i18n
-						cell.appendChild(text1);
-						var text2 = document.createElement('div');
-							text2.className = 'text2';
-							text2.textContent = 'away'; //FIXME: i18n
-						cell.appendChild(text2);
-						var text3 = document.createElement('div');
-							text3.className = 'text3';
-							text3.textContent = 'ping'; //FIXME: i18n
-						cell.appendChild(text3);
-					preview.appendChild(cell);
-				}
-			theme.appendChild(preview);
-		Torus.ui.themes.html.appendChild(theme);
+		var tr = document.createElement('tr');
+			var td = document.createElement('td');
+				var radio = document.createElement('input');
+					radio.id = 'torus-theme-' + i;
+					Torus.ui.ids['theme-' + i] = radio;
+					radio.className = 'torus-theme-radio';
+					radio.type = 'radio';
+					radio.name = 'torus-theme';
+					radio.value = i;
+					radio.addEventListener('click', Torus.ui.themes.click_theme);
+					if(i == Torus.ui.themes.selected) {radio.checked = true;}
+				td.appendChild(radio);
+				var label = document.createElement('label');
+					label.for = 'torus-theme-' + i;
+					label.className = 'torus-theme-label';
+					label.textContent = Torus.ui.themes.dir[i].name;
+				td.appendChild(label);
+			tr.appendChild(td);
+			var td = document.createElement('td');
+				var preview = document.createElement('table');
+					preview.id = 'torus-preview-' + i;
+					Torus.ui.ids['preview-' + i];
+					preview.className = 'torus-theme-preview';
+					for(var j = 1; j <= 5; j++) {
+						var cell = document.createElement('td');
+							cell.className = 'torus-theme-cell bg' + j;
+							if(j <= 3) {cell.className += ' border1';}
+							else {cell.className += ' border2';}
+							if(j >= 2 && j <= 4) {
+								var text1 = document.createElement('div');
+									text1.className = 'text1';
+									text1.textContent = 'text'; //FIXME: i18n
+								cell.appendChild(text1);
+								var text2 = document.createElement('div');
+									text2.className = 'text2';
+									text2.textContent = 'link'; //FIXME: i18n
+								cell.appendChild(text2);
+								var text3 = document.createElement('div');
+									text3.className = 'text3';
+									text3.textContent = 'away'; //FIXME: i18n
+								cell.appendChild(text3);
+								var text4 = document.createElement('div');
+									text4.className = 'text4';
+									text4.textContent = 'ping'; //FIXME: i18n
+								cell.appendChild(text4);
+							}
+						preview.appendChild(cell);
+					}
+				td.appendChild(preview);
+			tr.appendChild(td);
+		table.appendChild(tr);
 	}
+	Torus.ui.themes.html.appendChild(table);
 };
 
 Torus.ui.themes.select = function(theme) {
