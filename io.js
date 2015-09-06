@@ -232,7 +232,7 @@ Torus.io.transports.polling.prototype.poll = function() {
 								sock.call_listeners({
 									type: 'io',
 									event: 'disconnect',
-									message: 'Protocol error: ' + JSON.parse(text)[1],
+									message: 'Protocol error: ' + JSON.parse(text),
 									sock: sock
 								});
 								return;
