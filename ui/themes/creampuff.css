@@ -1,0 +1,114 @@
+/*** creampuff theme ***/
+
+table#torus-preview-creampuff.torus-theme-preview .bg1, #torus.theme-creampuff .bg1 {background-color: #f66;}
+table#torus-preview-creampuff.torus-theme-preview .bg2, #torus.theme-creampuff .bg2 {background-color: #f99;} 
+table#torus-preview-creampuff.torus-theme-preview .bg3, #torus.theme-creampuff .bg3 {background-color: #fcc;} 
+table#torus-preview-creampuff.torus-theme-preview .bg4, #torus.theme-creampuff .bg4 {background-color: #fed;} 
+table#torus-preview-creampuff.torus-theme-preview .bg5, #torus.theme-creampuff .bg5 {background-color: #fff;} 
+table#torus-preview-creampuff.torus-theme-preview .border1, #torus.theme-creampuff .border1 {border-color: #000;} 
+table#torus-preview-creampuff.torus-theme-preview .border2, #torus.theme-creampuff .border2 {border-color: #999;} 
+table#torus-preview-creampuff.torus-theme-preview .border3, #torus.theme-creampuff .border3 {border-color: #ccc;} 
+table#torus-preview-creampuff.torus-theme-preview .text1, #torus.theme-creampuff .text1 {color: #000;} 
+table#torus-preview-creampuff.torus-theme-preview .text2, #torus.theme-creampuff .text2 {color: #909;} 
+table#torus-preview-creampuff.torus-theme-preview .text3, #torus.theme-creampuff .text3 {color: #666;} 
+table#torus-preview-creampuff.torus-theme-preview .text4, #torus.theme-creampuff .text4 {color: #f00;} 
+
+#torus.theme-creampuff {
+	color: #000;
+	border: 1px solid #000;
+}
+#torus.theme-creampuff a {color: #909;}
+#torus.theme-creampuff a:visited {color: #990;}
+
+#torus.theme-creampuff #torus-tabs {
+	background-color: #f66;
+}
+#torus.theme-creampuff #torus-tabs span.torus-tab {
+	background-color: #f99;
+	border: 1px solid #ccc;
+}
+#torus.theme-creampuff #torus-tabs span.torus-tab-viewing,
+#torus.theme-creampuff #torus-tabs span.torus-tab:hover {
+	background-color: #fed;
+}
+#torus.theme-creampuff #torus-tabs span.torus-tab-active,
+#torus.theme-creampuff #torus-tabs span.torus-tab-active:hover {
+	background-color: #fff;
+}
+#torus.theme-creampuff #torus-tabs span.torus-tab-alert {color: #909;} 
+#torus.theme-creampuff #torus-tabs span.torus-tab-message {color: #f00;} 
+#torus.theme-creampuff #torus-tabs span.torus-tab-ping {color: #f00;}
+#torus.theme-creampuff #torus-tabs span.torus-tab-close {color: #000;}
+#torus.theme-creampuff #torus-tabs span.torus-tab-close:hover {color: #f00;}
+
+#torus.theme-creampuff #torus-info {
+	background-color: #edd; 
+	border-top: 1px solid #000;
+	border-right: 1px solid #000;
+}
+
+#torus.theme-creampuff #torus-window {
+	background-color: #fcc;
+	border-top: 1px solid #000;
+	border-right: 1px solid #000;
+}
+#torus.theme-creampuff #torus-window div.torus-message-inactive {color: #666;}
+#torus.theme-creampuff #torus-window span.torus-message-ping {color: #f00;}
+
+#torus.theme-creampuff #torus-sidebar {
+	background-color: #f66;
+	border-top: 1px solid #000;
+}
+#torus.theme-creampuff #torus-sidebar span.torus-user-away {color: #666;}
+#torus.theme-creampuff #torus-sidebar li.torus-sidebar-button {background-color: #f99;}
+#torus.theme-creampuff #torus-sidebar li.torus-sidebar-button:hover {background-color: #fed;}
+#torus.theme-creampuff #torus-sidebar li.torus-sidebar-button-selected,
+#torus.theme-creampuff #torus-sidebar li.torus-sidebar-button-selected:hover {background-color: #fff;}
+
+#torus.theme-creampuff #torus-popup {
+	background-color: #f66;
+	border: 1px solid #000;
+}
+#torus.theme-creampuff #torus-popup-avatar {
+	border: 1px solid #ccc;
+}
+#torus.theme-creampuff #torus-popup-name,
+#torus.theme-creampuff #torus-popup-name a {
+	color: #000;
+}
+#torus.theme-creampuff #torus-popup a.torus-popup-userlink,
+#torus.theme-creampuff #torus-popup a.torus-popup-action,
+#torus.theme-creampuff #torus-popup a.torus-popup-action-disabled {
+	border-top-color: #ccc;
+	border-bottom-color: #ccc;
+	background-color: #f99;
+}
+#torus.theme-creampuff #torus-popup a.torus-popup-userlink:hover,
+#torus.theme-creampuff #torus-popup a.torus-popup-action:hover {
+	background-color: #fed;
+}
+#torus.theme-creampuff #torus-popup a.torus-popup-action-disabled,
+#torus.theme-creampuff #torus-popup a.torus-popup-action-disabled:hover {
+	background-color: #ddd;
+	color: #999;
+}
+#torus.theme-creampuff #torus-popup-modconfirm,
+#torus.theme-creampuff #torus-popup-banmodal {
+	background-color: #f66;
+	border: 1px solid #000;
+	border-right: 1px solid #999;
+	color: #000;
+}
+
+#torus.theme-creampuff #torus-input {
+	background-color: #f66;
+	border-top: 1px solid #000;
+}
+
+#torus.theme-creampuff #torus-menu-extensions a {
+	background-color: #f99;
+}
+#torus.theme-creampuff #torus-menu-extensions a:hover {
+	background-color: #fed;
+}
+#torus.theme-creampuff #torus-window fieldset {border: 1px solid #909;}

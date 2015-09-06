@@ -2,6 +2,11 @@ Torus.ui.themes = new Torus.classes.Extension('themes', -4);
 Torus.ui.themes.text = 'Themes';
 
 Torus.ui.themes.dir = {
+	'creampuff': {
+		url: 'http://monchbox.wikia.com/wiki/MediaWiki:Torus.js/ui/themes/creampuff.css?action=raw&ctype=text/css',
+		name: 'Creampuff',
+		loaded: true,
+	},
 	'default': {
 		url: 'http://monchbox.wikia.com/wiki/MediaWiki:Torus.js/ui/themes/default.css?action=raw&ctype=text/css',
 		name: 'Default',
