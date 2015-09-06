@@ -1,0 +1,150 @@
+/*** binary theme ***/
+
+/*
+ * TEMPLATE THEME
+ * 
+ * Use your favorite find/replace tool to fill in colors. See
+ * comments on the following block for which colors go to what.
+ * Miscellaneous colors are marked with $other. Find these, read the
+ * comment on it to figure out what it goes to, and then put whatever
+ * you want there. Don't try to just replace all of them; it'll look
+ * weird. Feel free to manually tweak stuff, you don't have to follow
+ * all the suggestions here.
+ * 
+ * Replace binary with a UNIQUE IDENTIFIER for torus to use for your
+ * theme. Please use all lowercase letters; if you want spaces, use
+ * underscores.
+ * 
+ * To make your theme selectable, add it to the top of ui/themes.js:
+ * 'binary': {
+ * 	'url': 'http://monchbox.wikia.com/wiki/Torus.js/ui/themes/binary.css?action=raw&ctype=text/css',
+ * 	'name': 'A pretty name for people to see',
+ * 	'loaded': true,
+ * },
+ * Please keep the list alphabetical, so if your theme is called
+ * "aaaaaaaaaaaa", put it at the top. Please also don't name your
+ * theme "aaaaaaaaaaaa".
+ * Then open ui/main.css, go to the bottom, and add:
+ * {{MediaWiki:Torus.js/ui/themes/binary.css}}
+ * Please keep this list alphabetical too.
+ * You can then select your theme from the theme menu.
+ * 
+ * Once you're done and you like what you have, remove this comment,
+ * commit your changes, and open a pull request to
+ * https://github.com/Monchoman45/Torus. PLEASE DON'T COMMIT TO THE
+ * MASTER BRANCH, BAD THINGS MIGHT HAPPEN. Create your own branch and
+ * commit to that.
+ */
+
+table#torus-preview-binary.torus-theme-preview .bg1, #torus.theme-binary .bg1 {background-color: #363636;} /* dark UI backgrounds (sidebar, tabs, input) */
+table#torus-preview-binary.torus-theme-preview .bg2, #torus.theme-binary .bg2 {background-color: #4D4D4D;} /* most buttons (tabs, menu buttons, sidebar buttons) */
+table#torus-preview-binary.torus-theme-preview .bg3, #torus.theme-binary .bg3 {background-color: #000000;} /* chat window */
+table#torus-preview-binary.torus-theme-preview .bg4, #torus.theme-binary .bg4 {background-color: #5F5F5F;} /* button hover */
+table#torus-preview-binary.torus-theme-preview .bg5, #torus.theme-binary .bg5 {background-color: #737373;} /* button selected */
+table#torus-preview-binary.torus-theme-preview .border1, #torus.theme-binary .border1 {border-color: #000000;} /* UI borders */
+table#torus-preview-binary.torus-theme-preview .border2, #torus.theme-binary .border2 {border-color: #000000;} /* minor details */
+table#torus-preview-binary.torus-theme-preview .border3, #torus.theme-binary .border3 {border-color: #000000;} /* button borders */
+table#torus-preview-binary.torus-theme-preview .text1, #torus.theme-binary .text1 {color: #00FF00;} /* most text */
+table#torus-preview-binary.torus-theme-preview .text2, #torus.theme-binary .text2 {color: #FFFFFF;} /* links */
+table#torus-preview-binary.torus-theme-preview .text3, #torus.theme-binary .text3 {color: #009B00;} /* greyed out */
+table#torus-preview-binary.torus-theme-preview .text4, #torus.theme-binary .text4 {color: #FF0000;} /* pings */
+
+#torus.theme-binary {
+	color: #00FF00;
+	border: 1px solid #000000;
+}
+#torus.theme-binary a {color: #FFFFFF;}
+#torus.theme-binary a:visited {color: #FFFFFF;} /* visited link */
+
+#torus.theme-binary #torus-tabs {
+	background-color: #363636;
+}
+#torus.theme-binary #torus-tabs span.torus-tab {
+	background-color: #4D4D4D;
+	border: 1px solid #000000;
+}
+#torus.theme-binary #torus-tabs span.torus-tab-viewing,
+#torus.theme-binary #torus-tabs span.torus-tab:hover {
+	background-color: #5F5F5F;
+}
+#torus.theme-binary #torus-tabs span.torus-tab-active,
+#torus.theme-binary #torus-tabs span.torus-tab-active:hover {
+	background-color: #737373;
+}
+#torus.theme-binary #torus-tabs span.torus-tab-alert {color: #009B00;} /* color for tabs with new joins/parts/kicks/etc */
+#torus.theme-binary #torus-tabs span.torus-tab-message {color: #FFFFFF;} /* color for tabs with new messages */
+#torus.theme-binary #torus-tabs span.torus-tab-ping {color: #FF0000;}
+#torus.theme-binary #torus-tabs span.torus-tab-close {color: #00FF00;}
+#torus.theme-binary #torus-tabs span.torus-tab-close:hover {color: #FF0000;}
+
+#torus.theme-binary #torus-info {
+	background-color: #666666; /* bg for the info bar */
+	border-top: 1px solid #000000;
+	border-right: 1px solid #000000;
+}
+
+#torus.theme-binary #torus-window {
+	background-color: #000000;
+	border-top: 1px solid #000000;
+	border-right: 1px solid #000000;
+}
+#torus.theme-binary #torus-window div.torus-message-inactive {color: #009B00;}
+#torus.theme-binary #torus-window span.torus-message-ping {color: #FF0000;}
+
+#torus.theme-binary #torus-sidebar {
+	background-color: #363636;
+	border-top: 1px solid #000000;
+}
+#torus.theme-binary #torus-sidebar span.torus-user-away {color: #009B00;}
+#torus.theme-binary #torus-sidebar li.torus-sidebar-button {background-color: #4D4D4D;}
+#torus.theme-binary #torus-sidebar li.torus-sidebar-button:hover {background-color: #5F5F5F;}
+#torus.theme-binary #torus-sidebar li.torus-sidebar-button-selected,
+#torus.theme-binary #torus-sidebar li.torus-sidebar-button-selected:hover {background-color: #737373;}
+
+#torus.theme-binary #torus-popup {
+	background-color: #363636;
+	border: 1px solid #000000;
+}
+#torus.theme-binary #torus-popup-avatar {
+	border: 1px solid #000000;
+}
+#torus.theme-binary #torus-popup-name,
+#torus.theme-binary #torus-popup-name a {
+	color: #00FF00;
+}
+#torus.theme-binary #torus-popup a.torus-popup-userlink,
+#torus.theme-binary #torus-popup a.torus-popup-action,
+#torus.theme-binary #torus-popup a.torus-popup-action-disabled {
+	border-top-color: #000000;
+	border-bottom-color: #000000;
+	background-color: #4D4D4D;
+}
+#torus.theme-binary #torus-popup a.torus-popup-userlink:hover,
+#torus.theme-binary #torus-popup a.torus-popup-action:hover {
+	background-color: #5F5F5F;
+}
+#torus.theme-binary #torus-popup a.torus-popup-action-disabled,
+#torus.theme-binary #torus-popup a.torus-popup-action-disabled:hover {
+	background-color: #ddd;
+	color: #999;
+}
+#torus.theme-binary #torus-popup-modconfirm,
+#torus.theme-binary #torus-popup-banmodal {
+	background-color: #363636;
+	border: 1px solid #000000;
+	border-right: 1px solid #000000;
+	color: #00FF00;
+}
+
+#torus.theme-binary #torus-input {
+	background-color: #363636;
+	border-top: 1px solid #000000;
+}
+
+#torus.theme-binary #torus-menu-extensions a {
+	background-color: #4D4D4D;
+}
+#torus.theme-binary #torus-menu-extensions a:hover {
+	background-color: #5F5F5F;
+}
+#torus.theme-binary #torus-window fieldset {border: 1px solid #FFFFFF;}
