@@ -1,41 +1,5 @@
 /*** binary theme ***/
 
-/*
- * TEMPLATE THEME
- * 
- * Use your favorite find/replace tool to fill in colors. See
- * comments on the following block for which colors go to what.
- * Miscellaneous colors are marked with $other. Find these, read the
- * comment on it to figure out what it goes to, and then put whatever
- * you want there. Don't try to just replace all of them; it'll look
- * weird. Feel free to manually tweak stuff, you don't have to follow
- * all the suggestions here.
- * 
- * Replace binary with a UNIQUE IDENTIFIER for torus to use for your
- * theme. Please use all lowercase letters; if you want spaces, use
- * underscores.
- * 
- * To make your theme selectable, add it to the top of ui/themes.js:
- * 'binary': {
- * 	'url': 'http://monchbox.wikia.com/wiki/Torus.js/ui/themes/binary.css?action=raw&ctype=text/css',
- * 	'name': 'A pretty name for people to see',
- * 	'loaded': true,
- * },
- * Please keep the list alphabetical, so if your theme is called
- * "aaaaaaaaaaaa", put it at the top. Please also don't name your
- * theme "aaaaaaaaaaaa".
- * Then open ui/main.css, go to the bottom, and add:
- * {{MediaWiki:Torus.js/ui/themes/binary.css}}
- * Please keep this list alphabetical too.
- * You can then select your theme from the theme menu.
- * 
- * Once you're done and you like what you have, remove this comment,
- * commit your changes, and open a pull request to
- * https://github.com/Monchoman45/Torus. PLEASE DON'T COMMIT TO THE
- * MASTER BRANCH, BAD THINGS MIGHT HAPPEN. Create your own branch and
- * commit to that.
- */
-
 table#torus-preview-binary.torus-theme-preview .bg1, #torus.theme-binary .bg1 {background-color: #363636;} /* dark UI backgrounds (sidebar, tabs, input) */
 table#torus-preview-binary.torus-theme-preview .bg2, #torus.theme-binary .bg2 {background-color: #4D4D4D;} /* most buttons (tabs, menu buttons, sidebar buttons) */
 table#torus-preview-binary.torus-theme-preview .bg3, #torus.theme-binary .bg3 {background-color: #000000;} /* chat window */
