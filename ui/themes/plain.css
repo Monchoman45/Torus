@@ -1,0 +1,114 @@
+/*** plain theme ***/
+
+table#torus-preview-plain.torus-theme-preview .bg1, #torus.theme-plain .bg1 {background-color: #ddd;}
+table#torus-preview-plain.torus-theme-preview .bg2, #torus.theme-plain .bg2 {background-color: #eee;}
+table#torus-preview-plain.torus-theme-preview .bg3, #torus.theme-plain .bg3 {background-color: #fff;}
+table#torus-preview-plain.torus-theme-preview .bg4, #torus.theme-plain .bg4 {background-color: #fff;}
+table#torus-preview-plain.torus-theme-preview .bg5, #torus.theme-plain .bg5 {background-color: #fff;}
+table#torus-preview-plain.torus-theme-preview .border1, #torus.theme-plain .border1 {border-color: #000;}
+table#torus-preview-plain.torus-theme-preview .border2, #torus.theme-plain .border2 {border-color: #999;}
+table#torus-preview-plain.torus-theme-preview .border3, #torus.theme-plain .border3 {border-color: #999;}
+table#torus-preview-plain.torus-theme-preview .text1, #torus.theme-plain .text1 {color: #000;}
+table#torus-preview-plain.torus-theme-preview .text2, #torus.theme-plain .text2 {color: #03c;}
+table#torus-preview-plain.torus-theme-preview .text3, #torus.theme-plain .text3 {color: #666;}
+table#torus-preview-plain.torus-theme-preview .text4, #torus.theme-plain .text4 {color: #f00;}
+
+#torus.theme-plain {
+	color: #000;
+	border: 1px solid #000;
+}
+#torus.theme-plain a {color: #03c;}
+#torus.theme-plain a:visited {color: #939;}
+
+#torus.theme-plain #torus-tabs {
+	background-color: #ddd;
+}
+#torus.theme-plain #torus-tabs span.torus-tab {
+	background-color: #eee;
+	border: 1px solid #999;
+}
+#torus.theme-plain #torus-tabs span.torus-tab-viewing,
+#torus.theme-plain #torus-tabs span.torus-tab:hover {
+	background-color: #fff;
+}
+#torus.theme-plain #torus-tabs span.torus-tab-active,
+#torus.theme-plain #torus-tabs span.torus-tab-active:hover {
+	background-color: #fff;
+}
+#torus.theme-plain #torus-tabs span.torus-tab-alert {color: #909;}
+#torus.theme-plain #torus-tabs span.torus-tab-message {color: #ff0;}
+#torus.theme-plain #torus-tabs span.torus-tab-ping {color: #f00;}
+#torus.theme-plain #torus-tabs span.torus-tab-close {color: #000;}
+#torus.theme-plain #torus-tabs span.torus-tab-close:hover {color: #f00;}
+
+#torus.theme-plain #torus-info {
+	background-color: #ddd;
+	border-top: 1px solid #000;
+	border-right: 1px solid #000;
+}
+
+#torus.theme-plain #torus-window {
+	background-color: #fff;
+	border-top: 1px solid #000;
+	border-right: 1px solid #000;
+}
+#torus.theme-plain #torus-window div.torus-message-inactive {color: #666;}
+#torus.theme-plain #torus-window span.torus-message-ping {color: #f00;}
+
+#torus.theme-plain #torus-sidebar {
+	background-color: #ddd;
+	border-top: 1px solid #000;
+}
+#torus.theme-plain #torus-sidebar span.torus-user-away {color: #666;}
+#torus.theme-plain #torus-sidebar li.torus-sidebar-button {background-color: #eee;}
+#torus.theme-plain #torus-sidebar li.torus-sidebar-button:hover {background-color: #fff;}
+#torus.theme-plain #torus-sidebar li.torus-sidebar-button-selected,
+#torus.theme-plain #torus-sidebar li.torus-sidebar-button-selected:hover {background-color: #fff;}
+
+#torus.theme-plain #torus-popup {
+	background-color: #ddd;
+	border: 1px solid #000;
+}
+#torus.theme-plain #torus-popup-avatar {
+	border: 1px solid #999;
+}
+#torus.theme-plain #torus-popup-name,
+#torus.theme-plain #torus-popup-name a {
+	color: #000;
+}
+#torus.theme-plain #torus-popup a.torus-popup-userlink,
+#torus.theme-plain #torus-popup a.torus-popup-action,
+#torus.theme-plain #torus-popup a.torus-popup-action-disabled {
+	border-top-color: #999;
+	border-bottom-color: #999;
+	background-color: #eee;
+}
+#torus.theme-plain #torus-popup a.torus-popup-userlink:hover,
+#torus.theme-plain #torus-popup a.torus-popup-action:hover {
+	background-color: #fff;
+}
+#torus.theme-plain #torus-popup a.torus-popup-action-disabled,
+#torus.theme-plain #torus-popup a.torus-popup-action-disabled:hover {
+	background-color: #ddd;
+	color: #999;
+}
+#torus.theme-plain #torus-popup-modconfirm,
+#torus.theme-plain #torus-popup-banmodal {
+	background-color: #ddd;
+	border: 1px solid #000;
+	border-right: 1px solid #999;
+	color: #000;
+}
+
+#torus.theme-plain #torus-input {
+	background-color: #ddd;
+	border-top: 1px solid #000;
+}
+
+#torus.theme-plain #torus-menu-extensions a {
+	background-color: #eee;
+}
+#torus.theme-plain #torus-menu-extensions a:hover {
+	background-color: #fff;
+}
+#torus.theme-plain #torus-window fieldset {border: 1px solid #999;}

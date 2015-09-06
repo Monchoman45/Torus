@@ -72,40 +72,44 @@ Torus.ext.ccui.render = function() {
 		var div = document.createElement('div');
 			div.id = 'torus-ext-ccui-' + tables[i];
 			Torus.ui.ids['ext-ccui-' + tables[i]] = div;
-			div.className = 'torus-ext-ccui-table';
-			var info = document.createElement('div');
-				info.id = 'torus-ext-ccui-' + tables[i] + '-info';
-				Torus.ui.ids['ext-ccui-' + tables[i] + '-info'] = info;
-				info.className = 'torus-ext-ccui-info';
-				info.appendChild(document.createTextNode(' '));
+			div.className = 'torus-ext-ccui-group border2';
+			var title = document.createElement('div');
+				title.id = 'torus-ext-ccui-' + tables[i] + '-title';
+				Torus.ui.ids['ext-ccui-' + tables[i] + '-title'] = title;
+				title.className = 'torus-ext-ccui-title bg2 border2';
+				title.appendChild(document.createTextNode(' '));
 				var span = document.createElement('span');
 					span.id = 'torus-ext-ccui-' + tables[i] + '-num';
 					Torus.ui.ids['ext-ccui-' + tables[i] + '-num'] = span;
 					span.textContent = '0';
-				info.appendChild(span);
-			div.appendChild(info);
+				title.appendChild(span);
+			div.appendChild(title);
 			var table = document.createElement('div');
 				table.id = 'torus-ext-ccui-' + tables[i] + '-table';
 				Torus.ui.ids['ext-ccui-' + tables[i] + '-table'] = table;
+				table.className = 'torus-ext-ccui-table bg5';
 				var time = document.createElement('ul');
 					time.id = 'torus-ext-ccui-' + tables[i] + '-time';
 					Torus.ui.ids['ext-ccui-' + tables[i] + '-time'] = time;
+					time.className = 'border2';
 				table.appendChild(time);
 				var users = document.createElement('ul');
 					users.id = 'torus-ext-ccui-' + tables[i] + '-users';
 					Torus.ui.ids['ext-ccui-' + tables[i] + '-users'] = users;
+					users.className = 'border2';
 				table.appendChild(users);
 				var ips = document.createElement('ul');
 					ips.id = 'torus-ext-ccui-' + tables[i] + '-ips';
 					Torus.ui.ids['ext-ccui-' + tables[i] + '-ips'] = ips;
+					ips.className = 'border2';
 				table.appendChild(ips);
 			div.appendChild(table);
 		Torus.ui.ids['window'].appendChild(div);
 	}
-	Torus.ui.ids['ext-ccui-ips-info'].firstChild.textContent = 'User\'s IPs: ';
-	Torus.ui.ids['ext-ccui-exact-info'].firstChild.textContent = 'Exact matches: ';
-	Torus.ui.ids['ext-ccui-close-info'].firstChild.textContent = '/24 matches: ';
-	Torus.ui.ids['ext-ccui-far-info'].firstChild.textContent = '/16 matches: ';
+	Torus.ui.ids['ext-ccui-ips-title'].firstChild.textContent = 'User\'s IPs: ';
+	Torus.ui.ids['ext-ccui-exact-title'].firstChild.textContent = 'Exact matches: ';
+	Torus.ui.ids['ext-ccui-close-title'].firstChild.textContent = '/24 matches: ';
+	Torus.ui.ids['ext-ccui-far-title'].firstChild.textContent = '/16 matches: ';
 
 	Torus.ext.ccui.fill();
 }
@@ -164,15 +168,13 @@ Torus.ext.ccui.fill = function() {
 		for(var j = 0; j < matches[i].length; j++) {
 			var time = document.createElement('li');
 				time.className = 'torus-ext-ccui-timestamp';
-				if(even) {time.classList.add('torus-ext-ccui-li-even');}
-				else {time.classList.add('torus-ext-ccui-li-odd');}
+				if(!even) {time.classList.add('bg4');}
 				time.textContent = Torus.util.print_mwdate(matches[i][j].timestamp);
 			Torus.ui.ids['ext-ccui-' + i + '-time'].appendChild(time);
 
 			var user = document.createElement('li');
 				user.className = 'torus-ext-ccui-user';
-				if(even) {user.classList.add('torus-ext-ccui-li-even');}
-				else {user.classList.add('torus-ext-ccui-li-odd');}
+				if(!even) {user.classList.add('bg4');}
 				var userpage = document.createElement('a');
 					userpage.href = '/wiki/User:' + matches[i][j].user.replace(/ /g, String.fromCharCode(160));
 					userpage.textContent = matches[i][j].user;
@@ -207,8 +209,7 @@ Torus.ext.ccui.fill = function() {
 
 			var ip = document.createElement('li');
 				ip.className = 'torus-ext-ccui-ip';
-				if(even) {ip.classList.add('torus-ext-ccui-li-even');}
-				else {ip.classList.add('torus-ext-ccui-li-odd');}
+				if(!even) {ip.classList.add('bg4');}
 				var contribs = document.createElement('a');
 					contribs.href = '/wiki/Special:Contributions/' + matches[i][j].ip;
 					contribs.textContent = matches[i][j].ip;
@@ -229,8 +230,7 @@ Torus.ext.ccui.fill = function() {
 				ip.appendChild(document.createTextNode(')'));
 			Torus.ui.ids['ext-ccui-' + i + '-ips'].appendChild(ip);
 
-			if(even) {even = false;}
-			else {even = true;}
+			even = !even;
 		}
 	}
 }

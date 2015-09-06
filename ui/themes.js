@@ -7,6 +7,11 @@ Torus.ui.themes.dir = {
 		name: 'Default',
 		loaded: true,
 	},
+	'plain': {
+		url: 'http://monchbox.wikia.com/wiki/MediaWiki:Torus.js/ui/themes/plain.css?action=raw&ctype=text/css',
+		name: 'Plain',
+		loaded: true,
+	},
 };
 
 Torus.ui.themes.selected = 'default';
@@ -25,6 +30,7 @@ Torus.ui.themes.rebuild = function() {
 
 		var tr = document.createElement('tr');
 			var td = document.createElement('td');
+				td.className = 'border2';
 				var radio = document.createElement('input');
 					radio.id = 'torus-theme-' + i;
 					Torus.ui.ids['theme-' + i] = radio;
@@ -36,12 +42,13 @@ Torus.ui.themes.rebuild = function() {
 					if(i == Torus.ui.themes.selected) {radio.checked = true;}
 				td.appendChild(radio);
 				var label = document.createElement('label');
-					label.for = 'torus-theme-' + i;
+					label.setAttribute('for', 'torus-theme-' + i);
 					label.className = 'torus-theme-label';
 					label.textContent = Torus.ui.themes.dir[i].name;
 				td.appendChild(label);
 			tr.appendChild(td);
 			var td = document.createElement('td');
+				td.className = 'border2';
 				var preview = document.createElement('table');
 					preview.id = 'torus-preview-' + i;
 					Torus.ui.ids['preview-' + i];
@@ -49,8 +56,9 @@ Torus.ui.themes.rebuild = function() {
 					for(var j = 1; j <= 5; j++) {
 						var cell = document.createElement('td');
 							cell.className = 'torus-theme-cell bg' + j;
-							if(j <= 3) {cell.className += ' border1';}
-							else {cell.className += ' border2';}
+							if(j <= 2) {cell.className += ' border1';}
+							else if(j == 3) {cell.className += ' border2';}
+							else {cell.className += ' border3';}
 							if(j >= 2 && j <= 4) {
 								var text1 = document.createElement('div');
 									text1.className = 'text1';

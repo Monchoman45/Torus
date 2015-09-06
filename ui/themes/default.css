@@ -1,19 +1,24 @@
-/*** Default theme ***/
+/*** default theme ***/
 
-#torus-preview-default .bg1 {background-color: #66f;}
-#torus-preview-default .bg2 {background-color: #99f;}
-#torus-preview-default .bg3 {background-color: #ccf;}
-#torus-preview-default .bg4 {background-color: #def;}
-#torus-preview-default .bg5 {background-color: #fff;}
-#torus-preview-default .border1 {border: 1px solid #000;}
-#torus-preview-default .border2 {border: 1px solid #ccc;}
-#torus-preview-default .text1 {color: #000;}
-#torus-preview-default .text2 {color: #03c;}
-#torus-preview-default .text3 {color: #666;}
-#torus-preview-default .text4 {color: #f00;}
+table#torus-preview-default.torus-theme-preview .bg1, #torus.theme-default .bg1 {background-color: #66f;}
+table#torus-preview-default.torus-theme-preview .bg2, #torus.theme-default .bg2 {background-color: #99f;}
+table#torus-preview-default.torus-theme-preview .bg3, #torus.theme-default .bg3 {background-color: #ccf;}
+table#torus-preview-default.torus-theme-preview .bg4, #torus.theme-default .bg4 {background-color: #def;}
+table#torus-preview-default.torus-theme-preview .bg5, #torus.theme-default .bg5 {background-color: #fff;}
+table#torus-preview-default.torus-theme-preview .border1, #torus.theme-default .border1 {border-color: #000;}
+table#torus-preview-default.torus-theme-preview .border2, #torus.theme-default .border2 {border-color: #999;}
+table#torus-preview-default.torus-theme-preview .border3, #torus.theme-default .border3 {border-color: #ccc;}
+table#torus-preview-default.torus-theme-preview .text1, #torus.theme-default .text1 {color: #000;}
+table#torus-preview-default.torus-theme-preview .text2, #torus.theme-default .text2 {color: #03c;}
+table#torus-preview-default.torus-theme-preview .text3, #torus.theme-default .text3 {color: #666;}
+table#torus-preview-default.torus-theme-preview .text4, #torus.theme-default .text4 {color: #f00;}
 
-#torus.theme-default {color: #000;}
+#torus.theme-default {
+	color: #000;
+	border: 1px solid #000;
+}
 #torus.theme-default a {color: #03c;}
+#torus.theme-default a:visited {color: #909;}
 
 #torus.theme-default #torus-tabs {
 	background-color: #66f;
@@ -71,14 +76,11 @@
 #torus.theme-default #torus-popup-name a {
 	color: #000;
 }
-#torus.theme-default #torus-popup-access {
-	color: #0f0;
-}
 #torus.theme-default #torus-popup a.torus-popup-userlink,
 #torus.theme-default #torus-popup a.torus-popup-action,
 #torus.theme-default #torus-popup a.torus-popup-action-disabled {
-	border-top: 1px solid #ccc;
-	border-bottom: 1px solid #ccc;
+	border-top-color: #ccc;
+	border-bottom-color: #ccc;
 	background-color: #99f;
 }
 #torus.theme-default #torus-popup a.torus-popup-userlink:hover,
@@ -94,7 +96,7 @@
 #torus.theme-default #torus-popup-banmodal {
 	background-color: #66f;
 	border: 1px solid #000;
-	border-right: 1px solid #555;
+	border-right: 1px solid #666;
 	color: #000;
 }
 
@@ -102,3 +104,11 @@
 	background-color: #66f;
 	border-top: 1px solid #000;
 }
+
+#torus.theme-default #torus-menu-extensions a {
+	background-color: #99f;
+}
+#torus.theme-default #torus-menu-extensions a:hover {
+	background-color: #def;
+}
+#torus.theme-default #torus-window fieldset {border: 1px solid #66f;}

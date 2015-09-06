@@ -146,6 +146,7 @@
 #torus-popup-access {
 	font-size: 1.5em;
 	font-weight: bold;
+	color: #0f0;
 }
 #torus-popup-status-state {font-size: larger;}
 #torus-popup-status-message {
@@ -160,6 +161,8 @@
 	padding: .5em 0;
 	text-align: center;
 	text-decoration: none;
+	border-top: 1px solid;
+	border-bottom: 1px solid;
 }
 #torus-popup a.torus-popup-userlink {
 	display: inline-block;
@@ -217,10 +220,63 @@
 	resize: none;
 }
 
+#torus-menu-name {
+	margin-top: 1em;
+	margin-bottom: .5em;
+	font-size: 4em;
+	text-align: center;
+}
+#torus-menu-links {
+	margin-bottom: 2em;
+	font-size: 1.5em;
+	text-align: center;
+}
+
+#torus-menu-extensions a {
+	display: block;
+	padding: .5em 0;
+	margin-bottom: 5px;
+	cursor: pointer;
+	font-size: 2em;
+	text-align: center;
+	text-decoration: none;
+}
+
+#torus-themes-table {
+	border-spacing: 0;
+	text-align: center;
+}
+#torus-themes-table > tr > td {
+	padding: 1em 0;
+	border-bottom: 1px solid;
+}
+#torus-themes-table > tr:last-child > td {border-bottom: 0;}
+#torus-themes-table > tr > td:first-child {width: 30%;}
+#torus-themes-table > tr > td:last-child {width: 70%;}
+#torus-themes-table label.torus-theme-label {font-size: 150%;}
+#torus-themes-table table.torus-theme-preview {border-spacing: 0;}
+#torus-themes-table table.torus-theme-preview td {
+	border: 1px solid;
+	border-left: 0;
+	min-width: 12em;
+}
+#torus-themes-table table.torus-theme-preview td:first-child {border-left: 1px solid;}
+
+#torus-window fieldset legend {font-size: 1.5em;}
+#torus-window textarea {
+	resize: vertical;
+	width: 100%;
+	display: block;
+}
+#torus-window input[type="checkbox"] {
+	vertical-align: bottom;
+	margin: 0;
+}
+
 #torus a.torus-fakelink {cursor: pointer;}
 
-{{MediaWiki:Torus.js/ui/menu.css}}
-
 {{MediaWiki:Torus.js/ui/themes/default.css}}
+
+{{MediaWiki:Torus.js/ui/themes/plain.css}}
 
 {{MediaWiki:Torus.js/ext/ccui.css}}
