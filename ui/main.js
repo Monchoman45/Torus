@@ -94,6 +94,8 @@ Torus.ui.onload = function() {
 
 {{MediaWiki:Torus.js/ui/pings.js}}
 
+{{MediaWiki:Torus.js/ui/themes.js}}
+
 {{MediaWiki:Torus.js/ui/chat_listeners.js}}
 
 {{MediaWiki:Torus.js/ui/dom_listeners.js}}
@@ -103,7 +105,7 @@ Torus.ui.onload = function() {
 {{MediaWiki:Torus.js/ui/util.js}}
 
 //(function() { //I really hate these but it's better then leaking temp variables everywhere //FIXME: iffy causes load order problems
-	Torus.util.load_css('http://monchbox.wikia.com/wiki/MediaWiki:Torus.js/ui/main.css?action=raw&ctype=text/css&templates=expand&t=' + (new Date()).getTime());
+	Torus.util.load_css('http://monchbox.wikia.com/wiki/MediaWiki:Torus.js/ui/main.css?action=raw&ctype=text/css&templates=expand');
 
 	Torus.ui.window.id = 'torus';
 	Torus.ui.ids['torus'] = Torus.ui.window;

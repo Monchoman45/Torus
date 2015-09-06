@@ -161,7 +161,7 @@ Torus.ui.pings.rebuild = function() {
 				var textarea = document.createElement('textarea');
 					textarea.id = 'torus-pings-' + i + '-literal';
 					Torus.ui.ids['torus-pings-' + i + '-literal'] = textarea;
-					fieldset.className = 'torus-pings-literal';
+					textarea.className = 'torus-pings-literal';
 					textarea.rows = 5
 					textarea.value = Torus.ui.pings.dir[i].literal.join('\n');
 					textarea.setAttribute('data-id', i);
@@ -178,7 +178,7 @@ Torus.ui.pings.rebuild = function() {
 				var textarea = document.createElement('textarea');
 					textarea.id = 'torus-pings-' + i + '-regex';
 					Torus.ui.ids['torus-pings-' + i + '-regex'] = textarea;
-					fieldset.className = 'torus-pings-regex';
+					textarea.className = 'torus-pings-regex';
 					textarea.rows = 10;
 					textarea.value = '';
 					for(var j = 0; j < Torus.ui.pings.dir[i].regex.length; j++) {textarea.value += Torus.ui.pings.dir[i].regex[j].toString() + '\n';}
