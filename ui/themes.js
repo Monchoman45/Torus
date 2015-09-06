@@ -103,6 +103,13 @@ Torus.ui.themes.select = function(theme) {
 	//Torus.ui.themes.rebuild(); //FIXME: this is a dumb way of making sure the radio button is in the right place
 };
 
+Torus.ui.themes.add = function(name, obj) {
+	if(!obj.url) {throw new Error('Tried to add theme `' + name + '`, but didn\'t provide a url');}
+	if(!obj.name) {obj.name = Torus.util.cap(name);}
+	Torus.ui.themes.dir[name] = obj;
+	Torus.ui.themes.rebuild();
+};
+
 Torus.ui.themes.click_theme = function(event) {Torus.ui.themes.select(this.value);};
 
 Torus.ui.themes.render = function(event) {
