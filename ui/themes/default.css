@@ -104,6 +104,10 @@ table#torus-preview-default.torus-theme-preview .text4, #torus.theme-default .te
 	background-color: #66f;
 	border-top: 1px solid #000;
 }
+#torus.theme-default #torus-input-box {
+	background-color: #fff;
+	color: #000;
+}
 
 #torus.theme-default #torus-menu-extensions a {
 	background-color: #99f;
@@ -112,3 +116,9 @@ table#torus-preview-default.torus-theme-preview .text4, #torus.theme-default .te
 	background-color: #def;
 }
 #torus.theme-default #torus-window fieldset {border: 1px solid #66f;}
+#torus.theme-default #torus-window textarea,
+#torus.theme-default #torus-window input[type="text"],
+#torus.theme-default #torus-window input[type="number"] {
+	background-color: #fff;
+	color: #000;
+}

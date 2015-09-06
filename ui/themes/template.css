@@ -140,6 +140,10 @@ table#torus-preview-$name.torus-theme-preview .text4, #torus.theme-$name .text4 
 	background-color: $bg1;
 	border-top: 1px solid $border1;
 }
+#torus.theme-$name #torus-input-box {
+	background-color: $bg5;
+	color: $text1;
+}
 
 #torus.theme-$name #torus-menu-extensions a {
 	background-color: $bg2;
@@ -147,4 +151,11 @@ table#torus-preview-$name.torus-theme-preview .text4, #torus.theme-$name .text4 
 #torus.theme-$name #torus-menu-extensions a:hover {
 	background-color: $bg4;
 }
+
 #torus.theme-$name #torus-window fieldset {border: 1px solid $text2;}
+#torus.theme-$name #torus-window textarea,
+#torus.theme-$name #torus-window input[type="text"],
+#torus.theme-$name #torus-window input[type="number"] {
+	background-color: $bg5;
+	color: $text1;
+}
