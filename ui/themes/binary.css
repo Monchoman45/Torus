@@ -106,7 +106,7 @@ table#torus-preview-binary.torus-theme-preview .text4, #torus.theme-binary .text
 }
 #torus.theme-binary #torus-input-box {
 	background-color: #737373;
-	color: #0f0;
+	color: #00FF00;
 }
 
 #torus.theme-binary #torus-menu-extensions a {
@@ -120,4 +120,5 @@ table#torus-preview-binary.torus-theme-preview .text4, #torus.theme-binary .text
 #torus.theme-binary #torus-window input[type="text"],
 #torus.theme-binary #torus-window input[type="number"] {
 	background-color: #737373;
-	color: #0f0;
+	color: #00FF00;
+}

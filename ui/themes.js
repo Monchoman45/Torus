@@ -3,10 +3,10 @@ Torus.ui.themes.text = 'Themes';
 
 Torus.ui.themes.dir = {
 	'binary': {
-  	'url': 'http://monchbox.wikia.com/wiki/Torus.js/ui/themes/binary.css?action=raw&ctype=text/css',
-  	'name': 'Binary',
-   	'loaded': true,
-    },
+		url: 'http://monchbox.wikia.com/wiki/MediaWiki:Torus.js/ui/themes/binary.css?action=raw&ctype=text/css',
+		name: 'Binary',
+		loaded: true,
+	},
 	'creampuff': {
 		url: 'http://monchbox.wikia.com/wiki/MediaWiki:Torus.js/ui/themes/creampuff.css?action=raw&ctype=text/css',
 		name: 'Creampuff',

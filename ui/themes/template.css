@@ -17,9 +17,9 @@
  * 
  * To make your theme selectable, add it to the top of ui/themes.js:
  * '$name': {
- * 	'url': 'http://monchbox.wikia.com/wiki/Torus.js/ui/themes/$name.css?action=raw&ctype=text/css',
- * 	'name': 'A pretty name for people to see',
- * 	'loaded': true,
+ * 	url: 'http://monchbox.wikia.com/wiki/MediaWiki:Torus.js/ui/themes/$name.css?action=raw&ctype=text/css',
+ * 	name: 'A pretty name for people to see',
+ * 	loaded: true,
  * },
  * Please keep the list alphabetical, so if your theme is called
  * "aaaaaaaaaaaa", put it at the top. Please also don't name your
