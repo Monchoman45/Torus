@@ -12,7 +12,8 @@
 	border-bottom: 0;
 }
 #torus-window div.torus-ext-ccui-group:last-child {
-	border-bottom: 1px solid;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
 }
 #torus-window div.torus-ext-ccui-title {
 	border-bottom: 1px solid;
