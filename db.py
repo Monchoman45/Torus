@@ -21,11 +21,13 @@ wikis = [
 	'gta',
 	'mlp',
 	'monchbox',
+	'rappy',
 	'runescape',
 	'sactage',
 	'tes',
 	'thehungergames',
 	'ttte',
+	'wlb',
 ]
 
 if len(sys.argv) < 2:
