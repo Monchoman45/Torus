@@ -285,7 +285,7 @@ Torus.io.transports.polling.prototype.poll = function() {
 	this.xhr.send();
 }
 Torus.io.transports.polling.prototype.send = function(message) {
-	var data = '42["message",' + JSON.stringify(message) + ']';
+	var data = '42["message",' + Torus.util.utf8ify(JSON.stringify(message)) + ']';
 
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', this.url, true);

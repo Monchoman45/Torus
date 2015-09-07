@@ -212,6 +212,14 @@ Torus.util.stupid_to_int = function(stupid) {
 	return num;
 }
 
+Torus.util.utf8ify = function(str) {
+	str = encodeURIComponent(str);
+	for(var i = str.indexOf('%'); i != -1; i = str.indexOf('%')) {
+		str = str.substring(0, i) + String.fromCharCode(parseInt(str.substring(i + 1, i + 3), 16)) + str.substring(i + 3);
+	}
+	return str;
+}
+
 Torus.util.load_js = function(url) {
 	var js = document.createElement('script');
 		js.className = 'torus-js';
