@@ -289,16 +289,16 @@ Torus.io.transports.polling.prototype.send = function(message) {
 
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', this.url, true);
-	xhr.setRequestHeader('Content-Type', 'application/octet-stream'); //socket.io is literally the worst
+	xhr.setRequestHeader('Content-Type', 'text/plain;charset=utf-8');
 	//xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
-	xhr.send(new Blob(['\0', Torus.util.int_to_stupid(data.length), Torus.util.xFF, data])); //no actually though
+	xhr.send('' + data.length + ':' + data);
 }
 Torus.io.transports.polling.prototype.ping = function() {
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', this.url, true);
-	xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+	xhr.setRequestHeader('Content-Type', 'text/plain;charset=utf-8');
 	//xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
-	xhr.send(new Blob(['\0', Torus.util.int_to_stupid(1), Torus.util.xFF, '2']));
+	xhr.send('1:2');
 }
 Torus.io.transports.polling.prototype.close = function() {
 	this.open = false;

@@ -1,8 +1,4 @@
-Torus.util = {
-	xFF: new Uint8Array(1),
-}
-
-Torus.util.xFF[0] = 255; //don't ask
+Torus.util = {};
 
 Torus.util.debug = function() {console.log.apply(console, arguments);}
 Torus.util.null = function() {}
