@@ -89,6 +89,7 @@ Torus.ui.render_line = function(message) {
 		switch(message.event) {
 			case 'me':
 			case 'message':
+				if(message.ping) {line.classList.add('torus-message-ping');}
 				if(message.event == 'message') {
 					var span = document.createElement('span'); //this is arguably one of the dumber things i've ever done
 					span.className = 'torus-whitespace'; //it works though

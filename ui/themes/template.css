@@ -89,7 +89,7 @@ table#torus-preview-$name.torus-theme-preview .text4, #torus.theme-$name .text4 
 	border-right: 1px solid $border1;
 }
 #torus.theme-$name #torus-window div.torus-message-inactive {color: $text3;}
-#torus.theme-$name #torus-window span.torus-message-ping {color: $text4;}
+#torus.theme-$name #torus-window div.torus-message-ping {color: $text4;}
 
 #torus.theme-$name #torus-sidebar {
 	background-color: $bg1;

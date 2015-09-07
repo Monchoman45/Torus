@@ -207,32 +207,32 @@ Torus.ui.initial = function(event) {
 Torus.ui.parse_message = function(event) {
 	event.html = event.text;
 
-	var pinged = false;
+	event.ping = false;
 	if(event.user != wgUserName && !event.room.parent && event.room != Torus.chats[0] && Torus.ui.pings.dir['#global'].enabled) {
 		var text = event.text.toLowerCase();
 		var global = Torus.ui.pings.dir['#global'];
 		var local = Torus.ui.pings.dir[event.room.domain];
 
 		for(var i = 0; i < global.literal.length; i++) {
-			if(text.indexOf(global.literal[i]) != -1) {pinged = true; break;}
+			if(text.indexOf(global.literal[i]) != -1) {event.ping = true; break;}
 		}
-		if(!pinged && local.enabled) {
+		if(!event.ping && local.enabled) {
 			for(var i = 0; i < local.literal.length; i++) {
-				if(text.indexOf(local.literal[i]) != -1) {pinged = true; break;}
+				if(text.indexOf(local.literal[i]) != -1) {event.ping = true; break;}
 			}
 		}
-		if(!pinged) {
+		if(!event.ping) {
 			for(var i = 0; i < global.regex.length; i++) {
 				var test = global.regex[i].test(text)
 				global.regex[i].lastIndex = 0;
-				if(test) {pinged = true; break;}
+				if(test) {event.ping = true; break;}
 			}
 		}
-		if(!pinged && local.enabled) {
+		if(!event.ping && local.enabled) {
 			for(var i = 0; i < local.regex.length; i++) {
 				var test = local.regex[i].test(text);
 				local.regex[i].lastIndex = 0;
-				if(test) {pinged = true; break;}
+				if(test) {event.ping = true; break;}
 			}
 		}
 	}
@@ -240,10 +240,7 @@ Torus.ui.parse_message = function(event) {
 	while(event.html.indexOf('<') != -1) {event.html = event.html.replace('<', '&lt;');}
 	while(event.html.indexOf('>') != -1) {event.html = event.html.replace('>', '&gt;');}
 
-	if(pinged) { //FIXME: set something on the li instead
-		Torus.ui.ping(event.room);
-		event.html = '<span class="torus-message-ping">' + event.html + '</span>';
-	}
+	if(event.ping) {Torus.ui.ping(event.room);}
 
 	if(event.room.parent) {event.html = Torus.util.parse_links(event.html, event.room.parent.domain);}
 	else {event.html = Torus.util.parse_links(event.html, event.room.domain);}

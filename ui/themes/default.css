@@ -53,7 +53,7 @@ table#torus-preview-default.torus-theme-preview .text4, #torus.theme-default .te
 	border-right: 1px solid #000;
 }
 #torus.theme-default #torus-window div.torus-message-inactive {color: #666;}
-#torus.theme-default #torus-window span.torus-message-ping {color: #f00;}
+#torus.theme-default #torus-window div.torus-message-ping {color: #f00;}
 
 #torus.theme-default #torus-sidebar {
 	background-color: #66f;
