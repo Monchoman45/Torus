@@ -204,7 +204,8 @@ Torus.load_options = function() {
 	return Torus.options;
 }
 
-window.addEventListener('load', Torus.onload);
+if(document.readyState == 'complete') {Torus.onload();}
+else {window.addEventListener('load', Torus.onload);}
 window.addEventListener('beforeunload', Torus.unload);
 
 {{MediaWiki:Torus.js/io.js}}

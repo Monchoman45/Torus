@@ -68,7 +68,9 @@ Torus.ui.parser.parse_locallink = function(state) {
 		var title = state.text.substring(2, close);
 		var display = title;
 	}
-	if(!title) { //skip [[]] and [[|anything]]
+	title = title.trim();
+	display = display.trim();
+	if(!title || !display) { //skip [[]] and [[|anything]]
 		state.text = state.text.substring(2);
 		return document.createTextNode('[[');
 	}
@@ -117,7 +119,10 @@ Torus.ui.parser.parse_locallink = function(state) {
 		link.textContent = display;
 	return link;
 }
-Torus.ui.parser.parse_newline = function(state) {return document.createElement('br');}
+Torus.ui.parser.parse_newline = function(state) {
+	state.text = state.text.substring(1);
+	return document.createElement('br');
+}
 
 Torus.ui.parser.hooks = {
 	'http://': Torus.ui.parser.parse_plainlink,

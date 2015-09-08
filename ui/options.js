@@ -95,7 +95,7 @@ Torus.ext.options.rebuild = function() {
 		for(var j in Torus.ext.options.dir[i]) {
 			var fieldset = document.createElement('fieldset');
 				fieldset.id = 'torus-option-set-' + i + '-' + j;
-				Torus.ui.ids['torus-option-set-' + i + '-' + j] = fieldset;
+				Torus.ui.ids['option-set-' + i + '-' + j] = fieldset;
 				var name = Torus.util.cap(j);
 				while(name.indexOf('_') != -1) {name = name.replace('_', ' ');}
 				var legend = document.createElement('legend');
@@ -119,7 +119,7 @@ Torus.ext.options.rebuild = function() {
 
 					var div = document.createElement('div');
 						div.id = 'torus-option-value-' + option;
-						Torus.ui.ids['torus-option-value-' + option];
+						Torus.ui.ids['option-value-' + option];
 						var label = document.createElement('label');
 							label.setAttribute('for', 'torus-option-value-' + option + '-input');
 							label.textContent = name;
@@ -168,7 +168,7 @@ Torus.ext.options.unrender = function(event) {
 Torus.ext.options.types['text'] = function(option) {
 	var textarea = document.createElement('textarea');
 		textarea.id = 'torus-option-value-' + option + '-input';
-		Torus.ui.ids['torus-option-value-' + option + '-input'] = textarea;
+		Torus.ui.ids['option-value-' + option + '-input'] = textarea;
 		textarea.className = 'torus-option-text';
 		textarea.rows = 6;
 		textarea.value = Torus.options[option];
@@ -179,7 +179,7 @@ Torus.ext.options.types['text'] = function(option) {
 Torus.ext.options.types['string'] = function(option) {
 	var input = document.createElement('input');
 		input.id = 'torus-option-value-' + option + '-input';
-		Torus.ui.ids['torus-option-value-' + option + '-input'] = input;
+		Torus.ui.ids['option-value-' + option + '-input'] = input;
 		input.className = 'torus-option-string';
 		input.type = 'text';
 		input.value = Torus.options[option];
@@ -190,7 +190,7 @@ Torus.ext.options.types['string'] = function(option) {
 Torus.ext.options.types['number'] = function(option) {
 	var input = document.createElement('input');
 		input.id = 'torus-option-value-' + option + '-input';
-		Torus.ui.ids['torus-option-value-' + option + '-input'] = input;
+		Torus.ui.ids['option-value-' + option + '-input'] = input;
 		input.className = 'torus-option-number';
 		input.type = 'number';
 		input.value = Torus.options[option];
@@ -201,7 +201,7 @@ Torus.ext.options.types['number'] = function(option) {
 Torus.ext.options.types['boolean'] = function(option) {
 	var checkbox = document.createElement('input');
 		checkbox.id = 'torus-option-value-' + option + '-input';
-		Torus.ui.ids['torus-option-value-' + option + '-input'] = checkbox;
+		Torus.ui.ids['option-value-' + option + '-input'] = checkbox;
 		checkbox.className = 'torus-option-boolean';
 		checkbox.type = 'checkbox';
 		checkbox.checked = Torus.options[option];

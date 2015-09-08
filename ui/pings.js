@@ -61,7 +61,7 @@ Torus.ui.pings.rebuild = function() {
 		Torus.ui.pings.ui['group_' + i] = frag;
 		var fieldset = document.createElement('fieldset');
 			fieldset.id = 'torus-pings-' + i + '-fieldset';
-			Torus.ui.ids['torus-pings-' + i + '-fieldset'] = fieldset;
+			Torus.ui.ids['pings-' + i + '-fieldset'] = fieldset;
 			fieldset.className = 'torus-pings-fieldset';
 			var legend = document.createElement('legend');
 			legend.textContent = i;
@@ -75,7 +75,7 @@ Torus.ui.pings.rebuild = function() {
 				enabled.appendChild(document.createTextNode(' '));
 				var input = document.createElement('input');
 					input.id = 'torus-pings-' + i + '-enabled';
-					Torus.ui.ids['torus-pings-' + i + '-enabled'] = input;
+					Torus.ui.ids['pings-' + i + '-enabled'] = input;
 					input.className = 'torus-option-boolean';
 					input.type = 'checkbox';
 					input.checked = Torus.ui.pings.dir[i].enabled;
@@ -92,7 +92,7 @@ Torus.ui.pings.rebuild = function() {
 				alert.appendChild(document.createTextNode(' '));
 				var input = document.createElement('input');
 					input.id = 'torus-pings-' + i + '-alert';
-					Torus.ui.ids['torus-pings-' + i + '-alert'] = input;
+					Torus.ui.ids['pings-' + i + '-alert'] = input;
 					input.className = 'torus-option-string';
 					input.type = 'text';
 					input.value = Torus.ui.pings.dir[i].alert;
@@ -109,7 +109,7 @@ Torus.ui.pings.rebuild = function() {
 				interval.appendChild(document.createTextNode(' '));
 				var input = document.createElement('input');
 					input.id = 'torus-pings-' + i + '-input';
-					Torus.ui.ids['torus-pings-' + i + '-input'] = input;
+					Torus.ui.ids['pings-' + i + '-input'] = input;
 					input.className = 'torus-option-number';
 					input.type = 'number';
 					input.value = Torus.ui.pings.dir[i].interval;
@@ -126,7 +126,7 @@ Torus.ui.pings.rebuild = function() {
 				beep.appendChild(document.createTextNode(' '));
 				var input = document.createElement('input');
 					input.id = 'torus-pings-' + i + '-beep';
-					Torus.ui.ids['torus-pings-' + i + '-beep'] = input;
+					Torus.ui.ids['pings-' + i + '-beep'] = input;
 					input.className = 'torus-option-boolean';
 					input.type = 'checkbox';
 					input.checked = Torus.ui.pings.dir[i].beep;
@@ -143,7 +143,7 @@ Torus.ui.pings.rebuild = function() {
 				sound.appendChild(document.createTextNode(' '));
 				var input = document.createElement('input');
 					input.id = 'torus-pings-' + i + '-sound';
-					Torus.ui.ids['torus-pings-' + i + '-sound'] = input;
+					Torus.ui.ids['pings-' + i + '-sound'] = input;
 					input.className = 'torus-option-string';
 					input.type = 'text';
 					input.value = Torus.ui.pings.dir[i].sound;
@@ -160,7 +160,7 @@ Torus.ui.pings.rebuild = function() {
 				literal.appendChild(document.createTextNode(' '));
 				var textarea = document.createElement('textarea');
 					textarea.id = 'torus-pings-' + i + '-literal';
-					Torus.ui.ids['torus-pings-' + i + '-literal'] = textarea;
+					Torus.ui.ids['pings-' + i + '-literal'] = textarea;
 					textarea.className = 'torus-pings-literal';
 					textarea.rows = 5
 					textarea.value = Torus.ui.pings.dir[i].literal.join('\n');
@@ -177,7 +177,7 @@ Torus.ui.pings.rebuild = function() {
 				regex.appendChild(document.createTextNode(' '));
 				var textarea = document.createElement('textarea');
 					textarea.id = 'torus-pings-' + i + '-regex';
-					Torus.ui.ids['torus-pings-' + i + '-regex'] = textarea;
+					Torus.ui.ids['pings-' + i + '-regex'] = textarea;
 					textarea.className = 'torus-pings-regex';
 					textarea.rows = 10;
 					textarea.value = '';
@@ -191,7 +191,7 @@ Torus.ui.pings.rebuild = function() {
 
 	var add = document.createElement('li');
 		add.id = 'torus-pings-add';
-		Torus.ui.ids['torus-pings-add'] = add;
+		Torus.ui.ids['pings-add'] = add;
 		add.className = 'torus-sidebar-button';
 		add.textContent = '+ Add';
 		add.addEventListener('click', Torus.ui.pings.click_add);
@@ -250,11 +250,12 @@ Torus.ui.pings.click_add = function() { //FIXME: this works, but is stupid
 		add.appendChild(document.createTextNode(' '));
 		var input = document.createElement('input');
 			input.id = 'torus-pings-add-input';
-			Torus.ui.ids['torus-pings-add-input'] = input;
+			Torus.ui.ids['pings-add-input'] = input;
 			input.addEventListener('keyup', function() {
 				if(event.keyCode == 13) {
 					if(!Torus.ui.pings.dir[this.value]) {
-						Torus.ui.pings.dir[this.value] = Torus.ui.pings.dir['#global'];
+						Torus.ui.pings.dir[this.value] = {};
+						for(var i in Torus.ui.pings.dir['#global']) {Torus.ui.pings.dir[this.value][i] = Torus.ui.pings.dir['#global'][i];}
 						Torus.ui.pings.dir[this.value].enabled = true;
 						Torus.ui.pings.dir[this.value].literal = [];
 						Torus.ui.pings.dir[this.value].regex = [];

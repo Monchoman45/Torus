@@ -21,7 +21,8 @@ Torus.ui.new_room = function(event) {
 	event.room.add_listener('io', 'unban', Torus.ui.add_line);
 
 	if(!event.room.parent && !Torus.ui.pings.dir[event.room.domain]) {
-		Torus.ui.pings.dir[event.room.domain] = Torus.ui.pings.dir['#global'];
+		Torus.ui.pings.dir[event.room.domain] = {};
+		for(var i in Torus.ui.pings.dir['#global']) {Torus.ui.pings.dir[event.room.domain][i] = Torus.ui.pings.dir['#global'][i];}
 		Torus.ui.pings.dir[event.room.domain].enabled = true;
 		Torus.ui.pings.dir[event.room.domain].literal = [];
 		Torus.ui.pings.dir[event.room.domain].regex = [];
