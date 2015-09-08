@@ -35,6 +35,8 @@ Torus.ui.new_room = function(event) {
 
 	event.room.listeners.ui = {};
 
+	event.room.last_viewed = 0;
+
 	if(isNaN(event.room.domain * 1)) {
 		event.room.checkuser = false;
 

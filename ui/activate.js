@@ -2,6 +2,9 @@ Torus.ui.activate = function(room) {
 	if(Torus.ui.active.id >= 0) {Torus.ui.ids['tab-' + Torus.ui.active.domain].classList.remove('torus-tab-active');}
 	else {Torus.ui.ids['tab--1'].classList.remove('torus-tab-active');}
 
+	if(Torus.ui.active.id >= 0) {Torus.ui.active.last_viewed = (new Date()).getTime();}
+	for(var i = 0; i < Torus.ui.viewing.length; i++) {Torus.ui.viewing[i].last_viewed = (new Date()).getTime();}
+
 	Torus.util.empty(Torus.ui.ids['info']);
 	var event = new Torus.classes.UIEvent('deactivate', Torus.ui.active);
 	event.old_window = Torus.util.empty(Torus.ui.ids['window']);
@@ -62,6 +65,9 @@ Torus.ui.activate = function(room) {
 
 Torus.ui.show = function(room) {
 	if(room.id < 0) {throw new Error('Invalid room ' + room.domain + '. (ui.show)');}
+
+	if(Torus.ui.active.id >= 0) {Torus.ui.active.last_viewed = (new Date()).getTime();}
+	for(var i = 0; i < Torus.ui.viewing.length; i++) {Torus.ui.viewing[i].last_viewed = (new Date()).getTime();}
 
 	if(room.viewing) { //unshow
 		room.viewing = false;

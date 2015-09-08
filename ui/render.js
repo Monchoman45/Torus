@@ -17,6 +17,7 @@ Torus.ui.render = function(el) {
 		indexes.push(Torus.logs.messages[Torus.ui.active.domain].length - 1);
 	}
 
+	var bar = false;
 	var frag = document.createDocumentFragment(); //yo these things are so cool
 	for(var i = 0; i < Torus.options['messages-general-max'] && rooms.length > 0; i++) {
 		var message = rooms[0][indexes[0]];
@@ -32,7 +33,15 @@ Torus.ui.render = function(el) {
 			rooms.splice(source, 1);
 			indexes.splice(source, 1);
 		}
-		if(i == 0) {frag.appendChild(Torus.ui.render_line(message));}
+
+		if(!bar && message.id < Torus.ui.active.last_viewed) {
+			var hr = document.createElement('hr');
+			hr.className = 'torus-message-separator';
+			if(frag.children.length == 0) {frag.appendChild(hr);}
+			else {frag.insertBefore(hr, frag.firstChild);}
+			bar = true;
+		}
+		if(frag.children.length == 0) {frag.appendChild(Torus.ui.render_line(message));}
 		else {frag.insertBefore(Torus.ui.render_line(message), frag.firstChild);}
 	}
 	el.appendChild(frag);
@@ -59,149 +68,149 @@ Torus.ui.render_line = function(message) {
 	if(message.type != 'io') {throw new Error('Torus.ui.render_line: Event type must be `io`.');}
 
 	var line = document.createElement('div');
-		line.className = 'torus-message torus-room-' + message.room.domain;
-		if(message.room != Torus.ui.active) {line.classList.add('torus-message-inactive');}
-		var time = document.createElement('span');
-			time.className = 'torus-message-timestamp';
-			time.textContent = '[' + Torus.util.timestamp(message.time) + ']';
-		line.appendChild(time);
-		var viewing = Torus.ui.viewing.length;
-		if(Torus.ui.viewing.indexOf(Torus.chats[0]) != -1) {viewing--;}
-		if(Torus.ui.viewing.indexOf(Torus.ui.active) != -1) {viewing--;}
-		if(viewing > 0) {
-			var max = message.room.name.length;
-			for(var i = 0; i < Torus.ui.viewing.length; i++) {
-				if(max < Torus.ui.viewing[i].name.length) {max = Torus.ui.viewing[i].name.length;}
-			}
-			if(max < Torus.ui.active.name.length) {max = Torus.ui.active.name.length;}
-			max -= message.room.name.length;
-			var indent = '';
-			for(var i = 0; i < max; i++) {indent += ' ';}
-
-			line.appendChild(document.createTextNode(' '));
-			var room = document.createElement('span');
-				room.className = 'torus-message-room';
-				room.textContent = '{' + message.room.name + '}';
-			line.appendChild(room);
-			var span = document.createElement('span');
-				span.className = 'torus-whitespace';
-				span.textContent = indent;
-			line.appendChild(indent);
+	line.className = 'torus-message torus-room-' + message.room.domain;
+	if(message.room != Torus.ui.active) {line.classList.add('torus-message-inactive');}
+	var time = document.createElement('span');
+		time.className = 'torus-message-timestamp';
+		time.textContent = '[' + Torus.util.timestamp(message.time) + ']';
+	line.appendChild(time);
+	var viewing = Torus.ui.viewing.length;
+	if(Torus.ui.viewing.indexOf(Torus.chats[0]) != -1) {viewing--;}
+	if(Torus.ui.viewing.indexOf(Torus.ui.active) != -1) {viewing--;}
+	if(viewing > 0) {
+		var max = message.room.name.length;
+		for(var i = 0; i < Torus.ui.viewing.length; i++) {
+			if(max < Torus.ui.viewing[i].name.length) {max = Torus.ui.viewing[i].name.length;}
 		}
-		line.appendChild(document.createTextNode(' '));
+		if(max < Torus.ui.active.name.length) {max = Torus.ui.active.name.length;}
+		max -= message.room.name.length;
+		var indent = '';
+		for(var i = 0; i < max; i++) {indent += ' ';}
 
-		switch(message.event) {
-			case 'me':
-			case 'message':
-				if(message.ping) {line.classList.add('torus-message-ping');}
-				if(message.event == 'message') {
-					var span = document.createElement('span'); //this is arguably one of the dumber things i've ever done
-					span.className = 'torus-whitespace'; //it works though
-					span.textContent = '  '; //#yolo
-					line.appendChild(span);
-					line.appendChild(document.createTextNode('<'));
-					line.appendChild(Torus.ui.span_user(message.user));
-					line.appendChild(document.createTextNode('> '));
-				}
-				else {
-					line.appendChild(document.createTextNode('*'));
-					var span = document.createElement('span'); //this is arguably one of the dumber things i've ever done
-					span.className = 'torus-whitespace'; //it works though
-					span.textContent = '  '; //#yolo
-					line.appendChild(span);
-					line.appendChild(Torus.ui.span_user(message.user));
-					line.appendChild(document.createTextNode(' '));
-				}
-				line.appendChild(message.html);
-				break;
-			case 'alert':
-				line.appendChild(document.createTextNode('== '));
-				line.appendChild(message.html);
-				break;
-			case 'join':
-			case 'rejoin':
-			case 'ghost':
-				//FIXME: i18n - this shows up as "user joined room"
-				//FIXME: and ghost is only here because message.event + 'ed' is the correct tense
-				line.appendChild(document.createTextNode('== '));
+		line.appendChild(document.createTextNode(' '));
+		var room = document.createElement('span');
+			room.className = 'torus-message-room';
+			room.textContent = '{' + message.room.name + '}';
+		line.appendChild(room);
+		var span = document.createElement('span');
+			span.className = 'torus-whitespace';
+			span.textContent = indent;
+		line.appendChild(indent);
+	}
+	line.appendChild(document.createTextNode(' '));
+
+	switch(message.event) {
+		case 'me':
+		case 'message':
+			if(message.ping) {line.classList.add('torus-message-ping');}
+			if(message.event == 'message') {
+				var span = document.createElement('span'); //this is arguably one of the dumber things i've ever done
+				span.className = 'torus-whitespace'; //it works though
+				span.textContent = '  '; //#yolo
+				line.appendChild(span);
+				line.appendChild(document.createTextNode('<'));
 				line.appendChild(Torus.ui.span_user(message.user));
-				line.appendChild(document.createTextNode(' ' + message.event + 'ed {' + message.room.name + '}'));
-				break;
-			case 'part':
-				//FIXME: i18n
-				line.appendChild(document.createTextNode('== '));
-				line.appendChild(Torus.ui.span_user(message.user));
-				line.appendChild(document.createTextNode(' left {' + message.room.name + '}'));
-				break;
-			case 'logout':
-				//FIXME: i18n
-				line.appendChild(document.createTextNode('== '));
-				line.appendChild(Torus.ui.span_user(message.user));
-				line.appendChild(document.createTextNode(' logged out'));
-				break;
-			case 'ctcp':
-				//FIXME: i18n
-				if(message.user == wgUserName) {line.appendChild(document.createTextNode(' >'));}
-				else {line.appendChild(document.createTextNode(' <'));}
+				line.appendChild(document.createTextNode('> '));
+			}
+			else {
+				line.appendChild(document.createTextNode('*'));
 				var span = document.createElement('span'); //this is arguably one of the dumber things i've ever done
 				span.className = 'torus-whitespace'; //it works though
 				span.textContent = '  '; //#yolo
 				line.appendChild(span);
 				line.appendChild(Torus.ui.span_user(message.user));
-				if(!message.data) {line.appendChild(document.createTextNode(' CTCP|' + message.target + '|' + message.proto));}
-				else {line.appendChild(document.createTextNode(' CTCP|' + message.target + '|' + message.proto + ': ' + message.data));}
-				break;
-			case 'mod':
-				//FIXME: i18n
-				line.appendChild(document.createTextNode('== '));
-				line.appendChild(Torus.ui.span_user(message.performer));
-				line.appendChild(document.createTextNode(' promoted '));
-				line.appendChild(Torus.ui.span_user(message.target));
-				line.appendChild(document.createTextNode(' to chatmod of {' + message.room.name + '}'));
-				break;
-			case 'kick':
-			case 'ban':
-			case 'unban':
-				//FIXME: i18n
-				if(message.event != 'kick') {var tense = 'ned';} //curse you, english language
-				else {var tense = 'ed'}
-				if(message.room.parent) {var domain = message.room.parent.domain;}
-				else {var domain = message.room.domain;}
+				line.appendChild(document.createTextNode(' '));
+			}
+			line.appendChild(message.html);
+			break;
+		case 'alert':
+			line.appendChild(document.createTextNode('== '));
+			line.appendChild(message.html);
+			break;
+		case 'join':
+		case 'rejoin':
+		case 'ghost':
+			//FIXME: i18n - this shows up as "user joined room"
+			//FIXME: and ghost is only here because message.event + 'ed' is the correct tense
+			line.appendChild(document.createTextNode('== '));
+			line.appendChild(Torus.ui.span_user(message.user));
+			line.appendChild(document.createTextNode(' ' + message.event + 'ed {' + message.room.name + '}'));
+			break;
+		case 'part':
+			//FIXME: i18n
+			line.appendChild(document.createTextNode('== '));
+			line.appendChild(Torus.ui.span_user(message.user));
+			line.appendChild(document.createTextNode(' left {' + message.room.name + '}'));
+			break;
+		case 'logout':
+			//FIXME: i18n
+			line.appendChild(document.createTextNode('== '));
+			line.appendChild(Torus.ui.span_user(message.user));
+			line.appendChild(document.createTextNode(' logged out'));
+			break;
+		case 'ctcp':
+			//FIXME: i18n
+			if(message.user == wgUserName) {line.appendChild(document.createTextNode(' >'));}
+			else {line.appendChild(document.createTextNode(' <'));}
+			var span = document.createElement('span'); //this is arguably one of the dumber things i've ever done
+			span.className = 'torus-whitespace'; //it works though
+			span.textContent = '  '; //#yolo
+			line.appendChild(span);
+			line.appendChild(Torus.ui.span_user(message.user));
+			if(!message.data) {line.appendChild(document.createTextNode(' CTCP|' + message.target + '|' + message.proto));}
+			else {line.appendChild(document.createTextNode(' CTCP|' + message.target + '|' + message.proto + ': ' + message.data));}
+			break;
+		case 'mod':
+			//FIXME: i18n
+			line.appendChild(document.createTextNode('== '));
+			line.appendChild(Torus.ui.span_user(message.performer));
+			line.appendChild(document.createTextNode(' promoted '));
+			line.appendChild(Torus.ui.span_user(message.target));
+			line.appendChild(document.createTextNode(' to chatmod of {' + message.room.name + '}'));
+			break;
+		case 'kick':
+		case 'ban':
+		case 'unban':
+			//FIXME: i18n
+			if(message.event != 'kick') {var tense = 'ned';} //curse you, english language
+			else {var tense = 'ed'}
+			if(message.room.parent) {var domain = message.room.parent.domain;}
+			else {var domain = message.room.domain;}
 
-				line.appendChild(document.createTextNode('== '));
-				line.appendChild(Torus.ui.span_user(message.performer));
-				line.appendChild(document.createTextNode(' ' + message.event + tense + ' '));
-				line.appendChild(Torus.ui.span_user(message.target));
-				line.appendChild(document.createTextNode(' ('));
-				var talk = document.createElement('a');
-					talk.href = 'http://' + domain + '.wikia.com/wiki/User_talk:' + message.target;
-					talk.textContent = 't';
-					talk.addEventListener('click', Torus.ui.click_link);
-				line.appendChild(talk);
+			line.appendChild(document.createTextNode('== '));
+			line.appendChild(Torus.ui.span_user(message.performer));
+			line.appendChild(document.createTextNode(' ' + message.event + tense + ' '));
+			line.appendChild(Torus.ui.span_user(message.target));
+			line.appendChild(document.createTextNode(' ('));
+			var talk = document.createElement('a');
+				talk.href = 'http://' + domain + '.wikia.com/wiki/User_talk:' + message.target;
+				talk.textContent = 't';
+				talk.addEventListener('click', Torus.ui.click_link);
+			line.appendChild(talk);
+			line.appendChild(document.createTextNode('|'));
+			var contribs = document.createElement('a');
+				contribs.href = 'http://' + domain + '.wikia.com/wiki/Special:Contributions/' + message.target;
+				contribs.textContent = 'c';
+				contribs.addEventListener('click', Torus.ui.click_link);
+			line.appendChild(contribs);
+			line.appendChild(document.createTextNode('|'));
+			var ban = document.createElement('a');
+				ban.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatban?page=User:' + message.target;
+				ban.textContent = 'log';
+				ban.addEventListener('click', Torus.ui.click_link);
+			line.appendChild(ban);
+			if(message.room.checkuser) {
 				line.appendChild(document.createTextNode('|'));
-				var contribs = document.createElement('a');
-					contribs.href = 'http://' + domain + '.wikia.com/wiki/Special:Contributions/' + message.target;
-					contribs.textContent = 'c';
-					contribs.addEventListener('click', Torus.ui.click_link);
-				line.appendChild(contribs);
-				line.appendChild(document.createTextNode('|'));
-				var ban = document.createElement('a');
-					ban.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatban?page=User:' + message.target;
-					ban.textContent = 'log';
-					ban.addEventListener('click', Torus.ui.click_link);
-				line.appendChild(ban);
-				if(message.room.checkuser) {
-					line.appendChild(document.createTextNode('|'));
-					var ccon = document.createElement('a');
-						ccon.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatconnect?user=' + message.target;
-						ccon.textContent = 'ccon';
-						ccon.addEventListener('click', Torus.ui.click_link);
-					line.appendChild(ccon);
-				}
-				line.appendChild(document.createTextNode(') from {' + message.room.name + '}'));
-				if(message.event == 'ban') {line.appendChild(document.createTextNode(' for ' + message.expiry));}
-				break;
-			default: throw new Error('Message type ' + message.event + ' is not rendered. (ui.render_line)');
-		}
+				var ccon = document.createElement('a');
+					ccon.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatconnect?user=' + message.target;
+					ccon.textContent = 'ccon';
+					ccon.addEventListener('click', Torus.ui.click_link);
+				line.appendChild(ccon);
+			}
+			line.appendChild(document.createTextNode(') from {' + message.room.name + '}'));
+			if(message.event == 'ban') {line.appendChild(document.createTextNode(' for ' + message.expiry));}
+			break;
+		default: throw new Error('Message type ' + message.event + ' is not rendered. (ui.render_line)');
+	}
 	return line;
 }
