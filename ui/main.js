@@ -6,6 +6,7 @@ Torus.ui = {
 	active: Torus.chats[0],
 	viewing: [],
 	popup_timeout: 0,
+	away_timeout: 0,
 }
 Torus.listeners.ui = {
 	render: [],
@@ -79,6 +80,7 @@ Torus.ui.onload = function() {
 				if(!Torus.chats[rooms[i]]) {Torus.open(rooms[i]);} //could be Torus.local
 			}
 		}
+		Torus.ui.clear_away_timeout();
 	}
 }
 
@@ -169,6 +171,14 @@ Torus.ui.onload = function() {
 Torus.ui.window.addEventListener('mouseover', Torus.ui.window_mouseover);
 
 Torus.add_listener('window', 'load', Torus.ui.onload);
+
+Torus.add_listener('chat', 'open', Torus.ui.clear_away_timeout);
+Torus.add_listener('chat', 'send_message', Torus.ui.clear_away_timeout);
+Torus.add_listener('chat', 'send_me', Torus.ui.clear_away_timeout);
+Torus.add_listener('chat', 'givechatmod', Torus.ui.clear_away_timeout);
+Torus.add_listener('chat', 'kick', Torus.ui.clear_away_timeout);
+Torus.add_listener('chat', 'ban', Torus.ui.clear_away_timeout);
+Torus.add_listener('chat', 'unban', Torus.ui.clear_away_timeout);
 
 Torus.chats[0].add_listener('io', 'alert', Torus.ui.add_line);
 for(var i in Torus.logs) {Torus.logs[i][0] = [];}

@@ -107,8 +107,21 @@ Torus.ui.window_mouseover = function(event) {
 		Torus.data.pinginterval = 0;
 		document.title = Torus.data.titleflash;
 	}
-	//if(Torus.ui.active.id > 0) {
-	//	clearTimeout(Torus.ui.active.away_timeout);
-	//	setTimeout(function() {Torus.ui.active.set_status('away', ''); Torus.ui.active.auto_away = true;}, 5 * 60 * 1000);
-	//}
+}
+
+Torus.ui.clear_away_timeout = function() {
+	clearTimeout(Torus.ui.away_timeout);
+	Torus.ui.away_timeout = setTimeout(Torus.ui.auto_away, 5 * 60 * 1000);
+	for(var i in Torus.chats) {
+		if(i == 0 || !Torus.chats[i].connected) {continue;}
+		var user = Torus.chats[i].userlist[wgUserName];
+		if(user.status_state == 'away') {Torus.chats[i].set_status(user.old_state);}
+	}
+}
+
+Torus.ui.auto_away = function() {
+	for(var i in Torus.chats) {
+		if(i == 0 || !Torus.chats[i].connected) {continue;}
+		Torus.chats[i].set_status('away');
+	}
 }
