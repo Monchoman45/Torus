@@ -205,8 +205,6 @@ Torus.ui.initial = function(event) {
 }
 
 Torus.ui.parse_message = function(event) {
-	event.html = event.text;
-
 	event.ping = false;
 	if(event.user != wgUserName && !event.room.parent && event.room != Torus.chats[0] && Torus.ui.pings.dir['#global'].enabled) {
 		var text = event.text.toLowerCase();
@@ -237,15 +235,10 @@ Torus.ui.parse_message = function(event) {
 		}
 	}
 
-	while(event.html.indexOf('<') != -1) {event.html = event.html.replace('<', '&lt;');}
-	while(event.html.indexOf('>') != -1) {event.html = event.html.replace('>', '&gt;');}
-
 	if(event.ping) {Torus.ui.ping(event.room);}
 
-	if(event.room.parent) {event.html = Torus.util.parse_links(event.html, event.room.parent.domain);}
-	else {event.html = Torus.util.parse_links(event.html, event.room.domain);}
-
-	while(event.html.indexOf('\n') != -1) {event.html = event.html.replace('\n', '<br />');}
+	if(event.room.parent) {event.html = Torus.ui.parse_links(event.text, event.room.parent.domain);}
+	else {event.html = Torus.ui.parse_links(event.text, event.room.domain);}
 }
 
 Torus.add_listener('chat', 'new', Torus.ui.new_room);

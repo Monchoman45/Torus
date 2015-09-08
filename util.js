@@ -13,123 +13,6 @@ Torus.util.compare_strings = function(str1, str2) {
 
 Torus.util.cap = function(str) {return str.charAt(0).toUpperCase() + str.substring(1);}
 
-Torus.util.parse_links = function (text, wiki) {
-	if(!text) {return '';}
-	if(!isNaN(wiki * 1)) {wiki = '';}
- 
-	var ref = 0;
-	while(text.indexOf('http', ref) != -1) { //search for plain links
-		if(
-			text.charAt(text.indexOf('http', ref) - 1) != '[' &&
-			(text.indexOf('http://', ref) == text.indexOf('http', ref) || text.indexOf('https://', ref) == text.indexOf('http', ref))
-		) {
-			var start = text.indexOf('http', ref);
-			var space = text.indexOf(' ', start);
-			var line = text.indexOf('\n', start);
-			if(space != -1 && line != -1) {
-				if(space < line) {var end = space;}
-				else {var end = line;}
-			}
-			else if(space != -1) {var end = space;}
-			else if(line != -1) {var end = line;}
-			else {var end = text.length;}
-			var url = text.substring(start, end);
-			while(url.charAt(url.length - 1) == '.' || url.charAt(url.length - 1) == ',' || url.charAt(url.length - 1) == '!' || url.charAt(url.length - 1) == '?') {url = url.substring(0, url.length - 1); end--;}
-			var link = '<a href="' + url + '" onclick="Torus.ui.click_link.call(this, event);">' + url + '</a>';
-			text = text.substring(0, start) + link + text.substring(end);
-		}
-		ref = text.indexOf('http', ref) + (link ? link.length - 9 : 1); //FIXME: ternary
-	}
-
-	ref = 0;
-	while(text.indexOf('[[', ref) != -1) { //search for wikilinks
-		var open = text.indexOf('[[', ref);
-		var pipe = text.indexOf('|', open);
-		var close = text.indexOf(']]', open);
-
-		if(close == -1) {break;} //no closing ]] for this opening [[
-		if(text.indexOf('\n', open) != -1 && text.indexOf('\n', open) < close) {ref = open + 1; continue;} //there is a newline between the opening [[ and the closing ]], this link is bad
-
-		if(pipe != -1 && pipe < close) { //there is a pipe in the link
-			if(pipe == close - 1) { //is [[page|]], pipe trick
-				var title = text.substring(open + 2, pipe);
-				var display = title.substring(title.indexOf(':') + 1); //strip everything up to first :
-				if(display[display.length - 1] == ')' && display.lastIndexOf('(') != -1) {display = display.substring(0, display.lastIndexOf('('));} //strip trailing parens
-			}
-			else { //is [[page|display]]
-				var title = text.substring(open + 2, pipe);
-				var display = text.substring(pipe + 1, close);
-			}
-		}
-		else { //is [[page]]
-			var title = text.substring(open + 2, close);
-			var display = title;
-		}
-		if(!title) {ref = open + 1; continue;} //skip [[]] and [[|anything]]
-
-		if(title.indexOf('c:') == 0) {title = 'w:' + title;} //c: on central is w:c: everywhere else
-		if(title.indexOf('w:c:') == 0) { //w:c:domain link
-			if(title == 'w:c:') {ref = open + 1; continue;} //this link goes nowhere
-
-			if(title.indexOf(':', 4) != -1) { //is [[w:c:domain:page]]
-				var domain = title.substring(4, title.indexOf(':', 4));
-				var page = Torus.util.normalize_pagename(title.substring(title.indexOf(':', 4) + 1));
-				title = title.substring(0, title.indexOf(':', 4)) + ':' + page;
-			}
-			else { //is [[w:c:domain]]
-				var domain = title.substring(4);
-				var page = '';
-			}
-		}
-		else if(title.indexOf('w:') == 0) { //w: central link
-			var domain = 'c';
-			if(title == 'w:') {var page = '';}
-			else {
-				var page = Torus.util.normalize_pagename(title.substring(2));
-				title = 'w:' + page;
-			}
-		}
-		else if(wiki) { //local link
-			var domain = wiki;
-			var page = Torus.util.normalize_pagename(title);
-			title = page;
-		}
-		else {ref = open + 1; continue;} //no domain was specified and we don't know the local domain
-
-		var link = '<a href="http://' + domain + '.wikia.com/wiki/' + encodeURIComponent(page).replace(/%3A/g, ':').replace(/%20/g, '_').replace(/%2F/g, '/') + '" title="' + title + '" onclick="Torus.ui.click_link.call(this, event);">' + display + '</a>';
-		text = text.substring(0, open) + link + text.substring(close + 2);
-		ref = open + link.length;
-	}
-
-	ref = 0;
-	while(text.indexOf('[http', ref) != -1) { //search for external wikilinks
-		if(text.indexOf('[http://', ref) == text.indexOf('[http', ref) || text.indexOf('[https://', ref) == text.indexOf('[http', ref)) {
-			var start = text.indexOf('[http', ref);
-			var space = text.indexOf(' ', start);
-			var end = text.indexOf(']', space);
-			if(end == -1) {break;}
-			if(space + 1 >= text.indexOf(']', start) || (text.indexOf('\n', start) != -1 && text.indexOf('\n', start) < end)) {ref = text.indexOf('[http', ref) + 1; continue;}
-			var url = text.substring(start + 1, space);
-			var link = '<a href="' + encodeURIComponent(url).replace(/%3A/g, ':').replace(/%20/g, '_').replace(/%2F/g, '/') + '" onclick="Torus.ui.click_link.call(this, event);">' + text.substring(space + 1, end) + '</a>';
-			text = text.substring(0, start) + link + text.substring(end + 1);
-		}
-		ref = start + link.length;
-	}
-	return text;
-}
-
-Torus.util.normalize_pagename = function(page) {
-	if(!page) {return '';}
-	if(page.indexOf(':') != -1) { //Namespace:Title
-		var namespace = page.substring(0, page.indexOf(':'));
-		var title = page.substring(page.indexOf(':') + 1);
-		page = Torus.util.cap(namespace) + ':' + Torus.util.cap(title);
-	}
-	else {page = Torus.util.cap(page);} //Title (mainspace)
-	while(page.indexOf('_') != -1) {page = page.replace('_', ' ');}
-	return page;
-}
-
 Torus.util.timestamp = function(time) {
 	var date = new Date();
 	if(time) {date.setTime(time);}
@@ -214,7 +97,7 @@ Torus.util.stupid_to_int = function(stupid) {
 
 Torus.util.utf8ify = function(str) {
 	str = encodeURIComponent(str);
-	for(var i = str.indexOf('%'); i != -1; i = str.indexOf('%')) {
+	for(var i = str.indexOf('%'); i != -1; i = str.indexOf('%', i + 1)) {
 		str = str.substring(0, i) + String.fromCharCode(parseInt(str.substring(i + 1, i + 3), 16)) + str.substring(i + 3);
 	}
 	return str;

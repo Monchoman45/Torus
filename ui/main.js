@@ -100,6 +100,8 @@ Torus.ui.onload = function() {
 
 {{MediaWiki:Torus.js/ui/dom_listeners.js}}
 
+{{MediaWiki:Torus.js/ui/parser.js}}
+
 {{MediaWiki:Torus.js/ui/constructors.js}}
 
 {{MediaWiki:Torus.js/ui/util.js}}

@@ -108,11 +108,11 @@ Torus.ui.render_line = function(message) {
 					line.appendChild(Torus.ui.span_user(message.user));
 					line.appendChild(document.createTextNode(' '));
 				}
-				line.innerHTML += message.html; //FIXME: innerHTML +=
+				line.appendChild(message.html);
 				break;
 			case 'alert':
 				line.appendChild(document.createTextNode('== '));
-				line.innerHTML += message.html; //FIXME: innerHTML +=
+				line.appendChild(message.html);
 				break;
 			case 'join':
 			case 'rejoin':

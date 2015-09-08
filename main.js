@@ -158,14 +158,12 @@ Torus.alert = function(text, room) {
 			var event = new Torus.classes.IOEvent('alert', room);
 			event.text = spl[i];
 			Torus.call_listeners(event);
-			//Torus.ui.add_line(event); //FIXME: ui
 		}
 	}
 	else {
 		var event = new Torus.classes.IOEvent('alert', room);
 		event.text = text;
 		Torus.call_listeners(event);
-		//Torus.ui.add_line(event); //FIXME: ui
 	}
 }
 
