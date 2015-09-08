@@ -34,6 +34,25 @@ Torus.ui.new_room = function(event) {
 	}
 
 	event.room.listeners.ui = {};
+
+	if(isNaN(event.room.domain * 1)) {
+		event.room.checkuser = false;
+
+		Torus.io.jsonp('http://' + event.room.domain + '.wikia.com/api.php?action=query&list=users&ususers=' + encodeURIComponent(wgUserName) + '&usprop=rights&format=json', function(result) {
+			var rights = result.query.users[0].rights;
+			var found = false;
+			for(var i in rights) {
+				if(rights[i] == 'checkuser') {found = true; break;}
+			}
+			if(found) {
+				event.room.checkuser = true; //FIXME: closure
+				if(event.room.domain == Torus.local && !Torus.ext.ccui) {
+					Torus.util.load_js('http://@DOMAIN@/wiki/MediaWiki:Torus.js/ext/ccui/main.js?action=raw&ctype=text/javascript');
+					Torus.util.load_css('http://@DOMAIN@/wiki/MediaWiki:Torus.js/ext/ccui/main.css?action=raw&ctype=text/css');
+				}
+			}
+		});
+	}
 }
 
 Torus.ui.add_room = function(event) {
@@ -82,7 +101,7 @@ Torus.ui.add_line = function(event) {
 	Torus.logs.messages[event.room.domain].push(event);
 	//Torus.logs.plain[event.room.domain].push(event); //TODO: this is supposed to be like just text right?
 
-	if(event.room == Torus.ui.active || (event.room.viewing && Torus.ui.active != Torus.chats[0])) {
+	if(event.room == Torus.ui.active || (event.room.viewing && Torus.ui.active.id > 0)) {
 		var scroll = false;
 		if(Torus.ui.ids['window'].offsetHeight + Torus.ui.ids['window'].scrollTop >= Torus.ui.ids['window'].scrollHeight) {scroll = true;}
 		Torus.ui.ids['window'].appendChild(Torus.ui.render_line(event));

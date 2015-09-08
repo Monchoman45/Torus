@@ -39,8 +39,10 @@ while len(dirs):
 				dirs.append(os.listdir('.'))
 				dirnames.append('')
 		elif file.endswith('.js') or file.endswith('.css'):
-			with open(dirname + file, 'r') as f: files['MediaWiki:Torus.js/' + dirname.replace('\\', '/') + file] = f.read()
-			print('\t' + dirname + file + ': ' + str(len(files['MediaWiki:Torus.js/' + dirname.replace('\\', '/') + file])))
+			name = 'MediaWiki:Torus.js/' + dirname.replace('\\', '/') + file
+			with open(dirname + file, 'r') as f: files[name] = f.read()
+			files[name] = files[name].replace('@DOMAIN@', sys.argv[1]);
+			print('\t' + dirname + file + ': ' + str(len(files[name])))
 		elif not file.endswith('.py') and not file.endswith('.php'): #is a directory
 			dirs.append(os.listdir(dirname + file))
 			dirnames.append(dirname + file)

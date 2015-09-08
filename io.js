@@ -92,6 +92,28 @@ Torus.io.spider = function(domain, callback) {
 	xhr.send();
 }
 
+Torus.io.jsonp = function(url, callback) {
+	var id = Torus.io.jsonp_callbacks.length
+	var script = document.createElement('script');
+		script.src = url + '&callback=Torus.io.jsonp_callbacks[' + id + ']';
+		script.type = 'text/javascript';
+		script.setAttribute('data-id', '' + id);
+		script.onload = Torus.io.jsonp_cleanup;
+	document.head.appendChild(script);
+
+	Torus.io.jsonp_callbacks.push(callback);
+}
+Torus.io.jsonp_cleanup = function() {
+	this.parentNode.removeChild(this);
+
+	Torus.io.jsonp_callbacks[this.getAttribute('data-id') * 1] = null;
+
+	for(var i = 0; i < Torus.io.jsonp_callbacks.length; i++) {
+		if(Torus.io.jsonp_callbacks[i] != null) {return;}
+	}
+	Torus.io.jsonp_callbacks = [];
+}
+
 Torus.io.transports.polling = function(domain, info) {
 	if(!(this instanceof Torus.io.transports.polling)) {throw new Error('Must create transport with `new`.');}
 

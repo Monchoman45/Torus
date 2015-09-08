@@ -472,6 +472,23 @@ Torus.ext.ccui.input_keyup = function(event) {
 	if(event.keyCode == 13 && this.value) {Torus.ext.ccui.query(this.value, Torus.ui.ids['ext-ccui-limit'].value);}
 }
 
+Torus.ext.ccui.render_popup = function(event) {
+	if(Torus.local != Torus.ui.active.domain || !Torus.ui.active.checkuser) {return;}
+
+	var cc = Torus.ui.ids['popup-userlinks'].lastChild.lastChild;
+	cc.removeEventListener('click', Torus.ui.click_link);
+	cc.classList.add('torus-fakelink');
+	cc.setAttribute('data-user', event.user);
+	cc.addEventListener('click', Torus.ext.ccui.popup_click);
+}
+
+Torus.ext.ccui.popup_click = function(event) {
+	event.preventDefault();
+	Torus.ui.activate(Torus.ext.ccui);
+	Torus.ui.ids['window'].scrollTop = 0;
+	Torus.ext.ccui.query(this.getAttribute('data-user'));
+}
+
 //parses dates of the form HH:mm, Month D, YYYY
 //eg 22:46, September 7, 2014
 //MW dumps these out on log pages
@@ -578,6 +595,7 @@ Torus.util.match_ip16 = function(ip1, ip2) {
 }
 
 if(Torus.ui) {
+	Torus.add_listener('ui', 'render_popup', Torus.ext.ccui.render_popup); //FIXME: also do this to the ccon on bans (from ui/render.js)
 	Torus.ext.ccui.add_listener('ui', 'activate', Torus.ext.ccui.render);
 	Torus.ext.ccui.add_listener('ui', 'deactivate', Torus.util.null); //FIXME: i'm sure something important is supposed to go here
 }

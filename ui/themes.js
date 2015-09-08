@@ -3,22 +3,22 @@ Torus.ui.themes.text = 'Themes';
 
 Torus.ui.themes.dir = {
 	'binary': {
-		url: 'http://monchbox.wikia.com/wiki/MediaWiki:Torus.js/ui/themes/binary.css?action=raw&ctype=text/css',
+		url: 'http://@DOMAIN@/wiki/MediaWiki:Torus.js/ui/themes/binary.css?action=raw&ctype=text/css',
 		name: 'Binary',
 		loaded: true,
 	},
 	'creampuff': {
-		url: 'http://monchbox.wikia.com/wiki/MediaWiki:Torus.js/ui/themes/creampuff.css?action=raw&ctype=text/css',
+		url: 'http://@DOMAIN@/wiki/MediaWiki:Torus.js/ui/themes/creampuff.css?action=raw&ctype=text/css',
 		name: 'Creampuff',
 		loaded: true,
 	},
 	'default': {
-		url: 'http://monchbox.wikia.com/wiki/MediaWiki:Torus.js/ui/themes/default.css?action=raw&ctype=text/css',
+		url: 'http://@DOMAIN@/wiki/MediaWiki:Torus.js/ui/themes/default.css?action=raw&ctype=text/css',
 		name: 'Default',
 		loaded: true,
 	},
 	'plain': {
-		url: 'http://monchbox.wikia.com/wiki/MediaWiki:Torus.js/ui/themes/plain.css?action=raw&ctype=text/css',
+		url: 'http://@DOMAIN@/wiki/MediaWiki:Torus.js/ui/themes/plain.css?action=raw&ctype=text/css',
 		name: 'Plain',
 		loaded: true,
 	},

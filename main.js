@@ -69,6 +69,7 @@ window.Torus = {
 	},
 	io: {
 		transports: {},
+		jsonp_callbacks: [],
 	},
 	classes: {},
 	util: {},
@@ -204,10 +205,6 @@ Torus.load_options = function() {
 	return Torus.options;
 }
 
-if(document.readyState == 'complete') {Torus.onload();}
-else {window.addEventListener('load', Torus.onload);}
-window.addEventListener('beforeunload', Torus.unload);
-
 {{MediaWiki:Torus.js/io.js}}
 
 {{MediaWiki:Torus.js/chat.js}}
@@ -225,3 +222,11 @@ new Torus.classes.Chat(0);
 
 
 {{MediaWiki:Torus.js/ui/main.js}}
+
+
+
+
+
+window.addEventListener('beforeunload', Torus.unload);
+if(document.readyState == 'complete') {Torus.onload();}
+else {window.addEventListener('load', Torus.onload);}

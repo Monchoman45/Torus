@@ -87,6 +87,8 @@ table#torus-preview-creampuff.torus-theme-preview .text4, #torus.theme-creampuff
 #torus.theme-creampuff #torus-popup a.torus-popup-action:hover {
 	background-color: #fed;
 }
+#torus.theme-creampuff #torus-popup a.torus-popup-userlink-disabled,
+#torus.theme-creampuff #torus-popup a.torus-popup-userlink-disabled:hover,
 #torus.theme-creampuff #torus-popup a.torus-popup-action-disabled,
 #torus.theme-creampuff #torus-popup a.torus-popup-action-disabled:hover {
 	background-color: #ddd;

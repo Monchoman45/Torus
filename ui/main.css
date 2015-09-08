@@ -182,6 +182,8 @@
 #torus-popup a.torus-popup-action:hover {
 	cursor: pointer;
 }
+#torus-popup a.torus-popup-userlink-disabled,
+#torus-popup a.torus-popup-userlink-disabled:hover,
 #torus-popup a.torus-popup-action-disabled,
 #torus-popup a.torus-popup-action-disabled:hover {
 	cursor: default;
@@ -285,5 +287,3 @@
 {{MediaWiki:Torus.js/ui/themes/default.css}}
 
 {{MediaWiki:Torus.js/ui/themes/plain.css}}
-
-{{MediaWiki:Torus.js/ext/ccui.css}}

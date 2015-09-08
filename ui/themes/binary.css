@@ -87,6 +87,8 @@ table#torus-preview-binary.torus-theme-preview .text4, #torus.theme-binary .text
 #torus.theme-binary #torus-popup a.torus-popup-action:hover {
 	background-color: #5F5F5F;
 }
+#torus.theme-binary #torus-popup a.torus-popup-userlink-disabled,
+#torus.theme-binary #torus-popup a.torus-popup-userlink-disabled:hover,
 #torus.theme-binary #torus-popup a.torus-popup-action-disabled,
 #torus.theme-binary #torus-popup a.torus-popup-action-disabled:hover {
 	background-color: #ddd;

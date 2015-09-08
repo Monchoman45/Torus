@@ -24,7 +24,7 @@ Torus.logs = {
 	socket: {},
 };
 
-Torus.ui.fullscreen = function() {
+Torus.ui.fullscreen = function() { //FIXME: move
 	if(Torus.data.fullscreen) {
 		document.body.removeChild(Torus.ui.window);
 		Torus.data.old_parent.appendChild(Torus.ui.window);
@@ -107,7 +107,7 @@ Torus.ui.onload = function() {
 {{MediaWiki:Torus.js/ui/util.js}}
 
 //(function() { //I really hate these but it's better then leaking temp variables everywhere //FIXME: iffy causes load order problems
-	Torus.util.load_css('http://monchbox.wikia.com/wiki/MediaWiki:Torus.js/ui/main.css?action=raw&ctype=text/css&templates=expand');
+	Torus.util.load_css('http://@DOMAIN@/wiki/MediaWiki:Torus.js/ui/main.css?action=raw&ctype=text/css&templates=expand&t=' + (new Date()).getTime());
 
 	Torus.ui.window.id = 'torus';
 	Torus.ui.ids['torus'] = Torus.ui.window;
@@ -181,5 +181,3 @@ Torus.ui.show(Torus.chats[0]);
 {{MediaWiki:Torus.js/ui/commands.js}}
 
 {{MediaWiki:Torus.js/ui/options.js}}
-
-{{MediaWiki:Torus.js/ext/ccui.js}}

@@ -17,7 +17,7 @@
  * 
  * To make your theme selectable, add it to the top of ui/themes.js:
  * '$name': {
- * 	url: 'http://monchbox.wikia.com/wiki/MediaWiki:Torus.js/ui/themes/$name.css?action=raw&ctype=text/css',
+ * 	url: 'http://@DOMAIN@/wiki/MediaWiki:Torus.js/ui/themes/$name.css?action=raw&ctype=text/css',
  * 	name: 'A pretty name for people to see',
  * 	loaded: true,
  * },
@@ -123,6 +123,8 @@ table#torus-preview-$name.torus-theme-preview .text4, #torus.theme-$name .text4 
 #torus.theme-$name #torus-popup a.torus-popup-action:hover {
 	background-color: $bg4;
 }
+#torus.theme-$name #torus-popup a.torus-popup-userlink-disabled,
+#torus.theme-$name #torus-popup a.torus-popup-userlink-disabled:hover,
 #torus.theme-$name #torus-popup a.torus-popup-action-disabled,
 #torus.theme-$name #torus-popup a.torus-popup-action-disabled:hover {
 	background-color: #ddd;

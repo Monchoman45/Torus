@@ -81,8 +81,12 @@ Torus.ui.render_line = function(message) {
 			line.appendChild(document.createTextNode(' '));
 			var room = document.createElement('span');
 				room.className = 'torus-message-room';
-				room.textContent = '{' + message.room.name + '}' + indent;
+				room.textContent = '{' + message.room.name + '}';
 			line.appendChild(room);
+			var span = document.createElement('span');
+				span.className = 'torus-whitespace';
+				span.textContent = indent;
+			line.appendChild(indent);
 		}
 		line.appendChild(document.createTextNode(' '));
 
@@ -186,20 +190,14 @@ Torus.ui.render_line = function(message) {
 					ban.textContent = 'log';
 					ban.addEventListener('click', Torus.ui.click_link);
 				line.appendChild(ban);
-				line.appendChild(document.createTextNode('|'));
-				var ccon = document.createElement('a');
-					ccon.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatconnect?user=' + message.target;
-					ccon.textContent = 'ccon';
-					//ccon.addEventListener('click', Torus.ui.click_link);
-					ccon.className = 'torus-fakelink';
-					ccon.setAttribute('data-user', message.target);
-					ccon.addEventListener('click', function(event) { //FIXME: ccui is not required
-						event.preventDefault();
-						Torus.ui.activate(Torus.ext.ccui);
-						Torus.ui.ids['window'].scrollTop = 0;
-						Torus.ext.ccui.query(this.getAttribute('data-user'));
-					});
-				line.appendChild(ccon);
+				if(message.room.checkuser) {
+					line.appendChild(document.createTextNode('|'));
+					var ccon = document.createElement('a');
+						ccon.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatconnect?user=' + message.target;
+						ccon.textContent = 'ccon';
+						ccon.addEventListener('click', Torus.ui.click_link);
+					line.appendChild(ccon);
+				}
 				line.appendChild(document.createTextNode(') from {' + message.room.name + '}'));
 				if(message.event == 'ban') {line.appendChild(document.createTextNode(' for ' + message.expiry));}
 				break;

@@ -87,6 +87,8 @@ table#torus-preview-default.torus-theme-preview .text4, #torus.theme-default .te
 #torus.theme-default #torus-popup a.torus-popup-action:hover {
 	background-color: #def;
 }
+#torus.theme-default #torus-popup a.torus-popup-userlink-disabled,
+#torus.theme-default #torus-popup a.torus-popup-userlink-disabled:hover,
 #torus.theme-default #torus-popup a.torus-popup-action-disabled,
 #torus.theme-default #torus-popup a.torus-popup-action-disabled:hover {
 	background-color: #ddd;

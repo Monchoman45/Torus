@@ -3,9 +3,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 	var user = room.userlist[wgUserName];
 
 	var domain = room.domain;
-	if(room.parent) {
-		domain = room.parent.domain;
-	}
+	if(room.parent) {domain = room.parent.domain;}
 
 	Torus.util.empty(Torus.ui.ids['popup']);
 
@@ -16,9 +14,11 @@ Torus.ui.render_popup = function(name, room, coords) {
 
 	var info = document.createElement('div');
 	info.id = 'torus-popup-info';
+	Torus.ui.ids['popup-info'] = info;
 	var div = document.createElement('div');
 		var info_name = document.createElement('span');
 		info_name.id = 'torus-popup-name';
+		Torus.ui.ids['popup-name'] = info_name;
 		var userpage = document.createElement('a');
 			userpage.href = 'http://' + domain + '.wikia.com/wiki/User:' + encodeURIComponent(name);
 			userpage.textContent = name;
@@ -30,6 +30,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 			div.appendChild(document.createTextNode(' '));
 			var info_access = document.createElement('span');
 			info_access.id = 'torus-popup-access';
+			Torus.ui.ids['popup-access'] = info_access;
 			var icon = document.createElement('img');
 			if(target.staff) {
 				icon.className = 'torus-user-icon-staff';
@@ -47,17 +48,20 @@ Torus.ui.render_popup = function(name, room, coords) {
 
 		var state = document.createElement('div');
 		state.id = 'torus-popup-status-state';
+		Torus.ui.ids['popup-status-state'] = state;
 		state.textContent = target.status_state;
 		info.appendChild(state);
 
 		var message = document.createElement('div');
 		message.id = 'torus-popup-status-message';
+		Torus.ui.ids['popup-status-message'] = message;
 		message.textContent = target.status_message;
 		info.appendChild(message);
 	Torus.ui.ids['popup'].appendChild(info);
 
 	var userlinks = document.createElement('div');
 	userlinks.id = 'torus-popup-userlinks';
+	Torus.ui.ids['popup-userlinks'] = userlinks;
 	var div = document.createElement('div');
 		var talk = document.createElement('a');
 		talk.className = 'torus-popup-userlink';
@@ -83,23 +87,19 @@ Torus.ui.render_popup = function(name, room, coords) {
 
 		var chatconnect = document.createElement('a');
 		chatconnect.className = 'torus-popup-userlink';
-		chatconnect.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatconnect?user=' + encodeURIComponent(name);
-		//chatconnect.addEventListener('click', Torus.ui.click_link);
-		chatconnect.className += ' torus-fakelink';
-		chatconnect.setAttribute('data-user', name);
-		chatconnect.addEventListener('click', function(event) { //FIXME: ccui is not required
-			event.preventDefault();
-			Torus.ui.activate(Torus.ext.ccui);
-			Torus.ui.ids['window'].scrollTop = 0;
-			Torus.ext.ccui.query(this.getAttribute('data-user'));
-		});
+		if(room.checkuser) {
+			chatconnect.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatconnect?user=' + encodeURIComponent(name);
+			chatconnect.addEventListener('click', Torus.ui.click_link);
+		}
+		else {chatconnect.classList.add('torus-popup-userlink-disabled');}
 		chatconnect.textContent = 'chatconnect'; //FIXME: i18n
 		div.appendChild(chatconnect);
 	userlinks.appendChild(div);
 	Torus.ui.ids['popup'].appendChild(userlinks);
 
 	var actions = document.createElement('div');
-	actions.id = 'torus-popup-actions';
+		actions.id = 'torus-popup-actions';
+		Torus.ui.ids['popup-actions'] = actions;
 		var priv = document.createElement('a');
 			if(Torus.data.blockedBy.indexOf(name) != -1) {priv.className = 'torus-popup-action-disabled';}
 			else {
@@ -130,9 +130,11 @@ Torus.ui.render_popup = function(name, room, coords) {
 			mod.className = 'torus-popup-action';
 			mod.addEventListener('click', function() {this.children[0].style.display = 'block';});
 			var confirm = document.createElement('div');
-			confirm.id = 'torus-popup-modconfirm';
+				confirm.id = 'torus-popup-modconfirm';
+				Torus.ui.ids['popup-modconfirm'] = confirm;
 				var yes = document.createElement('input');
 				yes.id = 'torus-popup-modconfirm-yes';
+				Torus.ui.ids['popup-modconfirm-yes'] = yes;
 				yes.type = 'button';
 				yes.value = 'Yes'; //FIXME: i18n
 				yes.addEventListener('click', function(event) {
@@ -147,6 +149,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 
 				var no = document.createElement('input');
 				no.id = 'torus-popup-modconfirm-no';
+				Torus.ui.ids['popup-modconfirm-no'] = no;
 				no.type = 'button';
 				no.value = 'No'; //FIXME: i18n
 				no.addEventListener('click', function(event) {
@@ -177,6 +180,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 			ban.className = 'torus-popup-action';
 			var modal = document.createElement('div');
 				modal.id = 'torus-popup-banmodal';
+				Torus.ui.ids['popup-banmodal'] = modal;
 				modal.setAttribute('data-user', name);
 				var div = document.createElement('div');
 					var expiry_label = document.createElement('label');
@@ -188,6 +192,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 
 					var expiry = document.createElement('input');
 					expiry.id = 'torus-popup-banexpiry';
+					Torus.ui.ids['popup-banexpiry'] = expiry;
 					expiry.type = 'text';
 					expiry.placeholder = '1 day'; //FIXME: i18n
 					expiry.addEventListener('keyup', function(event) {
@@ -211,6 +216,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 
 					var reason = document.createElement('input');
 					reason.id = 'torus-popup-banreason';
+					Torus.ui.ids['popup-banreason'] = reason;
 					reason.placeholder = 'Misbehaving in chat'; //FIXME: i18n
 					reason.addEventListener('keyup', function(event) {
 						if(event.keyCode == 13) {
@@ -227,6 +233,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 				div = document.createElement('div');
 					var submit = document.createElement('input');
 					submit.id = 'torus-popup-banbutton';
+					Torus.ui.ids['popup-banbutton'] = submit;
 					submit.type = 'submit'
 					submit.value = 'Ban'; //FIXME: i18n
 					submit.addEventListener('click', function(event) {
