@@ -152,6 +152,7 @@ Torus.logout = function() {
 
 Torus.alert = function(text, room) {
 	if(!room) {room = Torus.chats[0];}
+	text = text.trim();
 
 	if(text.indexOf('\n') != -1) {
 		var spl = text.split('\n');
@@ -193,7 +194,7 @@ Torus.save_options = function() {
 
 Torus.load_options = function() {
 	var load = JSON.parse(window.localStorage.getItem('torus-options'));
-	if(!load) {
+	if(load) {
 		if(load.version < 231) {
 			window.localStorage.removeItem('torus-options');
 			load.data = {};
