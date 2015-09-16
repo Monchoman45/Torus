@@ -70,7 +70,7 @@ Torus.ui.pings.rebuild = function() {
 			var enabled = document.createElement('div');
 				var label = document.createElement('label');
 					label.setAttribute('for', 'torus-pings-' + i + '-enabled');
-					label.textContent = 'Enabled:'; //FIXME: i18n
+					label.textContent = Torus.i18n.text('options-enabled') + ':';
 				enabled.appendChild(label);
 				enabled.appendChild(document.createTextNode(' '));
 				var input = document.createElement('input');
@@ -87,7 +87,7 @@ Torus.ui.pings.rebuild = function() {
 			var alert = document.createElement('div');
 				var label = document.createElement('label');
 					label.setAttribute('for', 'torus-pings-' + i + '-alert');
-					label.textContent = 'Alert:'; //FIXME: i18n
+					label.textContent = Torus.i18n.text('pings-alert') + ':';
 				alert.appendChild(label);
 				alert.appendChild(document.createTextNode(' '));
 				var input = document.createElement('input');
@@ -103,8 +103,8 @@ Torus.ui.pings.rebuild = function() {
 
 			var interval = document.createElement('div');
 				var label = document.createElement('label');
-					label.setAttribute('for', 'torus-pings-' + i + '-alert');
-					label.textContent = 'Interval:'; //FIXME: i18n
+					label.setAttribute('for', 'torus-pings-' + i + '-interval');
+					label.textContent = Torus.i18n.text('pings-interval') + ':';
 				interval.appendChild(label);
 				interval.appendChild(document.createTextNode(' '));
 				var input = document.createElement('input');
@@ -121,7 +121,7 @@ Torus.ui.pings.rebuild = function() {
 			var beep = document.createElement('div');
 				var label = document.createElement('label');
 					label.setAttribute('for', 'torus-pings-' + i + '-beep');
-					label.textContent = 'Enabled:'; //FIXME: i18n
+					label.textContent = Torus.i18n.text('pings-beep') + ':';
 				beep.appendChild(label);
 				beep.appendChild(document.createTextNode(' '));
 				var input = document.createElement('input');
@@ -138,7 +138,7 @@ Torus.ui.pings.rebuild = function() {
 			var sound = document.createElement('div');
 				var label = document.createElement('label');
 					label.setAttribute('for', 'torus-pings-' + i + '-sound');
-					label.textContent = 'Sound:'; //FIXME: i18n
+					label.textContent = Torus.i18n.text('pings-sound') + ':';
 				sound.appendChild(label);
 				sound.appendChild(document.createTextNode(' '));
 				var input = document.createElement('input');
@@ -155,9 +155,9 @@ Torus.ui.pings.rebuild = function() {
 			var literal = document.createElement('div');
 				var label = document.createElement('label');
 					label.setAttribute('for', 'torus-pings-' + i + '-literal');
-					label.textContent = 'Literal:\n'; //FIXME: i18n
+					label.textContent = Torus.i18n.text('pings-literal') + ':';
 				literal.appendChild(label);
-				literal.appendChild(document.createTextNode(' '));
+				literal.appendChild(document.createElement('br'));
 				var textarea = document.createElement('textarea');
 					textarea.id = 'torus-pings-' + i + '-literal';
 					Torus.ui.ids['pings-' + i + '-literal'] = textarea;
@@ -172,9 +172,9 @@ Torus.ui.pings.rebuild = function() {
 			var regex = document.createElement('div');
 				var label = document.createElement('label');
 					label.setAttribute('for', 'torus-pings-' + i + '-regex');
-					label.textContent = 'Regex:\n'; //FIXME: i18n
+					label.textContent = Torus.i18n.text('pings-regex') + ':';
 				regex.appendChild(label);
-				regex.appendChild(document.createTextNode(' '));
+				regex.appendChild(document.createElement('br'));
 				var textarea = document.createElement('textarea');
 					textarea.id = 'torus-pings-' + i + '-regex';
 					Torus.ui.ids['pings-' + i + '-regex'] = textarea;
@@ -245,7 +245,7 @@ Torus.ui.pings.click_add = function() { //FIXME: this works, but is stupid
 	var add = document.createElement('div');
 		var label = document.createElement('label');
 			label.setAttribute('for', 'torus-pings-add-input');
-			label.textContent = 'Add:'; //FIXME: i18n
+			label.textContent = Torus.i18n.text('pings-add') + ':';
 		add.appendChild(label);
 		add.appendChild(document.createTextNode(' '));
 		var input = document.createElement('input');

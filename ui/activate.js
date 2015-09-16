@@ -23,39 +23,37 @@ Torus.ui.activate = function(room) {
 
 	if(room.id > 0) { //chat
 		if(!room.parent) {
-			Torus.ui.ids['info'].textContent = 'Public room of '; //FIXME: i18n
-			var a = document.createElement('a');
-				a.href = 'http://' + room.domain + '.wikia.com';
-				a.textContent = room.domain;
-				a.addEventListener('click', Torus.ui.click_link);
-			Torus.ui.ids['info'].appendChild(a);
-			Torus.ui.ids['info'].appendChild(document.createTextNode('.'));
+			var link = document.createElement('a');
+			link.href = 'http://' + room.domain + '.wikia.com/wiki/';
+			link.textContent = room.domain;
+			link.addEventListener('click', Torus.ui.click_link);
+
+			Torus.ui.ids['info'].appendChild(Torus.i18n.html('info-public', link));
 		}
 		else {
-			Torus.ui.ids['info'].textContent = 'Private room of '; //FIXME: i18n
-			var a = document.createElement('a');
-				a.href = 'http://' + room.parent.domain + '.wikia.com';
-				a.textContent = room.parent.domain;
-				a.addEventListener('click', Torus.ui.click_link);
-			Torus.ui.ids['info'].appendChild(a);
-			Torus.ui.ids['info'].appendChild(document.createTextNode(', between ' + room.priv_users.slice(0, room.priv_users.length - 1).join(', ') + ' and ' + room.priv_users[room.priv_users.length - 1] + '.')); //FIXME: i18n
+			var link = document.createElement('a');
+			link.href = 'http://' + room.parent.domain + '.wikia.com/wiki/';
+			link.textContent = room.parent.domain;
+			link.addEventListener('click', Torus.ui.click_link);
+
+			Torus.ui.ids['info'].appendChild(Torus.i18n.html('info-private', link, document.createTextNode(room.priv_users.slice(0, room.priv_users.length - 1).join(', ') + ' ' + Torus.i18n.text('and') + ' ' + room.priv_users[room.priv_users.length - 1])));
 		}
 	}
 	else { //extension
 		if(room.id == 0 || room.id == -1) { //status and menu
-			Torus.ui.ids['info'].textContent = 'Torus v' + Torus.pretty_version + ', running on '; //FIXME: i18n
-			var a = document.createElement('a');
-				a.href = 'http://' + Torus.local + '.wikia.com/wiki/';
-				a.textContent = Torus.local;
-				a.addEventListener('click', Torus.ui.click_link);
-			Torus.ui.ids['info'].appendChild(a);
+			var link = document.createElement('a');
+			link.href = 'http://' + Torus.local + '.wikia.com/wiki/';
+			link.textContent = Torus.local;
+			link.addEventListener('click', Torus.ui.click_link);
+
+			Torus.ui.ids['info'].appendChild(Torus.i18n.html('info-menu', document.createTextNode(Torus.pretty_version), link));
 		}
 		else {
-			var a = document.createElement('a');
-				a.className = 'torus-fakelink';
-				a.textContent = '------- Back to menu -------'; //FIXME: i18n
-				a.addEventListener('click', Torus.ui.menu.tab_click);
-			Torus.ui.ids['info'].appendChild(a);
+			var link = document.createElement('a');
+				link.className = 'torus-fakelink';
+				link.textContent = '------- ' + Torus.i18n.text('info-menu-back') + ' -------';
+				link.addEventListener('click', Torus.ui.menu.tab_click);
+			Torus.ui.ids['info'].appendChild(link);
 		}
 	}
 	if(room.id >= 0) {Torus.ui.render(Torus.ui.ids['window']);}

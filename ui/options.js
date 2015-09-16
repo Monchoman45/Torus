@@ -24,56 +24,72 @@ Torus.ext.options.dir = {};
 Torus.ext.options.types = {};
 
 Torus.ext.options.dir.messages = {
+	label: 'options-messages',
 	general: {
+		label: 'options-messages-general',
 		max: {
 			type: 'number',
+			label: 'options-messages-general-max',
 			help: '', //TODO:
 		},
 		rejoins: {
 			type: 'boolean',
+			label: 'options-messages-general-rejoins',
 			help: '', //TODO:
 		},
 		timezone: {
 			type: 'number',
+			label: 'options-messages-general-timezone',
 			help: '', //TODO:
 		},
 	},
 };
 Torus.ext.options.dir.misc = {
+	label: 'options-misc',
 	connection: {
+		label: 'options-misc-connection',
 		default_rooms: {
 			type: 'text',
+			label: 'options-misc-connection-default_rooms',
 			help: '', //TODO:
 		},
 		local: {
 			type: 'boolean',
+			label: 'options-misc-connection-local',
 			help: '', //TODO:
 		},
 	},
 	user_colors: {
+		label: 'options-misc-user_colors',
 		enabled: {
 			type: 'boolean',
 		},
 		hue: {
 			type: 'number',
+			label: 'options-misc-user_colors-hue',
 			help: '', //TODO:
 		},
 		sat: {
 			type: 'number',
+			label: 'options-misc-user_colors-sat',
 			help: '', //TODO:
 		},
 		val: {
 			type: 'number',
+			label: 'options-misc-user_colors-val',
 			help: '', //TODO:
 		},
 	},
 	links: {
+		label: 'options-misc-links',
 		chat: {
 			type: 'boolean',
+			label: 'options-misc-links-chat',
 			help: '', //TODO:
 		},
 		target: {
 			type: 'string',
+			label: 'options-misc-links-target',
 			help: '', //TODO:
 		},
 	},
@@ -87,33 +103,30 @@ Torus.ext.options.rebuild = function() {
 			li.className = 'torus-sidebar-button';
 			if(i == Torus.ext.options.selected) {li.classList.add('torus-sidebar-button-selected');}
 			li.setAttribute('data-id', i);
-			li.textContent = Torus.util.cap(i);
+			li.textContent = Torus.i18n.text(Torus.ext.options.dir[i].label);
 			li.addEventListener('click', Torus.ext.options.click_sidebar);
 		Torus.ext.options.ui.sidebar.appendChild(li);
 
 		var frag = document.createDocumentFragment();
 		for(var j in Torus.ext.options.dir[i]) {
+			if(j == 'label') {continue;}
 			var fieldset = document.createElement('fieldset');
 				fieldset.id = 'torus-option-set-' + i + '-' + j;
 				Torus.ui.ids['option-set-' + i + '-' + j] = fieldset;
-				var name = Torus.util.cap(j);
-				while(name.indexOf('_') != -1) {name = name.replace('_', ' ');}
 				var legend = document.createElement('legend');
 					if(Torus.ext.options.dir[i][j].enabled && Torus.ext.options.dir[i][j].enabled.type == 'boolean') { //FIXME: target
 						var label = document.createElement('label');
 							label.setAttribute('for', 'torus-option-value-' + i + '-' + j + '-enabled');
-							label.textContent = name;
+							label.textContent = Torus.i18n.text(Torus.ext.options.dir[i][j].label);
 						legend.appendChild(label);
 						legend.appendChild(document.createTextNode(' '));
 						legend.appendChild(Torus.ext.options.types['boolean'](i + '-' + j + '-enabled'));
 					}
-					else {legend.textContent = name;}
+					else {legend.textContent = Torus.i18n.text(Torus.ext.options.dir[i][j].label);}
 				fieldset.appendChild(legend);
 
 				for(var k in Torus.ext.options.dir[i][j]) {
-					if(Torus.ext.options.dir[i][j][k].name) {var name = Torus.ext.options.dir[i][j][k].name;}
-					else {var name = Torus.util.cap(k);}
-					while(name.indexOf('_') != -1) {name = name.replace('_', ' ');}
+					if(k == 'label' || k == 'enabled') {continue;}
 					if(Torus.ext.options.dir[i][j][k].target) {var option = Torus.ext.options.dir[i][j][k].target;} 
 					else {var option = i + '-' + j + '-' + k;}
 
@@ -122,7 +135,7 @@ Torus.ext.options.rebuild = function() {
 						Torus.ui.ids['option-value-' + option];
 						var label = document.createElement('label');
 							label.setAttribute('for', 'torus-option-value-' + option + '-input');
-							label.textContent = name;
+							label.textContent = Torus.i18n.text(Torus.ext.options.dir[i][j][k].label);
 						div.appendChild(label);
 						div.appendChild(document.createTextNode(': '));
 						div.appendChild(Torus.ext.options.types[Torus.ext.options.dir[i][j][k].type](option));

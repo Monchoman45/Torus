@@ -1,8 +1,6 @@
 Torus.commands = {};
 Torus.commands.join = {
-	help: 'Usage: /join <domain>\n' //FIXME: i18n
-	    + 'Join the chat room associated with <domain>. `/join 0` is special, it is the same as `/logout`.\n'
-	    + 'For example, `/join community` will take you to the room for [[w:|community.wikia.com]].',
+	help: 'commands-help-join',
 	func: function(room) {
 		if(room == '0') {
 			Torus.logout();
@@ -13,8 +11,7 @@ Torus.commands.join = {
 	}
 };
 Torus.commands.part = {
-	help: 'Usage: /part <domain>\n' //FIXME: i18n
-	    + 'Leave the room associated with <domain>. If <domain> is unspecified, you will leave the room you are currently viewing.',
+	help: 'commands-help-part',
 	func: function(room) {
 		if(!room) {Torus.ui.active.disconnect('closed');}
 		else {
@@ -26,13 +23,11 @@ Torus.commands.part = {
 };
 Torus.commands.quit = '/logout';
 Torus.commands.logout = {
-	help: 'Usage: /logout\n' //FIXME: i18n
-	    + 'Leave every room.',
+	help: 'commands-help-logout',
 	func: Torus.logout
 };
 Torus.commands.kick = {
-	help: 'Usage: /kick <user>\n' //FIXME: i18n
-	    + 'Kick <user> from the current room.',
+	help: 'commands-help-kick',
 	func: function() {
 		var user = '';
 		for(var i = 0; i < arguments.length; i++) {user += ' ' + arguments[i];}
@@ -41,44 +36,30 @@ Torus.commands.kick = {
 	}
 };
 Torus.commands.ban = {
-	help: 'Usage: /ban <user> <expiry> <summary>\n' //FIXME: i18n
-	    + 'Ban or reban <user> from the current room. If <user>\'s name includes spaces, you must put quotes around their name. If <user>\'s name includes quotes, you must precede them with a backslash (\\).\n'
-	    + 'For example:\n'
-	    + '`/ban Troll "1 day" trolling`: Bans the user `Troll` for 1 day with the summary `trolling`.\n'
-	    + '`/ban "A big troll" "3 years" "super trolling"`: Bans the user `A big troll` for 3 years with the summary `super trolling`.\n'
-	    + '`/ban "A \\"big\\" troll" infinite`: Bans the user `A "big" troll` forever.',
+	help: 'commands-help-ban',
 	func: function(user, expiry, summary) {
 		if(!summary) {summary = 'Misbehaving in chat';} //FIXME: ?action=query&meta=allmessages
 		Torus.ui.active.ban(user, expiry, summary);
 	}
 };
 Torus.commands.unban = {
-	help: 'Usage: /unban <user>\n' //FIXME: i18n
-	    + 'Unban <user> from the current room.',
+	help: 'commands-help-unban',
 	func: function(user) {Torus.ui.active.ban(user, 0, 'undo');} //FIXME: ?action=query&meta=allmessages
 };
 Torus.commands.mod = '/givemod';
 Torus.commands.givemod = {
-	help: 'Usage: /givemod <user>\n' //FIXME: i18n
-	    + 'Promote <user> to chatmod in the current room.',
+	help: 'commands-help-givemod',
 	func: function(user) {Torus.ui.active.mod(user);}
 };
 Torus.commands.pm = '/private';
 Torus.commands.query = '/private';
 Torus.commands.priv = '/private';
 Torus.commands.private = {
-	help: 'Usage: /private <user1> <user2> <user3>...\n' //FIXME: i18n
-	    + 'Open a private room with each of the specified users. If a user\'s name includes spaces, you must put quotes around their name. If a user\'s name includes quotes, you must precede them with a backslash (\\).\n'
-	    + 'For example:\n'
-	    + '`/private Coolguy`: PM the user `Coolguy`.\n'
-	    + '`/private "Cool guy"`: PM the user `Cool guy`.\n'
-	    + '`/private "\\"Cool\\" guy"`: PM the user `"Cool" guy`.\n'
-	    + '`/private "\\"Cool\\" guy" "Some mod" Admin`: Open a multi-user private room with `"Cool" guy`, `Some mod`, and `Admin`.',
+	help: 'commands-help-private',
 	func: function() {Torus.ui.active.open_private(Array.prototype.slice.call(arguments));}
 };
 Torus.commands.away = {
-	help: 'Usage: /away <message>\n' //FIXME: i18n
-	    + 'Toggle your away status for the current room. If <message> is specified, your status message will be set to that.',
+	help: 'commands-help-away',
 	func: function(message) {
 		var user = Torus.ui.active.userlist[wgUserName];
 
@@ -90,32 +71,22 @@ Torus.commands.away = {
 	}
 };
 Torus.commands.back = {
-	help: 'Usage: /back <message>\n' //FIXME: i18n
-	    + 'Set your status state to `here` for the current room. If <message> is specified, your status message will be set to that.',
+	help: 'commands-help-back',
 	func: function(message) {
 		if(!message) {message = '';}
 		Torus.ui.active.set_status('here', message);
 	}
 };
 Torus.commands.status = {
-	help: 'Usage: /status <state> <message>\n' //FIXME: i18n
-	    + 'Change your status state and/or message for the current room. Your status state can only be one word (no spaces), but your status message can be as long as you want. Users on Special:Chat won\'t be able to see either.\n'
-	    + 'Two status states are special:\n'
-	    + '`here`: used to denote active users. `/back` will set your status state to this.\n'
-	    + '`away`: user to denote inactive users. `/away` will set your status state to this.',
+	help: 'commands-help-status',
 	func: function(state, message) {Torus.ui.active.set_status(state, message);}
 };
 Torus.commands.ctcp = {
-	help: 'Usage: /ctcp <target> <proto> <message>\n'
-	    + 'Client to client protocol. Other users with Torus implement at least the <proto> "version".\n'
-	    + 'If the target user has spaces in their name, you must surround their name with quotes.\n'
-	    + '<target> defaults to an empty string (meaning everyone). <proto> defaults to "version". <message> defaults to an empty string.\n'
-	    + 'This means that just "/ctcp" is equivalent to sending everyone in the room a "/ctcp <name> version".',
+	help: 'commands-help-ctcp',
 	func: function(target, proto, message) {Torus.ui.active.ctcp(target, proto, message);}
 };
 /*Torus.commands.me = { //XXX: right now /me is implemented by literally sending /me
-	help: 'Usage: /me <message>\n' //FIXME: i18n
-	    + 'Emote yourself.',
+	help: 'commands-help-me',
 	func: function() {
 		var str = '';
 		for(var i = 0; i < arguments.length; i++) {str += ' ' + arguments[i];}
@@ -123,18 +94,15 @@ Torus.commands.ctcp = {
 	}
 };*/
 Torus.commands.options = {
-	help: 'Usage: /options\n' //FIXME: i18n
-	    + 'View options.',
+	help: 'commands-help-options',
 	func: function() {Torus.ui.activate(Torus.ext.options);}
 };
 Torus.commands.fullscreen = {
-	help: 'Usage: /fullscreen\n' //FIXME: i18n
-	    + 'Make Torus fullscreen.',
+	help: 'commands-help-fullscreen',
 	func: Torus.ui.fullscreen
 };
 Torus.commands.help = {
-	help: 'Usage: /help <command>\n' //FIXME: i18n
-	    + 'Displays help data.',
+	help: 'commands-help-help',
 	func: function() {
 		var str = '';
 		for(var i = 0; i < arguments.length; i++) {str += ' ' + arguments[i];}
@@ -142,8 +110,8 @@ Torus.commands.help = {
 
 		if(str) {
 			var help = Torus.commands.eval(str, 'help');
-			if(!help) {Torus.alert('No help data for ' + str);} //FIXME: i18n
-			else {return 'Help: ' + str + ':\n' + help;} //FIXME: i18n
+			if(!help) {Torus.alert(Torus.i18n.text('commands-nohelp', str));}
+			else {return Torus.i18n.text('commands-help', str, Torus.i18n.text(help));}
 		}
 		else {
 			var coms = '';
@@ -151,7 +119,7 @@ Torus.commands.help = {
 				if(typeof Torus.commands[i] != 'function' && typeof Torus.commands[i] != 'string') {coms += ', ' + i;}
 			}
 			coms = coms.substring(2);
-			return 'Commands:\n' + coms + '\nFull documentation: [[w:c:monchbox:Torus]]'; //FIXME: i18n
+			return Torus.i18n.text('commands-dir', coms);
 		}
 	}
 };

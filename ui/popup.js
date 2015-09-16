@@ -67,14 +67,14 @@ Torus.ui.render_popup = function(name, room, coords) {
 		talk.className = 'torus-popup-userlink';
 		talk.href = 'http://' + domain + '.wikia.com/wiki/User_talk:' + encodeURIComponent(name);
 		talk.addEventListener('click', Torus.ui.click_link);
-		talk.textContent = 'talk'; //FIXME: i18n
+		talk.textContent = Torus.i18n.text('popup-talk');
 		div.appendChild(talk);
 
 		var contribs = document.createElement('a');
 		contribs.className = 'torus-popup-userlink';
 		contribs.href = 'http://' + domain + '.wikia.com/wiki/Special:Contributions/' + encodeURIComponent(name);
 		contribs.addEventListener('click', Torus.ui.click_link);
-		contribs.textContent = 'contribs'; //FIXME: i18n
+		contribs.textContent = Torus.i18n.text('popup-contribs');
 		div.appendChild(contribs);
 	userlinks.appendChild(div);
 	div = document.createElement('div');
@@ -82,7 +82,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 		chatban.className = 'torus-popup-userlink';
 		chatban.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatban?page=User:' + encodeURIComponent(name);
 		chatban.addEventListener('click', Torus.ui.click_link);
-		chatban.textContent = 'ban history'; //FIXME: i18n
+		chatban.textContent = Torus.i18n.text('popup-history');
 		div.appendChild(chatban);
 
 		var chatconnect = document.createElement('a');
@@ -92,7 +92,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 			chatconnect.addEventListener('click', Torus.ui.click_link);
 		}
 		else {chatconnect.classList.add('torus-popup-userlink-disabled');}
-		chatconnect.textContent = 'chatconnect'; //FIXME: i18n
+		chatconnect.textContent = Torus.i18n.text('popup-chatconnect');
 		div.appendChild(chatconnect);
 	userlinks.appendChild(div);
 	Torus.ui.ids['popup'].appendChild(userlinks);
@@ -109,7 +109,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 					Torus.ui.active.open_private([this.getAttribute('data-user')], function(event) {Torus.ui.activate(event.room);});
 				});
 			}
-			priv.textContent = 'Private message'; //FIXME: i18n
+			priv.textContent = Torus.i18n.text('popup-pm');
 		actions.appendChild(priv);
 
 		var block = document.createElement('a');
@@ -117,11 +117,11 @@ Torus.ui.render_popup = function(name, room, coords) {
 			block.setAttribute('data-user', name);
 			if(Torus.data.blocked.indexOf(name) != -1) {
 				block.addEventListener('click', Torus.ui.popup_unblock);
-				block.textContent = 'Unblock PMs'; //FIXME: i18n
+				block.textContent = Torus.i18n.text('popup-unblock');
 			}
 			else {
 				block.addEventListener('click', Torus.ui.popup_block);
-				block.textContent = 'Block PMs'; //FIXME: i18n
+				block.textContent = Torus.i18n.text('popup-block');
 			}
 		actions.appendChild(block);
 
@@ -136,7 +136,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 				yes.id = 'torus-popup-modconfirm-yes';
 				Torus.ui.ids['popup-modconfirm-yes'] = yes;
 				yes.type = 'button';
-				yes.value = 'Yes'; //FIXME: i18n
+				yes.value = Torus.util.cap(Torus.i18n.text('yes'));
 				yes.addEventListener('click', function(event) {
 					event.stopPropagation();
 					this.parentNode.style.display = 'none';
@@ -145,26 +145,26 @@ Torus.ui.render_popup = function(name, room, coords) {
 				yes.setAttribute('data-user', name);
 				confirm.appendChild(yes);
 
-				confirm.appendChild(document.createTextNode(' Are you sure? ')); //FIXME: i18n
+				confirm.appendChild(document.createTextNode(' ' + Torus.i18n.text('popup-mod-areyousure') + ' '));
 
 				var no = document.createElement('input');
 				no.id = 'torus-popup-modconfirm-no';
 				Torus.ui.ids['popup-modconfirm-no'] = no;
 				no.type = 'button';
-				no.value = 'No'; //FIXME: i18n
+				no.value = Torus.util.cap(Torus.i18n.text('no'));
 				no.addEventListener('click', function(event) {
 					event.stopPropagation();
 					this.parentNode.style.display = 'none';
 				});
 				confirm.appendChild(no);
 			mod.appendChild(confirm);
-			mod.appendChild(document.createTextNode('Promote to mod')); //FIXME: i18n
+			mod.appendChild(document.createTextNode(Torus.i18n.text('popup-mod')));
 			actions.appendChild(mod);
 		}
 		else {
 			var mod = document.createElement('a');
 			mod.className = 'torus-popup-action-disabled';
-			mod.textContent = 'Promote to mod'; //FIXME: i18n
+			mod.textContent = Torus.i18n.text('popup-mod');
 			actions.appendChild(mod);
 		}
 
@@ -173,7 +173,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 			kick.className = 'torus-popup-action';
 			kick.setAttribute('data-user', name);
 			kick.addEventListener('click', function() {Torus.ui.active.kick(this.getAttribute('data-user'));});
-			kick.textContent = 'Kick'; //FIXME: i18n
+			kick.textContent = Torus.i18n.text('popup-kick');
 			actions.appendChild(kick);
 
 			var ban = document.createElement('a');
@@ -185,7 +185,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 				var div = document.createElement('div');
 					var expiry_label = document.createElement('label');
 					expiry_label.for = 'torus-popup-banexpiry';
-					expiry_label.textContent = 'Expiry:'; //FIXME: i18n
+					expiry_label.textContent = Torus.i18n.text('popup-ban-expiry') + ':';
 					div.appendChild(expiry_label);
 
 					div.appendChild(document.createTextNode(' '));
@@ -209,7 +209,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 				div = document.createElement('div');
 					var reason_label = document.createElement('label');
 					reason_label.for = 'torus-popup-banexpiry';
-					reason_label.textContent = 'Reason:'; //FIXME: i18n
+					reason_label.textContent = Torus.i18n.text('popup-ban-reason') + ':';
 					div.appendChild(reason_label);
 
 					div.appendChild(document.createTextNode(' '));
@@ -235,7 +235,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 					submit.id = 'torus-popup-banbutton';
 					Torus.ui.ids['popup-banbutton'] = submit;
 					submit.type = 'submit'
-					submit.value = 'Ban'; //FIXME: i18n
+					submit.value = Torus.i18n.text('popup-ban');
 					submit.addEventListener('click', function(event) {
 						var target = this.parentNode.parentNode.getAttribute('data-user');
 						var expiry = this.parentNode.previousSibling.previousSibling.lastChild.value;
@@ -246,18 +246,18 @@ Torus.ui.render_popup = function(name, room, coords) {
 					});
 				modal.appendChild(div);
 			ban.appendChild(modal);
-			ban.appendChild(document.createTextNode('Ban')); //FIXME: i18n
+			ban.appendChild(document.createTextNode(Torus.i18n.text('popup-ban')));
 			actions.appendChild(ban);
 		}
 		else {
 			var kick = document.createElement('a');
 			kick.className = 'torus-popup-action-disabled';
-			kick.textContent = 'Kick'; //FIXME: i18n
+			kick.textContent = Torus.i18n.text('popup-ban');
 			actions.appendChild(kick);
 
 			var ban = document.createElement('a');
 			ban.className = 'torus-popup-action-disabled';
-			ban.textContent = 'Ban'; //FIXME: i18n
+			ban.textContent = Torus.i18n.text('popup-ban');
 			actions.appendChild(ban);
 		}
 	Torus.ui.ids['popup'].appendChild(actions);
@@ -299,7 +299,7 @@ Torus.ui.popup_block = function() {
 		Torus.util.empty(el);
 		el.removeEventListener('click', Torus.ui.popup_block);
 		el.addEventListener('click', Torus.ui.popup_unblock);
-		el.textContent = 'Unblock PMs';
+		el.textContent = Torus.i18n.text('popup-unblock');
 	});
 }
 
@@ -310,6 +310,6 @@ Torus.ui.popup_unblock = function() {
 		Torus.util.empty(el);
 		el.removeEventListener('click', Torus.ui.popup_unblock);
 		el.addEventListener('click', Torus.ui.popup_block);
-		el.textContent = 'Block PMs';
+		el.textContent = Torus.i18n.text('popup-block');
 	});
 }

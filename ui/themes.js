@@ -72,19 +72,19 @@ Torus.ui.themes.rebuild = function() {
 							if(j >= 2 && j <= 4) {
 								var text1 = document.createElement('div');
 									text1.className = 'text1';
-									text1.textContent = 'text'; //FIXME: i18n
+									text1.textContent = Torus.i18n.text('themes-text');
 								cell.appendChild(text1);
 								var text2 = document.createElement('div');
 									text2.className = 'text2';
-									text2.textContent = 'link'; //FIXME: i18n
+									text2.textContent = Torus.i18n.text('themes-link');
 								cell.appendChild(text2);
 								var text3 = document.createElement('div');
 									text3.className = 'text3';
-									text3.textContent = 'away'; //FIXME: i18n
+									text3.textContent = Torus.i18n.text('themes-away');
 								cell.appendChild(text3);
 								var text4 = document.createElement('div');
 									text4.className = 'text4';
-									text4.textContent = 'ping'; //FIXME: i18n
+									text4.textContent = Torus.i18n.text('themes-ping');
 								cell.appendChild(text4);
 							}
 						preview.appendChild(cell);

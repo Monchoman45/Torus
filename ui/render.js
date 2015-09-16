@@ -130,26 +130,15 @@ Torus.ui.render_line = function(message) {
 		case 'join':
 		case 'rejoin':
 		case 'ghost':
-			//FIXME: i18n - this shows up as "user joined room"
-			//FIXME: and ghost is only here because message.event + 'ed' is the correct tense
-			line.appendChild(document.createTextNode('== '));
-			line.appendChild(Torus.ui.span_user(message.user));
-			line.appendChild(document.createTextNode(' ' + message.event + 'ed {' + message.room.name + '}'));
-			break;
 		case 'part':
-			//FIXME: i18n
 			line.appendChild(document.createTextNode('== '));
-			line.appendChild(Torus.ui.span_user(message.user));
-			line.appendChild(document.createTextNode(' left {' + message.room.name + '}'));
+			line.appendChild(Torus.i18n.html('message-' + message.event, Torus.ui.span_user(message.user), document.createTextNode('{' + message.room.name + '}')));
 			break;
 		case 'logout':
-			//FIXME: i18n
 			line.appendChild(document.createTextNode('== '));
-			line.appendChild(Torus.ui.span_user(message.user));
-			line.appendChild(document.createTextNode(' logged out'));
+			line.appendChild(Torus.i18n.html('message-logout', Torus.ui.span_user(message.user)));
 			break;
 		case 'ctcp':
-			//FIXME: i18n
 			if(message.user == wgUserName) {line.appendChild(document.createTextNode(' >'));}
 			else {line.appendChild(document.createTextNode(' <'));}
 			var span = document.createElement('span'); //this is arguably one of the dumber things i've ever done
@@ -161,54 +150,47 @@ Torus.ui.render_line = function(message) {
 			else {line.appendChild(document.createTextNode(' CTCP|' + message.target + '|' + message.proto + ': ' + message.data));}
 			break;
 		case 'mod':
-			//FIXME: i18n
 			line.appendChild(document.createTextNode('== '));
-			line.appendChild(Torus.ui.span_user(message.performer));
-			line.appendChild(document.createTextNode(' promoted '));
-			line.appendChild(Torus.ui.span_user(message.target));
-			line.appendChild(document.createTextNode(' to chatmod of {' + message.room.name + '}'));
+			line.appendChild(Torus.i18n.html('message-mod', Torus.ui.span_user(message.performer), Torus.ui.span_user(message.target), document.createTextNode('{' + message.room.name + '}')));
 			break;
 		case 'kick':
 		case 'ban':
 		case 'unban':
-			//FIXME: i18n
-			if(message.event != 'kick') {var tense = 'ned';} //curse you, english language
-			else {var tense = 'ed'}
 			if(message.room.parent) {var domain = message.room.parent.domain;}
 			else {var domain = message.room.domain;}
 
-			line.appendChild(document.createTextNode('== '));
-			line.appendChild(Torus.ui.span_user(message.performer));
-			line.appendChild(document.createTextNode(' ' + message.event + tense + ' '));
-			line.appendChild(Torus.ui.span_user(message.target));
-			line.appendChild(document.createTextNode(' ('));
+			var frag = document.createDocumentFragment();
+			frag.appendChild(Torus.ui.span_user(message.target));
+			frag.appendChild(document.createTextNode(' ('));
 			var talk = document.createElement('a');
 				talk.href = 'http://' + domain + '.wikia.com/wiki/User_talk:' + message.target;
-				talk.textContent = 't';
+				talk.textContent = Torus.i18n.text('message-banlinks-talk');
 				talk.addEventListener('click', Torus.ui.click_link);
-			line.appendChild(talk);
-			line.appendChild(document.createTextNode('|'));
+			frag.appendChild(talk);
+			frag.appendChild(document.createTextNode('|'));
 			var contribs = document.createElement('a');
 				contribs.href = 'http://' + domain + '.wikia.com/wiki/Special:Contributions/' + message.target;
-				contribs.textContent = 'c';
+				contribs.textContent = Torus.i18n.text('message-banlinks-contribs');
 				contribs.addEventListener('click', Torus.ui.click_link);
-			line.appendChild(contribs);
-			line.appendChild(document.createTextNode('|'));
+			frag.appendChild(contribs);
+			frag.appendChild(document.createTextNode('|'));
 			var ban = document.createElement('a');
 				ban.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatban?page=User:' + message.target;
-				ban.textContent = 'log';
+				ban.textContent = Torus.i18n.text('message-banlinks-history');
 				ban.addEventListener('click', Torus.ui.click_link);
-			line.appendChild(ban);
+			frag.appendChild(ban);
 			if(message.room.checkuser) {
-				line.appendChild(document.createTextNode('|'));
+				frag.appendChild(document.createTextNode('|'));
 				var ccon = document.createElement('a');
 					ccon.href = 'http://' + domain + '.wikia.com/wiki/Special:Log/chatconnect?user=' + message.target;
-					ccon.textContent = 'ccon';
+					ccon.textContent = Torus.i18n.text('message-banlinks-chatconnect');
 					ccon.addEventListener('click', Torus.ui.click_link);
-				line.appendChild(ccon);
+				frag.appendChild(ccon);
 			}
-			line.appendChild(document.createTextNode(') from {' + message.room.name + '}'));
-			if(message.event == 'ban') {line.appendChild(document.createTextNode(' for ' + message.expiry));}
+			frag.appendChild(document.createTextNode(')'));
+
+			line.appendChild(document.createTextNode('== '));
+			line.appendChild(Torus.i18n.html('message-' + message.event, Torus.ui.span_user(message.performer), frag, document.createTextNode('{' + message.room.name + '}'), document.createTextNode(message.expiry)));
 			break;
 		default: throw new Error('Message type ' + message.event + ' is not rendered. (ui.render_line)');
 	}

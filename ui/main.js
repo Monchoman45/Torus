@@ -32,7 +32,7 @@ Torus.ui.fullscreen = function() { //FIXME: move
 
 		Torus.ui.window.classList.remove('fullscreen');
 		Torus.data.fullscreen = false;
-		Torus.call_listeners(new Torus.classes.UIEvent('fullscreen')); //FIXME:
+		Torus.call_listeners(new Torus.classes.UIEvent('fullscreen')); //FIXME: unfullscreen
 	}
 	else {
 		Torus.data.old_parent = Torus.ui.window.parentNode;
@@ -52,12 +52,12 @@ Torus.ui.onload = function() {
 	Torus.local = domain;
 
 	if(wgCanonicalNamespace == 'Special' && wgTitle == 'Torus') {
-		document.title = 'Torus - It\'s a donut - ' + wgSiteName;
+		document.title = Torus.i18n.text('title', wgSiteName);
 		if(window.skin == 'oasis') {
 			var body = 'WikiaArticle';
 			if(document.getElementById('WikiaPageHeader')) {
 				document.getElementById('WikiaPageHeader').getElementsByTagName('h1')[0].innerHTML = 'Torus';
-				document.getElementById('WikiaPageHeader').getElementsByTagName('h2')[0].innerHTML = 'It\'s a donut';
+				document.getElementById('WikiaPageHeader').getElementsByTagName('h2')[0].innerHTML = 'It\'s a donut'; //FIXME: i18n
 			}
 		}
 		else {
@@ -68,7 +68,7 @@ Torus.ui.onload = function() {
 		document.getElementById(body).appendChild(Torus.ui.window);
 
 		if(wgUserName == null) {
-			Torus.alert('You don\'t appear to be logged in - you must have an account to use chat on Wikia. Please [[Special:UserSignup|register]] or [[Special:UserLogin|log in]].'); //FIXME: i18n
+			Torus.alert(Torus.i18n.text('error-login'));
 			return;
 		}
 
@@ -105,6 +105,10 @@ Torus.ui.onload = function() {
 {{ui/constructors.js}}
 
 {{ui/util.js}}
+
+{{MediaWiki:Torus.js/ui/i18n.js}}
+
+{{MediaWiki:Torus.js/ui/i18n/en.js}}
 
 //(function() { //I really hate these but it's better then leaking temp variables everywhere //FIXME: iffy causes load order problems
 	Torus.util.load_css('http://@DOMAIN@/wiki/MediaWiki:Torus.js/ui/main.css?action=raw&ctype=text/css');

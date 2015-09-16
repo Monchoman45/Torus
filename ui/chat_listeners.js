@@ -58,6 +58,8 @@ Torus.ui.new_room = function(event) {
 }
 
 Torus.ui.add_room = function(event) {
+	Torus.alert(Torus.i18n.text('connecting', '{' + event.room.name + '}'));
+
 	for(var i = 0; i < Torus.ui.ids['tabs'].children.length; i++) {
 		if(Torus.ui.ids['tabs'].children[i].getAttribute('data-id') == event.room.domain) {return;}
 	}
