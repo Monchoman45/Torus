@@ -15,13 +15,24 @@ from urllib.parse import quote
 import json
 from getpass import getpass
 
-if len(sys.argv) < 4:
-	print('Usage: push.py domain summary file1 file2 file3 ...\nOr: push.py domain summary *')
+if len(sys.argv) < 3:
+	print('Usage: python3 push.py <domain> <summary>')
 	sys.exit(1)
+
+targets = {
+	'main.js': 'MediaWiki:Torus.js/main.js',
+	'ui/main.css': 'MediaWiki:Torus.js/ui/main.css',
+	'ext/ccui/main.js': 'MediaWiki:Torus.js/ext/ccui/main.js',
+	'ext/ccui/main.css': 'MediaWiki:Torus.js/ext/ccui/main.css',
+}
+
+variables = {
+	'DOMAIN': sys.argv[1],
+}
 
 print('Collecting files...')
 files = {}
-dirs = [sys.argv[3:]]
+dirs = [os.listdir('.')]
 dirnames = ['']
 while len(dirs):
 	dir = dirs[0]
@@ -38,14 +49,30 @@ while len(dirs):
 			else:
 				dirs.append(os.listdir('.'))
 				dirnames.append('')
-		elif file.endswith('.js') or file.endswith('.css'):
-			name = 'MediaWiki:Torus.js/' + dirname.replace('\\', '/') + file
+		elif file.endswith('.js') or file.endswith('.css') or file.endswith('.json'):
+			name = dirname.replace('\\', '/') + file
 			with open(dirname + file, 'r') as f: files[name] = f.read()
-			files[name] = files[name].replace('@DOMAIN@', sys.argv[1]);
-			print('\t' + dirname + file + ': ' + str(len(files[name])))
-		elif not file.endswith('.py') and not file.endswith('.php'): #is a directory
+		elif file.find('.') == -1: #is a directory
 			dirs.append(os.listdir(dirname + file))
 			dirnames.append(dirname + file)
+
+def transclude(text):
+	if text.find('{{') == -1: return text
+
+	for i in files:
+		if text.find('{{' + i + '}}') != -1:
+			files[i] = transclude(files[i])
+			text = text.replace('{{' + i + '}}', files[i])
+
+	for i in variables:
+		if text.find('@' + i.upper() + '@') != -1: text = text.replace('@' + i.upper() + '@', variables[i])
+	return text
+
+for i in targets:
+	files[i] = transclude(files[i])
+	print('\t' + targets[i] + ': ' + str(len(files[i])))
+
+#for i in targets: print(files[i])
 
 print('Connecting...')
 sock = http.client.HTTPConnection(sys.argv[1], timeout=300)
@@ -70,7 +97,9 @@ while not session:
 		'action=login&lgname=' + user +'&lgpassword=' + password + '&lgtoken=' + token + '&format=json',
 		{'Connection': 'Keep alive', 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': session}
 	)
-	result = json.loads(sock.getresponse().read().decode('utf-8'))['login']['result']
+	result = json.loads(sock.getresponse().read().decode('utf-8'))
+	print(result)
+	result = result['login']['result']
 	if result == 'WrongPass':
 		print('Wrong password')
 		session = ''
@@ -83,25 +112,30 @@ while not session:
 print('Fetching tokens...')
 sock.request(
 	'GET',
-	'/api.php?action=query&prop=info&titles=' + '|'.join(list(files.keys())) + '&intoken=edit&format=json',
+	'/api.php?action=query&prop=info&titles=' + quote('|'.join(list(targets.values()))) + '&intoken=edit&format=json',
 	'',
 	{'Connection': 'Keep alive', 'Cookie': session}
 )
-pages = json.loads(sock.getresponse().read().decode('utf-8'))['query']['pages']
+result = json.loads(sock.getresponse().read().decode('utf-8'))
+pages = result['query']['pages']
 
-for page in pages:
-	pages[page]['title'] = pages[page]['title'].replace(' ', '_')
-	print('Publishing: ' + pages[page]['title'] + ' ... ', end='\r')
+for i in pages:
+	print('Publishing: ' + pages[i]['title'] + ' ... ', end='\r')
+	for j in targets:
+		if targets[j] == pages[i]['title']:
+			text = files[j]
+			break
+
 	sock.request(
 		'POST',
 		'/api.php',
-		'action=edit&title=' + pages[page]['title'] + '&text=' + quote(files[pages[page]['title']]) + '&summary=' + quote(sys.argv[2]) + '&token=' + quote(pages[page]['edittoken']) + '&format=json',
+		'action=edit&title=' + quote(pages[i]['title']) + '&text=' + quote(text) + '&summary=' + quote(sys.argv[2]) + '&token=' + quote(pages[i]['edittoken']) + '&format=json',
 		{'Content-Type': 'application/x-www-form-urlencoded', 'Connection': 'Keep alive', 'Cookie': session}
 	)
-	response = json.loads(sock.getresponse().read().decode('utf-8'))
-	print('Publishing: ' + pages[page]['title'] + ' ... ', end='')
-	if 'edit' in response:  print(response['edit']['result'])
-	else: print('Error ' + response['error']['code'] + ': ' + response['error']['info'])
+	result = json.loads(sock.getresponse().read().decode('utf-8'))
+	print('Publishing: ' + pages[i]['title'] + ' ... ', end='')
+	if 'edit' in result:  print(result['edit']['result'])
+	else: print('Error ' + result['error']['code'] + ': ' + result['error']['info'])
 
 print('Logging out...')
 sock.request('GET', '/api.php?action=logout', '', {'Cookie': session})

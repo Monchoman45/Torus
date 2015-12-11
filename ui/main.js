@@ -82,29 +82,29 @@ Torus.ui.onload = function() {
 	}
 }
 
-{{MediaWiki:Torus.js/ui/events.js}}
+{{ui/events.js}}
 
-{{MediaWiki:Torus.js/ui/activate.js}}
+{{ui/activate.js}}
 
-{{MediaWiki:Torus.js/ui/render.js}}
+{{ui/render.js}}
 
-{{MediaWiki:Torus.js/ui/popup.js}}
+{{ui/popup.js}}
 
-{{MediaWiki:Torus.js/ui/menu.js}}
+{{ui/menu.js}}
 
-{{MediaWiki:Torus.js/ui/pings.js}}
+{{ui/pings.js}}
 
-{{MediaWiki:Torus.js/ui/themes.js}}
+{{ui/themes.js}}
 
-{{MediaWiki:Torus.js/ui/chat_listeners.js}}
+{{ui/chat_listeners.js}}
 
-{{MediaWiki:Torus.js/ui/dom_listeners.js}}
+{{ui/dom_listeners.js}}
 
-{{MediaWiki:Torus.js/ui/parser.js}}
+{{ui/parser.js}}
 
-{{MediaWiki:Torus.js/ui/constructors.js}}
+{{ui/constructors.js}}
 
-{{MediaWiki:Torus.js/ui/util.js}}
+{{ui/util.js}}
 
 //(function() { //I really hate these but it's better then leaking temp variables everywhere //FIXME: iffy causes load order problems
 	Torus.util.load_css('http://@DOMAIN@/wiki/MediaWiki:Torus.js/ui/main.css?action=raw&ctype=text/css&templates=expand&t=' + (new Date()).getTime());
@@ -178,6 +178,6 @@ Torus.ui.show(Torus.chats[0]);
 
 
 
-{{MediaWiki:Torus.js/ui/commands.js}}
+{{ui/commands.js}}
 
-{{MediaWiki:Torus.js/ui/options.js}}
+{{ui/options.js}}

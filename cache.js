@@ -1,5 +1,5 @@
 Torus.cache = {
-{{MediaWiki:Torus.js/cache.json}}
+{{cache.json}}
 };
 
 Torus.cache.save = function() {

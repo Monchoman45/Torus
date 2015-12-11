@@ -206,23 +206,23 @@ Torus.load_options = function() {
 	return Torus.options;
 }
 
-{{MediaWiki:Torus.js/io.js}}
+{{io.js}}
 
-{{MediaWiki:Torus.js/chat.js}}
+{{chat.js}}
 
-{{MediaWiki:Torus.js/events.js}}
+{{events.js}}
 
-{{MediaWiki:Torus.js/ext.js}}
+{{ext.js}}
 
-{{MediaWiki:Torus.js/util.js}}
+{{util.js}}
 
-{{MediaWiki:Torus.js/cache.js}}
+{{cache.js}}
 
 new Torus.classes.Chat(0);
 
 
 
-{{MediaWiki:Torus.js/ui/main.js}}
+{{ui/main.js}}
 
 
 
