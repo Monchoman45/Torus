@@ -75,30 +75,33 @@ for i in targets:
 #for i in targets: print(files[i])
 
 print('Connecting...')
-sock = http.client.HTTPConnection(sys.argv[1], timeout=300)
 
-session = '';
+session = ''
 while not session:
+	sock = http.client.HTTPConnection(sys.argv[1], timeout=300)
 	user = quote(input('Username: '))
 	password = quote(getpass('Password: '))
 	sock.request(
 		'POST',
 		'/api.php',
 		'action=login&lgname=' + user + '&lgpassword=' + password + '&format=json',
-		{'Connection': 'Keep alive', 'Content-Type': 'application/x-www-form-urlencoded'}
+		{'Connection': 'Keep alive', 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': 'push.py'}
 	)
 	response = sock.getresponse()
-	session = response.getheader('Set-Cookie')
-	session = session[:session.find(';') + 1]
+	cookie = response.getheader('Set-Cookie')
+	session = cookie[:cookie.find(';') + 1]
 	token = quote(json.loads(response.read().decode('utf-8'))['login']['token'])
 	sock.request(
 		'POST',
 		'/api.php',
 		'action=login&lgname=' + user +'&lgpassword=' + password + '&lgtoken=' + token + '&format=json',
-		{'Connection': 'Keep alive', 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': session}
+		{'Connection': 'Keep alive', 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': session, 'User-Agent': 'push.py'}
 	)
-	result = json.loads(sock.getresponse().read().decode('utf-8'))
-	print(result)
+	response = sock.getresponse()
+	if sys.argv[1].find('.wikia.com') != -1:
+		cookie = response.getheader('Set-Cookie')
+		session += ' ' + cookie[:cookie.find(';') + 1]
+	result = json.loads(response.read().decode('utf-8'))
 	result = result['login']['result']
 	if result == 'WrongPass':
 		print('Wrong password')
@@ -114,7 +117,7 @@ sock.request(
 	'GET',
 	'/api.php?action=query&prop=info&titles=' + quote('|'.join(list(targets.values()))) + '&intoken=edit&format=json',
 	'',
-	{'Connection': 'Keep alive', 'Cookie': session}
+	{'Connection': 'Keep alive', 'Cookie': session, 'User-Agent': 'push.py'}
 )
 result = json.loads(sock.getresponse().read().decode('utf-8'))
 pages = result['query']['pages']
@@ -130,14 +133,14 @@ for i in pages:
 		'POST',
 		'/api.php',
 		'action=edit&title=' + quote(pages[i]['title']) + '&text=' + quote(text) + '&summary=' + quote(sys.argv[2]) + '&token=' + quote(pages[i]['edittoken']) + '&format=json',
-		{'Content-Type': 'application/x-www-form-urlencoded', 'Connection': 'Keep alive', 'Cookie': session}
+		{'Content-Type': 'application/x-www-form-urlencoded', 'Connection': 'Keep alive', 'Cookie': session, 'User-Agent': 'push.py'}
 	)
 	result = json.loads(sock.getresponse().read().decode('utf-8'))
 	print('Publishing: ' + pages[i]['title'] + ' ... ', end='')
 	if 'edit' in result:  print(result['edit']['result'])
-	else: print('Error ' + result['error']['code'] + ': ' + result['error']['info'])
+	else: print('Error ' + result['error']['code'] + ': ' + result['error']['info'] + '\n', result)
 
 print('Logging out...')
-sock.request('GET', '/api.php?action=logout', '', {'Cookie': session})
+sock.request('GET', '/api.php?action=logout', '', {'Connection': 'close', 'Cookie': session, 'User-Agent': 'push.py'})
 sock.getresponse().read()
 sock.close()
