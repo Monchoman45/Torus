@@ -78,7 +78,7 @@ Torus.ui.click_link = function(event) {
 	}
 	event.preventDefault();
 
-	if(this.href.indexOf('.wikia.com/wiki/Special:Chat') != -1 && Torus.options['misc-links-chat']) {Torus.open(this.href.substring(this.href.indexOf('://') + 3, this.href.indexOf('.wikia.com/wiki/Special:Chat')));}
+	if((this.href.indexOf('.wikia.com/wiki/Special:Chat') != -1 || this.href.indexOf('.wikia.com/wiki/Special:Torus') != -1) && Torus.options['misc-links-chat']) {Torus.open(this.href.substring(this.href.indexOf('://') + 3, this.href.indexOf('.wikia.com/wiki/Special:')));}
 	else {window.open(this.href, Torus.options['misc-links-target']);}
 }
 
