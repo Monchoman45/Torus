@@ -192,6 +192,9 @@ Torus.ui.render_line = function(message) {
 			line.appendChild(document.createTextNode('== '));
 			line.appendChild(Torus.i18n.html('message-' + message.event, Torus.ui.span_user(message.performer), frag, document.createTextNode('{' + message.room.name + '}'), document.createTextNode(message.expiry)));
 			break;
+		case 'error':
+			line.appendChild(document.createTextNode('== ' + Torus.i18n.text(message.error)));
+			break;
 		default: throw new Error('Message type ' + message.event + ' is not rendered. (ui.render_line)');
 	}
 	return line;

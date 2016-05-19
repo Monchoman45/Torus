@@ -2,11 +2,16 @@ Torus.i18n['en'] = {
 	'yes': 'yes',
 	'no': 'no',
 
-	'status': 'status',
+	'status': '#status',
 
 	'error-login': 'You don\'t appear to be logged in. You must have an account to use chat on Wikia. Please [[Special:UserSignup|register]] or [[Special:UserLogin|log in]].',
+	'error-otherbrowser': 'You are connected to $1 from another window.',
+	'error-cantkickmods': 'Can\'t kick moderators.',
 
 	'title': 'Torus - It\'s a donut - $1',
+
+	'firstheading': 'Torus',
+	'secondheading': 'It\'s a donut',
 
 	'connecting': 'Connecting to $1...',
 
@@ -50,6 +55,7 @@ Torus.i18n['en'] = {
 	'menu-suggest': 'suggest a bug',
 	'menu-doc': '"documentation"',
 
+	'pings-name': 'Pings',
 	'pings-alert': 'Alert',
 	'pings-interval': 'Interval',
 	'pings-beep': 'Beep',
@@ -58,6 +64,7 @@ Torus.i18n['en'] = {
 	'pings-regex': 'Regex',
 	'pings-add': '+ Add',
 
+	'options-name': 'Options',
 	'options-enabled': 'Enabled',
 	'options-messages': 'Messages',
 	'options-messages-general': 'General',
@@ -76,10 +83,16 @@ Torus.i18n['en'] = {
 	'options-misc-links-chat': 'Chat',
 	'options-misc-links-target': 'Target',
 
+	'themes-name': 'Themes',
 	'themes-text': 'text',
 	'themes-link': 'link',
 	'themes-away': 'away',
 	'themes-ping': 'ping',
+
+	'themes-name-binary': 'Binary',
+	'themes-name-creampuff': 'Creampuff',
+	'themes-name-default': 'Default',
+	'themes-name-plain': 'Plain',
 
 	'commands-help': 'Help: $1:\n$2',
 	'commands-nohelp': 'No help data for $1',

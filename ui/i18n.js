@@ -1,14 +1,15 @@
-Torus.i18n = {
-	lang: 'en',
-};
+Torus.i18n = {};
+
+if(window.mw && mw.config && mw.config.values) {Torus.i18n.lang = wgUserLanguage;}
+else {Torus.i18n.lang = 'en';}
 
 Torus.i18n.text = function(message) {
-	if(typeof Torus.i18n[Torus.i18n.lang] == 'object') {var lang = Torus.i18n.lang;}
+	if(Torus.i18n.lang == 'qqx' || typeof Torus.i18n[Torus.i18n.lang] == 'object') {var lang = Torus.i18n.lang;}
 	else {var lang = 'en';}
-	if(Torus.i18n[lang][message]) {message = Torus.i18n[Torus.i18n.lang][message];}
-	else {lang = 'xxx';}
+	if(Torus.i18n[lang] && Torus.i18n[lang][message]) {message = Torus.i18n[Torus.i18n.lang][message];}
+	else {lang = 'qqx';}
 
-	if(lang == 'xxx') {
+	if(lang == 'qqx') {
 		for(var i = 1; i < arguments.length; i++) {message += ' $' + i + ' = ' + arguments[i];}
 	}
 	else {
@@ -24,16 +25,16 @@ Torus.i18n.text = function(message) {
 }
 
 Torus.i18n.html = function(name) {
-	if(typeof Torus.i18n[Torus.i18n.lang] == 'object') {var lang = Torus.i18n.lang;}
+	if(Torus.i18n.lang == 'qqx' || typeof Torus.i18n[Torus.i18n.lang] == 'object') {var lang = Torus.i18n.lang;}
 	else {var lang = 'en';}
-	if(Torus.i18n[lang][name]) {var message = Torus.i18n[lang][name];}
+	if(Torus.i18n[lang] && Torus.i18n[lang][name]) {var message = Torus.i18n[lang][name];}
 	else {
 		var message = name;
-		lang = 'xxx';
+		lang = 'qqx';
 	}
 
 	var frag = document.createDocumentFragment();
-	if(lang == 'xxx') {
+	if(lang == 'qqx') {
 		frag.appendChild(document.createTextNode(name));
 		for(var i = 1; i < arguments.length; i++) {
 			frag.appendChild(document.createTextNode(' $' + i + ' = '));

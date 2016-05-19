@@ -25,7 +25,7 @@ Torus.ui.ping = function(room) {
 //basically a more specific version of options.js
 
 Torus.ui.pings = new Torus.classes.Extension('pings', -3);
-Torus.ui.pings.text = 'Pings';
+Torus.ui.pings.name = 'pings-name';
 
 Torus.ui.pings.dir = {
 	'#global': {
@@ -193,7 +193,7 @@ Torus.ui.pings.rebuild = function() {
 		add.id = 'torus-pings-add';
 		Torus.ui.ids['pings-add'] = add;
 		add.className = 'torus-sidebar-button';
-		add.textContent = '+ Add';
+		add.textContent = Torus.i18n.text('pings-add');
 		add.addEventListener('click', Torus.ui.pings.click_add);
 	Torus.ui.pings.ui.sidebar.appendChild(add);
 

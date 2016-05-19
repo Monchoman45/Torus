@@ -38,7 +38,7 @@ Torus.classes.Chat = function(domain, parent, users) {
 	}
 	else { //this is the status room
 		this.id = 0;
-		this.name = '#status'
+		this.name = 'status';
 		this.listeners = {
 			chat: {},
 			io: {},
@@ -53,7 +53,7 @@ Torus.classes.Chat.socket_connect = function(event) {
 	event.sock.chat.connecting = false;
 	event.sock.chat.connected = true;
 	event.sock.chat.send_command('initquery');
-	Torus.alert('Connected.', event.sock.chat);
+	//Torus.alert('Connected.', event.sock.chat); //FIXME: i18n
 	Torus.io.getBlockedPrivate();
 	Torus.call_listeners(new Torus.classes.ChatEvent('connected', event.sock.chat));
 }
@@ -229,14 +229,14 @@ Torus.classes.Chat.prototype['event_chat:add'] = function(data) {
 				event.target = data.attrs.msgParams[1];
 				break;
 			case 'chat-err-connected-from-another-browser':
-				//TODO: make this its own event
-				event.event = 'alert';
-				event.text = 'You are connected to ' + this.name + ' from another window.';
+				event.event = 'error';
+				event.error = 'error-otherbrowser';
+				event.args = [this.domain];
 				break;
 			case 'chat-kick-cant-kick-moderator':
-				//TODO: figure out who we tried to kick
-				event.event = 'alert';
-				event.text = 'Can\'t kick moderators.';
+				event.event = 'error';
+				event.error = 'error-cantkickmods';
+				event.args = [];
 				break;
 			default:
 				console.log(event);
@@ -246,6 +246,7 @@ Torus.classes.Chat.prototype['event_chat:add'] = function(data) {
 	else {
 		event.event = 'alert';
 		event.text = data.attrs.text;
+		console.log('got an alert from the server:', data); //this shouldn't actually happen so if it does i wanna know
 	}
 	return event;
 }

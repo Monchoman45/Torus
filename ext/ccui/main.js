@@ -1,5 +1,5 @@
 new Torus.classes.Extension('ccui', -11);
-Torus.ext.ccui.text = 'CCUI';
+Torus.ext.ccui.name = 'ccui-name';
 
 Torus.ext.ccui.fetching = false;
 Torus.ext.ccui.dataset = {
@@ -12,20 +12,20 @@ Torus.ext.ccui.dataset = {
 Torus.ext.ccui.render = function() {
 	var top = document.createElement('div');
 		var info = document.createElement('div');
-			info.id = 'torus-ext-ccui-domain';
+			info.id = 'torus-ext-ccui-link';
 			Torus.ui.ids['ext-ccui-domain'] = info;
 			info.className = 'torus-ext-ccui-info';
 			//info.textContent = 'Current domain: ' + Torus.local.domain + '. ';
 			var log = document.createElement('a');
 				log.href = '/wiki/Special:Log/chatconnect';
 				log.title = 'Special:Log/chatconnect';
-				log.textContent = 'S:L/chatconnect';
+				log.textContent = Torus.i18n.text('ext-ccui-link');
 				log.addEventListener('click', Torus.ui.click_link);
 			info.appendChild(log);
 		top.appendChild(info);
 		var label = document.createElement('label');
 			label.setAttribute('for', 'torus-ext-ccui-input');
-			label.textContent = 'User or IP:';
+			label.textContent = Torus.i18n.text('ext-ccui-input');
 		top.appendChild(label);
 		top.appendChild(document.createTextNode(' '));
 		var input = document.createElement('input');
@@ -38,25 +38,19 @@ Torus.ext.ccui.render = function() {
 			button.id = 'torus-ext-ccui-button';
 			Torus.ui.ids['ext-ccui-button'] = button;
 			button.type = 'submit';
-			button.value = 'Find';
+			button.value = Torus.i18n.text('ext-ccui-button');
 			button.addEventListener('click', Torus.ext.ccui.button_click);
 		top.appendChild(button);
 		top.appendChild(document.createTextNode(' '));
 		var label = document.createElement('label');
 			label.setAttribute('for', 'torus-ext-ccui-limit');
-			label.textContent = 'Search last';
-		top.appendChild(label);
-		top.appendChild(document.createTextNode(' '));
-		var limit = document.createElement('input');
-			limit.id = 'torus-ext-ccui-limit';
-			Torus.ui.ids['ext-ccui-limit'] = limit;
-			limit.type = 'number';
-			limit.value = '500';
-		top.appendChild(limit);
-		top.appendChild(document.createTextNode(' '));
-		var label = document.createElement('label');
-			label.setAttribute('for', 'torus-ext-ccui-limit');
-			label.textContent = 'connections';
+			label.textContent = Torus.i18n.text('ext-ccui-limit');
+			var limit = document.createElement('input');
+				limit.id = 'torus-ext-ccui-limit';
+				Torus.ui.ids['ext-ccui-limit'] = limit;
+				limit.type = 'number';
+				limit.value = '500';
+			label.appendChild(Torus.i18n.html('ext-ccui-limit', limit));
 		top.appendChild(label);
 		top.appendChild(document.createTextNode(' '));
 		var wait = Torus.ui.img_loader();
@@ -106,10 +100,10 @@ Torus.ext.ccui.render = function() {
 			div.appendChild(table);
 		Torus.ui.ids['window'].appendChild(div);
 	}
-	Torus.ui.ids['ext-ccui-ips-title'].firstChild.textContent = 'User\'s IPs: ';
-	Torus.ui.ids['ext-ccui-exact-title'].firstChild.textContent = 'Exact matches: ';
-	Torus.ui.ids['ext-ccui-close-title'].firstChild.textContent = '/24 matches: ';
-	Torus.ui.ids['ext-ccui-far-title'].firstChild.textContent = '/16 matches: ';
+	Torus.ui.ids['ext-ccui-ips-title'].firstChild.textContent = Torus.i18n.text('ext-ccui-ips-title');
+	Torus.ui.ids['ext-ccui-exact-title'].firstChild.textContent = Torus.i18n.text('ext-ccui-exact-title');
+	Torus.ui.ids['ext-ccui-close-title'].firstChild.textContent = Torus.i18n.text('ext-ccui-close-title');
+	Torus.ui.ids['ext-ccui-far-title'].firstChild.textContent = Torus.i18n.text('ext-ccui-far-title');
 
 	Torus.ext.ccui.fill();
 }
@@ -183,25 +177,25 @@ Torus.ext.ccui.fill = function() {
 				user.appendChild(document.createTextNode(String.fromCharCode(160) + '('));
 				var talk = document.createElement('a');
 					talk.href = '/wiki/User_talk:' + matches[i][j].user;
-					talk.textContent = 't';
+					talk.textContent = Torus.i18n.text('ext-ccui-link-talk');
 					talk.addEventListener('click', Torus.ui.click_link);
 				user.appendChild(talk);
 				user.appendChild(document.createTextNode('|'));
 				var contribs = document.createElement('a');
 					contribs.href = '/wiki/Special:Contributions/' + matches[i][j].user;
-					contribs.textContent = 'c';
+					contribs.textContent = Torus.i18n.text('ext-ccui-link-contribs');
 					contribs.addEventListener('click', Torus.ui.click_link);
 				user.appendChild(contribs);
 				user.appendChild(document.createTextNode('|'));
 				var ban = document.createElement('a');
 					ban.href = '/wiki/Special:Log/chatban?page=User:' + matches[i][j].user;
-					ban.textContent = 'bans';
+					ban.textContent = Torus.i18n.text('ext-ccui-link-bans');
 					ban.addEventListener('click', Torus.ui.click_link);
 				user.appendChild(ban);
 				user.appendChild(document.createTextNode('|'));
 				var block = document.createElement('a');
 					block.href = '/wiki/Special:Log/block?page=User:' + matches[i][j].user;
-					block.textContent = 'blocks';
+					block.textContent = Torus.i18n.text('ext-ccui-link-blocks');
 					block.addEventListener('click', Torus.ui.click_link);
 				user.appendChild(block);
 				user.appendChild(document.createTextNode(')'));
@@ -218,13 +212,13 @@ Torus.ext.ccui.fill = function() {
 				ip.appendChild(document.createTextNode(String.fromCharCode(160) + '('));
 				var block = document.createElement('a');
 					block.href = '/wiki/Special:Log/block?page=User:' + matches[i][j].ip;
-					block.textContent = 'blocks';
+					block.textContent = Torus.i18n.text('ext-ccui-link-blocks');
 					block.addEventListener('click', Torus.ui.click_link);
 				ip.appendChild(block);
 				ip.appendChild(document.createTextNode('|'));
 				var whois = document.createElement('a');
 					whois.href = 'http://whois.arin.net/rest/ip/' + matches[i][j].ip;
-					whois.textContent = 'whois';
+					whois.textContent = Torus.i18n.text('ext-ccui-link-whois');
 					whois.addEventListener('click', Torus.ui.click_link);
 				ip.appendChild(whois);
 				ip.appendChild(document.createTextNode(')'));
@@ -599,3 +593,5 @@ if(Torus.ui) {
 	Torus.ext.ccui.add_listener('ui', 'activate', Torus.ext.ccui.render);
 	Torus.ext.ccui.add_listener('ui', 'deactivate', Torus.util.null); //FIXME: i'm sure something important is supposed to go here
 }
+
+{{ext/ccui/i18n/en.js}}

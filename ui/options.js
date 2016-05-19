@@ -13,7 +13,7 @@ Torus.options['misc-links-chat'] = true;
 Torus.options['misc-links-target'] = '_blank';
 
 new Torus.classes.Extension('options', -2);
-Torus.ext.options.text = 'Options';
+Torus.ext.options.name = 'options-name';
 
 Torus.ext.options.ui = {
 	sidebar: document.createDocumentFragment()

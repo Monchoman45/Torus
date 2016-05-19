@@ -23,7 +23,7 @@ Torus.ui.menu.render = function() {
 		links.appendChild(document.createTextNode(' | '));
 		var suggest = document.createElement('a');
 			suggest.href = 'https://github.com/Monchoman45/Torus/issues/new?labels=feature-request';
-			suggest.textContent = Torus.i18n.text('suggest');
+			suggest.textContent = Torus.i18n.text('menu-suggest');
 			suggest.addEventListener('click', Torus.ui.click_link);
 		links.appendChild(suggest);
 		links.appendChild(document.createTextNode(' | '));
@@ -43,7 +43,7 @@ Torus.ui.menu.render = function() {
 				ext.id = 'torus-menu-ext-' + i;
 				Torus.ui.ids['menu-ext-' + i] = ext;
 				ext.setAttribute('data-id', i);
-				if(Torus.ext[i].text) {ext.textContent = Torus.ext[i].text;}
+				if(Torus.ext[i].name) {ext.textContent = Torus.i18n.text(Torus.ext[i].name);}
 				else {ext.textContent = i;}
 				ext.addEventListener('click', Torus.ui.menu.click_extension);
 			extensions.appendChild(ext);

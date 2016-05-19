@@ -19,6 +19,7 @@ Torus.ui.new_room = function(event) {
 	event.room.add_listener('io', 'kick', Torus.ui.add_line);
 	event.room.add_listener('io', 'ban', Torus.ui.add_line);
 	event.room.add_listener('io', 'unban', Torus.ui.add_line);
+	event.room.add_listener('io', 'error', Torus.ui.add_line);
 
 	if(!event.room.parent && !Torus.ui.pings.dir[event.room.domain]) {
 		Torus.ui.pings.dir[event.room.domain] = {};
@@ -41,12 +42,7 @@ Torus.ui.new_room = function(event) {
 		event.room.checkuser = false;
 
 		Torus.io.jsonp('http://' + event.room.domain + '.wikia.com/api.php?action=query&list=users&ususers=' + encodeURIComponent(wgUserName) + '&usprop=rights&format=json', function(result) {
-			var rights = result.query.users[0].rights;
-			var found = false;
-			for(var i in rights) {
-				if(rights[i] == 'checkuser') {found = true; break;}
-			}
-			if(found) {
+			if(result.query.users[0].rights.indexOf('checkuser') != -1) {
 				event.room.checkuser = true; //FIXME: closure
 				if(event.room.domain == Torus.local && !Torus.ext.ccui) {
 					Torus.util.load_js('http://@DOMAIN@/wiki/MediaWiki:Torus.js/ext/ccui/main.js?action=raw&ctype=text/javascript');
@@ -58,7 +54,7 @@ Torus.ui.new_room = function(event) {
 }
 
 Torus.ui.add_room = function(event) {
-	Torus.alert(Torus.i18n.text('connecting', '{' + event.room.name + '}'));
+	if(event.room.id != 0) {Torus.alert(Torus.i18n.text('connecting', '{' + event.room.name + '}'));}
 
 	for(var i = 0; i < Torus.ui.ids['tabs'].children.length; i++) {
 		if(Torus.ui.ids['tabs'].children[i].getAttribute('data-id') == event.room.domain) {return;}
@@ -70,7 +66,8 @@ Torus.ui.add_room = function(event) {
 	tab.setAttribute('data-id', event.room.domain);
 	tab.className = 'torus-tab';
 	tab.addEventListener('click', Torus.ui.tab_click);
-	tab.textContent = event.room.name;
+	if(event.room.id != 0) {tab.textContent = event.room.name;}
+	else {tab.textContent = Torus.i18n.text('status');}
 	if(event.room.id > 0) {
 		var x = document.createElement('span');
 		x.className = 'torus-tab-close';

@@ -13,6 +13,19 @@ Torus.util.compare_strings = function(str1, str2) {
 
 Torus.util.cap = function(str) {return str.charAt(0).toUpperCase() + str.substring(1);}
 
+Torus.util.softmerge = function(dest, source, prefix) {
+	if(!prefix) {prefix = '';}
+
+	for(var i in source) {
+		if(!dest[prefix + i]) {dest[prefix + i] = source[i];}
+	}
+}
+Torus.util.hardmerge = function(dest, source, prefix) {
+	if(!prefix) {prefix = '';}
+
+	for(var i in source) {dest[prefix + i] = source[i];}
+}
+
 Torus.util.timestamp = function(time) {
 	var date = new Date();
 	if(time) {date.setTime(time);}

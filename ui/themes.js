@@ -1,25 +1,25 @@
 Torus.ui.themes = new Torus.classes.Extension('themes', -4);
-Torus.ui.themes.text = 'Themes';
+Torus.ui.themes.name = 'themes-name';
 
 Torus.ui.themes.dir = {
 	'binary': {
 		url: 'http://@DOMAIN@/wiki/MediaWiki:Torus.js/ui/themes/binary.css?action=raw&ctype=text/css',
-		name: 'Binary',
+		name: 'themes-name-binary',
 		loaded: true,
 	},
 	'creampuff': {
 		url: 'http://@DOMAIN@/wiki/MediaWiki:Torus.js/ui/themes/creampuff.css?action=raw&ctype=text/css',
-		name: 'Creampuff',
+		name: 'themes-name-creampuff',
 		loaded: true,
 	},
 	'default': {
 		url: 'http://@DOMAIN@/wiki/MediaWiki:Torus.js/ui/themes/default.css?action=raw&ctype=text/css',
-		name: 'Default',
+		name: 'themes-name-default',
 		loaded: true,
 	},
 	'plain': {
 		url: 'http://@DOMAIN@/wiki/MediaWiki:Torus.js/ui/themes/plain.css?action=raw&ctype=text/css',
-		name: 'Plain',
+		name: 'themes-name-plain',
 		loaded: true,
 	},
 };
@@ -54,7 +54,7 @@ Torus.ui.themes.rebuild = function() {
 				var label = document.createElement('label');
 					label.setAttribute('for', 'torus-theme-' + i);
 					label.className = 'torus-theme-label';
-					label.textContent = Torus.ui.themes.dir[i].name;
+					label.textContent = Torus.i18n.text(Torus.ui.themes.dir[i].name);
 				td.appendChild(label);
 			tr.appendChild(td);
 			var td = document.createElement('td');

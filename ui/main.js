@@ -56,15 +56,24 @@ Torus.ui.onload = function() {
 		if(window.skin == 'oasis') {
 			var body = 'WikiaArticle';
 			if(document.getElementById('WikiaPageHeader')) {
-				document.getElementById('WikiaPageHeader').getElementsByTagName('h1')[0].innerHTML = 'Torus';
-				document.getElementById('WikiaPageHeader').getElementsByTagName('h2')[0].innerHTML = 'It\'s a donut'; //FIXME: i18n
+				document.getElementById('WikiaPageHeader').getElementsByTagName('h1')[0].textContent = Torus.i18n.text('firstheading');
+				document.getElementById('WikiaPageHeader').getElementsByTagName('h2')[0].textContent = Torus.i18n.text('secondheading');
 			}
 		}
 		else {
 			var body = 'bodyContent';
-			document.getElementById('firstHeading').innerHTML = 'Torus';
+			document.getElementById('firstHeading').textContent = Torus.i18n.text('firstheading');
 		}
-		document.getElementById(body).innerHTML = (document.getElementById('AdminDashboardHeader') ? '<div class="AdminDashboardGeneralHeader AdminDashboardArticleHeader"><h1>Torus</h1></div>' : '');
+		Torus.util.empty(document.getElementById(body));
+		if(document.getElementById('AdminDashboardHeader')) {
+			var div = document.createElement('div');
+				div.classList.add('AdminDashboardGeneralHeader');
+				div.classList.add('AdminDashboardArticleHeader');
+				var h1 = document.createElement('h1');
+					h1.textContent = Torus.i18n.text('firstheading');
+				div.appendChild(h1);
+			document.getElementById(body).appendChild(div);
+		}
 		document.getElementById(body).appendChild(Torus.ui.window);
 
 		if(wgUserName == null) {
@@ -106,9 +115,9 @@ Torus.ui.onload = function() {
 
 {{ui/util.js}}
 
-{{MediaWiki:Torus.js/ui/i18n.js}}
+{{ui/i18n.js}}
 
-{{MediaWiki:Torus.js/ui/i18n/en.js}}
+{{ui/i18n/en.js}}
 
 //(function() { //I really hate these but it's better then leaking temp variables everywhere //FIXME: iffy causes load order problems
 	Torus.util.load_css('http://@DOMAIN@/wiki/MediaWiki:Torus.js/ui/main.css?action=raw&ctype=text/css');
@@ -129,8 +138,7 @@ Torus.ui.onload = function() {
 				img.src = 'http://images2.wikia.nocookie.net/__cb20110812214252/monchbox/images/a/a1/Gear_icon.png';
 				img.width = '18';
 			menu.appendChild(img);
-			menu.appendChild(document.createTextNode(String.fromCharCode(160))); //&nbsp;
-			menu.appendChild(document.createTextNode('menu'));
+			menu.appendChild(document.createTextNode(String.fromCharCode(160) + Torus.i18n.text('menu-menu')));
 		tabs.appendChild(menu);
 	Torus.ui.window.appendChild(tabs);
 
