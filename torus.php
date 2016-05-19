@@ -83,9 +83,8 @@ if(!$response) {
 //fill $data
 $props = array(
 	'roomId' => 'room',
-	'nodeHostname' => 'host',
-	'nodeInstance' => 'server',
-	'nodePort' => 'port',
+	'chatServerHost' => 'host',
+	'chatServerPort' => 'port',
 );
 $data = array('_hits' => 1);
 foreach($props as $key => $val) {
@@ -96,6 +95,14 @@ foreach($props as $key => $val) {
 
 	$data[$val] = $response[$key];
 }
+
+//also need wiki id, so get that
+$response = json_decode(file_get_contents('http://' . $_GET['domain'] . '.wikia.com/api.php?action=query&meta=siteinfo&siprop=wikidesc&format=json'), true);
+if(!$response || array_key_exists('error', $response)) {
+	echo json_encode(array('error' => 'nometa'));
+	exit();
+}
+$data['wiki'] = $response['query']['wikidesc']['id'];
 
 //check cache size
 if(count($cache) > CACHE_MAX) {

@@ -75,7 +75,7 @@ Torus.classes.Chat.prototype.connect = function(transport) {
 		var info = {
 			host: this.parent.socket.host,
 			port: this.parent.socket.port,
-			server: this.parent.socket.server,
+			wiki: this.parent.socket.wiki,
 			room: this.id,
 			key: this.parent.socket.key,
 		};
@@ -269,7 +269,7 @@ Torus.classes.Chat.prototype.event_updateUser = function(data) {
 		avatar: data.attrs.avatarSrc.replace('28px', '100px'),
 		mod: data.attrs.isModerator,
 		staff: data.attrs.isStaff,
-		givemod: data.attrs.isCanGiveChatMod,
+		givemod: data.attrs.canPromoteModerator,
 		status_state: data.attrs.statusState,
 		status_message: data.attrs.statusMessage,
 		edits: data.attrs.editCount,

@@ -107,7 +107,7 @@ Torus.ui.onload = function() {
 {{ui/util.js}}
 
 //(function() { //I really hate these but it's better then leaking temp variables everywhere //FIXME: iffy causes load order problems
-	Torus.util.load_css('http://@DOMAIN@/wiki/MediaWiki:Torus.js/ui/main.css?action=raw&ctype=text/css&templates=expand&t=' + (new Date()).getTime());
+	Torus.util.load_css('http://@DOMAIN@/wiki/MediaWiki:Torus.js/ui/main.css?action=raw&ctype=text/css');
 
 	Torus.ui.window.id = 'torus';
 	Torus.ui.ids['torus'] = Torus.ui.window;

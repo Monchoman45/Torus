@@ -1,3 +1,18 @@
+if(window.mw && mw.user && mw.user.tokens && mw.user.tokens.values) {Torus.io.token = mw.user.tokens.values.editToken;}
+else {
+	var xhr = new XMLHttpRequest();
+	xhr.addEventListener('loadend', function() {
+		if(this.status == 200) {
+			if(!this.response.error) {Torus.io.token = this.response.query.pages[-1].edittoken;}
+		}
+		else {throw new Error('Request returned response ' + this.status + '. (token fetch)');}
+	});
+	xhr.open('GET', '/api.php?action=query&prop=info&titles=' + encodeURIComponent('#') + '&intoken=edit&format=json', true);
+	xhr.responseType = 'json';
+	xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
+	xhr.send();
+}
+
 Torus.io.ajax = function(method, post, callback) {
 	var str = '';
 	for(var i in post) {str += '&' + i + '=' + encodeURIComponent(post[i]);}
@@ -17,13 +32,13 @@ Torus.io.ajax = function(method, post, callback) {
 }
 
 Torus.io.getPrivateId = function(users, callback) {
-	Torus.io.ajax('getPrivateRoomId', {users: JSON.stringify(users)}, function(data) {
+	Torus.io.ajax('getPrivateRoomId', {users: JSON.stringify(users), token: Torus.io.token}, function(data) {
 		if(typeof callback == 'function') {callback.call(Torus, data.id);}
 	});
 }
 
 Torus.io.getBlockedPrivate = function(callback) {
-	Torus.io.ajax('getListOfBlockedPrivate', {}, function(data) {
+	Torus.io.ajax('getPrivateBlocks', {}, function(data) {
 		Torus.data.blockedBy = data.blockedByChatUsers;
 		Torus.data.blocked = data.blockedChatUsers;
 		if(typeof callback == 'function') {callback.call(Torus, data);}
@@ -121,7 +136,7 @@ Torus.io.transports.polling = function(domain, info) {
 	this.domain = domain;
 	this.host = info.host;
 	this.port = info.port;
-	this.server = info.server;
+	this.wiki = info.wiki;
 	this.room = info.room;
 	this.key = info.key;
 	this.session = '';
@@ -135,7 +150,7 @@ Torus.io.transports.polling = function(domain, info) {
 
 	this.add_listener('io', 'disconnect', this.close);
 
-	if(!this.host || !this.port || !this.server || !this.room) {
+	if(!this.host || !this.port || !this.wiki || !this.room) {
 		var sock = this; //FIXME: this forces a closure scope
 		Torus.io.spider(this.domain, function(data) {
 			if(data.error == 'nochat') {
@@ -151,10 +166,10 @@ Torus.io.transports.polling = function(domain, info) {
 
 			if(!sock.host) {sock.host = data.host;}
 			if(!sock.port) {sock.port = data.port;}
-			if(!sock.server) {sock.server = data.server;}
+			if(!sock.wiki) {sock.wiki = data.wiki;}
 			if(!sock.room) {sock.room = data.room;}
 
-			if(sock.host && sock.port && sock.server && sock.room && sock.key && !sock.open) {sock.poll();} //FIXME: long
+			if(sock.host && sock.port && sock.wiki && sock.room && sock.key && !sock.open) {sock.poll();} //FIXME: long
 		});
 	}
 
@@ -163,14 +178,14 @@ Torus.io.transports.polling = function(domain, info) {
 		Torus.io.key(function(key) {
 			if(!key) {throw new Error('transport: not logged in');}
 			sock.key = key;
-			if(sock.host && sock.port && sock.server && sock.room && sock.key && !sock.open) {sock.poll();} //FIXME: long
+			if(sock.host && sock.port && sock.wiki && sock.room && sock.key && !sock.open) {sock.poll();} //FIXME: long
 		});
 	}
 
-	if(this.host && this.port && this.server && this.room && this.key && !this.open) {this.poll();} //FIXME: long
+	if(this.host && this.port && this.wiki && this.room && this.key && !this.open) {this.poll();} //FIXME: long
 }
 Torus.io.transports.polling.prototype.poll = function() {
-	this.url = 'http://' + this.host + ':' + this.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + this.key + '&roomId=' + this.room + '&serverId=' + this.server;
+	this.url = 'http://' + this.host + ':' + this.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + this.key + '&roomId=' + this.room + '&serverId=' + this.wiki + '&wikiId=' + this.wiki;
 	if(this.session) {this.url += '&sid=' + this.session;}
 	this.open = true;
 
