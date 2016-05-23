@@ -6,7 +6,7 @@ else {Torus.i18n.lang = 'en';}
 Torus.i18n.text = function(message) {
 	if(Torus.i18n.lang == 'qqx' || typeof Torus.i18n[Torus.i18n.lang] == 'object') {var lang = Torus.i18n.lang;}
 	else {var lang = 'en';}
-	if(Torus.i18n[lang] && Torus.i18n[lang][message]) {message = Torus.i18n[Torus.i18n.lang][message];}
+	if(Torus.i18n[lang] && Torus.i18n[lang][message]) {message = Torus.i18n[lang][message];}
 	else {lang = 'qqx';}
 
 	if(lang == 'qqx') {

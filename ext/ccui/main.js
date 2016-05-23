@@ -1,5 +1,5 @@
 new Torus.classes.Extension('ccui', -11);
-Torus.ext.ccui.name = 'ccui-name';
+Torus.ext.ccui.name = 'ext-ccui-name';
 
 Torus.ext.ccui.fetching = false;
 Torus.ext.ccui.dataset = {
@@ -44,7 +44,6 @@ Torus.ext.ccui.render = function() {
 		top.appendChild(document.createTextNode(' '));
 		var label = document.createElement('label');
 			label.setAttribute('for', 'torus-ext-ccui-limit');
-			label.textContent = Torus.i18n.text('ext-ccui-limit');
 			var limit = document.createElement('input');
 				limit.id = 'torus-ext-ccui-limit';
 				Torus.ui.ids['ext-ccui-limit'] = limit;

@@ -252,7 +252,7 @@ Torus.ui.render_popup = function(name, room, coords) {
 		else {
 			var kick = document.createElement('a');
 			kick.className = 'torus-popup-action-disabled';
-			kick.textContent = Torus.i18n.text('popup-ban');
+			kick.textContent = Torus.i18n.text('popup-kick');
 			actions.appendChild(kick);
 
 			var ban = document.createElement('a');
