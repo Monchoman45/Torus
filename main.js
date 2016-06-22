@@ -10,8 +10,8 @@ if(window.Torus) {throw new Error('Torus already loaded');}
 window.Torus = {
 	init: false,
 	local: '',
-	version: 241,
-	pretty_version: '2.4.1',
+	version: 242,
+	pretty_version: '2.4.2',
 	chats: {},
 	listeners: {
 		window: {
