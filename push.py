@@ -94,7 +94,7 @@ while not session:
 	sock.request(
 		'POST',
 		'/api.php',
-		'action=login&lgname=' + user +'&lgpassword=' + password + '&lgtoken=' + token + '&format=json',
+		'action=login&lgname=' + user + '&lgpassword=' + password + '&lgtoken=' + token + '&format=json',
 		{'Connection': 'Keep alive', 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': session, 'User-Agent': 'push.py'}
 	)
 	response = sock.getresponse()

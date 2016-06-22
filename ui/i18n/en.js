@@ -71,6 +71,8 @@ Torus.i18n['en'] = {
 	'options-messages-general-max': 'Max',
 	'options-messages-general-rejoins': 'Rejoins',
 	'options-messages-general-timezone': 'Timezone',
+	'options-messages-emotes': 'Emotes',
+	'options-messages-emotes-max': 'Max',
 	'options-misc': 'Misc',
 	'options-misc-connection': 'Connection',
 	'options-misc-connection-default_rooms': 'Default rooms',

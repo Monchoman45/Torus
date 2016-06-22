@@ -124,6 +124,17 @@ Torus.ui.parser.parse_newline = function(state) {
 	return document.createElement('br');
 }
 
+Torus.ui.parser.parse_emote = function(state) {
+	state.text = state.text.substring(state.match.length);
+	if(Torus.options['messages-emotes-max'] != 0 && state.html.getElementsByTagName('img').length > Torus.options['messages-emotes-max']) {return document.createTextNode(state.match);}
+	var img = document.createElement('img');
+		img.className = 'torus-message-emote';
+		img.src = Torus.chats[state.wiki].emotes[state.match];
+		img.alt = state.match;
+		img.title = state.match;
+	return img;
+}
+
 Torus.ui.parser.hooks = {
 	'http://': Torus.ui.parser.parse_plainlink,
 	'https://': Torus.ui.parser.parse_plainlink,
@@ -142,21 +153,27 @@ Torus.ui.parser.hooks = {
 	'\n': Torus.ui.parser.parse_newline,
 };
 
-Torus.ui.parse_links = function(text, wiki) {
+Torus.ui.parse_links = function(text, wiki, exthooks) {
 	if(!text) {return '';}
+	if(!exthooks) {exthooks = {};}
+
+	var hooks = {};
+	Torus.util.hardmerge(hooks, exthooks);
+	Torus.util.hardmerge(hooks, Torus.ui.parser.hooks);
 
 	var state = {
 		text: text,
 		wiki: wiki,
+		match: '',
+		html: document.createElement('span'),
 	};
 
-	var html = document.createElement('span');
-	html.className = 'torus-message-text';
+	state.html.className = 'torus-message-text';
 	var min = '';
 	var ref = -1
 	do {
 		ref = -1;
-		for(var i in Torus.ui.parser.hooks) {
+		for(var i in hooks) {
 			var index = state.text.indexOf(i);
 			if(ref == -1 || (index != -1 && index < ref)) {
 				min = i;
@@ -166,17 +183,46 @@ Torus.ui.parse_links = function(text, wiki) {
 		if(ref == -1) {break;}
 
 		if(ref > 0) {
-			html.appendChild(document.createTextNode(state.text.substring(0, ref)));
+			state.html.appendChild(document.createTextNode(state.text.substring(0, ref)));
 			state.text = state.text.substring(ref);
 		}
-		html.appendChild(Torus.ui.parser.hooks[min](state));
+		state.match = min;
+		state.html.appendChild(hooks[min](state));
 	}
 	while(ref != -1);
-	html.appendChild(document.createTextNode(state.text));
+	state.html.appendChild(document.createTextNode(state.text));
 
 	//FIXME: combine adjacent text nodes
 
-	return html;
+	return state.html;
+}
+
+Torus.util.parse_emotes = function(emotes) {
+	while(emotes.indexOf('<!--') != -1) {
+		var open = emotes.indexOf('<!--');
+		var close = emotes.indexOf('-->', open);
+		if(close == -1) {break;}
+		emotes = emotes.substring(0, open) + emotes.substring(close + 3);
+	}
+
+	var lines = emotes.trim().split('\n');
+	var ret = {};
+
+	for(var i = 0; i < lines.length; i++) {
+		if(lines[i].charAt(0) == '*' && lines[i].charAt(1) != '*') {
+			var url = lines[i].substring(1).trim();
+			for(i++; i < lines.length && lines[i].indexOf('**') == 0; i++) {
+				var code = lines[i].substring(2).trim();
+				while(code.indexOf('\\\'') != -1) {code = code.replace('\\\'', '\'');} // \' -> '
+				while(code.indexOf('\\"') != -1) {code = code.replace('\\"', '"');}    // \" -> "
+				while(code.indexOf('\\\\') != -1) {code = code.replace('\\\\', '\\');} // \\ -> \
+				ret[code] = url;
+			}
+			i--; //because we started with for(i++
+		}
+		else {console.log('emote parse error at ' + i);}
+	}
+	return ret;
 }
 
 Torus.util.normalize_pagename = function(page) {

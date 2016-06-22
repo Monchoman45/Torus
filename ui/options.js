@@ -2,6 +2,8 @@
 Torus.options['messages-general-max'] = 200;
 Torus.options['messages-general-rejoins'] = false;
 Torus.options['messages-general-timezone'] = 0;
+Torus.options['messages-emotes-enabled'] = false;
+Torus.options['messages-emotes-max'] = 25;
 
 Torus.options['misc-connection-default_rooms'] = '';
 Torus.options['misc-connection-local'] = true;
@@ -40,6 +42,17 @@ Torus.ext.options.dir.messages = {
 		timezone: {
 			type: 'number',
 			label: 'options-messages-general-timezone',
+			help: '', //TODO:
+		},
+	},
+	emotes: {
+		label: 'options-messages-emotes',
+		enabled: {
+			type: 'boolean',
+		},
+		max: {
+			type: 'number',
+			label: 'options-messages-emotes-max',
 			help: '', //TODO:
 		},
 	},

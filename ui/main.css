@@ -80,6 +80,7 @@
 	word-wrap: break-word;
 }
 #torus-window span.torus-whitespace {white-space: pre;}
+#torus-window img.torus-message-emote {height: 1.455em;} /* FIXME: overly specific */
 
 #torus-sidebar {
 	position: absolute;

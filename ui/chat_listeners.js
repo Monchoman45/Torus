@@ -39,8 +39,12 @@ Torus.ui.new_room = function(event) {
 	event.room.last_viewed = 0;
 
 	if(isNaN(event.room.domain * 1)) {
-		event.room.checkuser = false;
+		event.room.emotes = {};
+		Torus.io.jsonp('http://' + event.room.domain + '.wikia.com/api.php?action=query&meta=allmessages&ammessages=Emoticons&format=json', function(result) {
+			event.room.emotes = Torus.util.parse_emotes(result.query.allmessages[0]['*']); //FIXME: closure
+		});
 
+		event.room.checkuser = false;
 		Torus.io.jsonp('http://' + event.room.domain + '.wikia.com/api.php?action=query&list=users&ususers=' + encodeURIComponent(wgUserName) + '&usprop=rights&format=json', function(result) {
 			if(result.query.users[0].rights.indexOf('checkuser') != -1) {
 				event.room.checkuser = true; //FIXME: closure
@@ -258,8 +262,15 @@ Torus.ui.parse_message = function(event) {
 
 	if(event.ping) {Torus.ui.ping(event.room);}
 
-	if(event.room.parent) {event.html = Torus.ui.parse_links(event.text, event.room.parent.domain);}
-	else {event.html = Torus.ui.parse_links(event.text, event.room.domain);}
+	var hooks = {};
+	if(Torus.options['messages-emotes-enabled']) {
+		if(event.room.parent) {var emotes = event.room.parent.emotes;}
+		else {var emotes = event.room.emotes;}
+		for(var i in emotes) {hooks[i] = Torus.ui.parser.parse_emote;}
+	}
+
+	if(event.room.parent) {event.html = Torus.ui.parse_links(event.text, event.room.parent.domain, hooks);}
+	else {event.html = Torus.ui.parse_links(event.text, event.room.domain, hooks);}
 }
 
 Torus.add_listener('chat', 'new', Torus.ui.new_room);
