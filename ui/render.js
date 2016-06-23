@@ -19,7 +19,7 @@ Torus.ui.render = function(el) {
 
 	var bar = false;
 	var frag = document.createDocumentFragment(); //yo these things are so cool
-	for(var i = 0; i < Torus.options['messages-general-max'] && rooms.length > 0; i++) {
+	for(var i = 0; (Torus.options.ui_maxmessages == 0 || i < Torus.options.ui_maxmessages) && rooms.length > 0; i++) {
 		var message = rooms[0][indexes[0]];
 		var source = 0;
 		for(var j = 1; j < rooms.length; j++) {
@@ -72,7 +72,7 @@ Torus.ui.render_line = function(message) {
 	if(message.room != Torus.ui.active) {line.classList.add('torus-message-inactive');}
 	var time = document.createElement('span');
 		time.className = 'torus-message-timestamp';
-		time.textContent = '[' + Torus.util.timestamp(message.time) + ']';
+		time.textContent = '[' + Torus.util.timestamp(message.time, Torus.options.ui_timezone) + ']';
 	line.appendChild(time);
 	var viewing = Torus.ui.viewing.length;
 	if(Torus.ui.viewing.indexOf(Torus.chats[0]) != -1) {viewing--;}

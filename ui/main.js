@@ -46,6 +46,8 @@ Torus.ui.fullscreen = function() { //FIXME: move
 }
 
 Torus.ui.onload = function() {
+	Torus.ext.options.load();
+
 	var domain = window.location.hostname.substring(0, document.location.hostname.indexOf('.wikia.com'));
 	if(domain.indexOf('preview.') == 0) {domain = domain.substring(8);}
 	if(!domain) {domain = 'localhost';}
@@ -81,15 +83,18 @@ Torus.ui.onload = function() {
 			return;
 		}
 
-		if(Torus.options['misc-connection-local']) {Torus.open(Torus.local);}
-		if(Torus.options['misc-connection-default_rooms']) {
-			var rooms = Torus.options['misc-connection-default_rooms'].split('\n');
-			for(var i = 0; i < rooms.length; i++) {
-				if(!Torus.chats[rooms[i]]) {Torus.open(rooms[i]);} //could be Torus.local
+		if(Torus.options.ui_joinlocal) {Torus.open(Torus.local);}
+		if(Torus.options.ui_defaultrooms) {
+			for(var i = 0; i < Torus.options.ui_defaultrooms.length; i++) {
+				if(!Torus.chats[Torus.options.ui_defaultrooms[i]]) {Torus.open(Torus.options.ui_defaultrooms[i]);} //could be Torus.local
 			}
 		}
 	}
 }
+
+{{ui/i18n.js}}
+
+{{ui/i18n/en.js}}
 
 {{ui/events.js}}
 
@@ -115,12 +120,8 @@ Torus.ui.onload = function() {
 
 {{ui/util.js}}
 
-{{ui/i18n.js}}
-
-{{ui/i18n/en.js}}
-
 //(function() { //I really hate these but it's better then leaking temp variables everywhere //FIXME: iffy causes load order problems
-	Torus.util.load_css('http://@DOMAIN@/wiki/MediaWiki:Torus.js/ui/main.css?action=raw&ctype=text/css');
+	Torus.util.load_css('http://@DOMAIN@/wiki/MediaWiki:Torus.js/modules/ui.css?action=raw&ctype=text/css');
 
 	Torus.ui.window.id = 'torus';
 	Torus.ui.ids['torus'] = Torus.ui.window;
@@ -180,8 +181,6 @@ Torus.ui.onload = function() {
 
 Torus.ui.window.addEventListener('mouseover', Torus.ui.window_mouseover);
 
-Torus.add_listener('window', 'load', Torus.ui.onload);
-
 Torus.chats[0].add_listener('io', 'alert', Torus.ui.add_line);
 for(var i in Torus.logs) {Torus.logs[i][0] = [];}
 Torus.chats[0].listeners.ui = {};
@@ -189,7 +188,10 @@ Torus.ui.add_room({room: Torus.chats[0]});
 Torus.ui.show(Torus.chats[0]);
 
 
-
 {{ui/commands.js}}
 
 {{ui/options.js}}
+
+
+if(document.readyState == 'complete') {Torus.ui.onload();}
+else {Torus.addEventListener('window', 'load', Torus.ui.onload);}

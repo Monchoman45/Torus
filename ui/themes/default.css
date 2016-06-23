@@ -104,7 +104,7 @@ table#torus-preview-default.torus-theme-preview .text4, #torus.theme-default .te
 
 #torus.theme-default #torus-input {
 	background-color: #66f;
-	border-top: 1px solid #000;
+	border-top-color: #000;
 }
 #torus.theme-default #torus-input-box {
 	background-color: #fff;
@@ -117,10 +117,17 @@ table#torus-preview-default.torus-theme-preview .text4, #torus.theme-default .te
 #torus.theme-default #torus-menu-extensions a:hover {
 	background-color: #def;
 }
-#torus.theme-default #torus-window fieldset {border: 1px solid #66f;}
+#torus.theme-default #torus-window fieldset {border-color: #66f;}
 #torus.theme-default #torus-window textarea,
 #torus.theme-default #torus-window input[type="text"],
 #torus.theme-default #torus-window input[type="number"] {
 	background-color: #fff;
 	color: #000;
 }
+#torus.theme-default #torus-window div.torus-option-array {border-color: #66f;}
+#torus.theme-default #torus-window div.torus-option-array ul {background-color: #def;}
+#torus.theme-default #torus-window div.torus-option-array li {border-bottom-color: #000;}
+#torus.theme-default #torus-window div.torus-option-array li:nth-child(even) {background-color: #fff;}
+#torus.theme-default #torus-window div.torus-option-array li:nth-child(odd) {background-color: #9cf;}
+#torus.theme-default #torus-window div.torus-option-array span.torus-option-array-remove {color: red;}
+#torus.theme-default #torus-window div.torus-option-array input {border-top-color: #66f;}

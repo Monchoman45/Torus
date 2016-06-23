@@ -6,7 +6,7 @@ Torus.ui.img_loader = function() {
 }
 
 Torus.ui.span_user = function(user) {
-	var color = Torus.util.color_hash(user, Torus.options['misc-user_colors-hue'], Torus.options['misc-user_colors-val'], Torus.options['misc-user_colors-sat']);
+	var color = Torus.util.color_hash(user, Torus.options.ui_colorhue, Torus.options.ui_colorval, Torus.options.ui_colorsat);
 	var span = document.createElement('span');
 		span.className = 'torus-message-usercolor';
 		span.style.color = color;

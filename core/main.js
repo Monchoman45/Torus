@@ -10,8 +10,8 @@ if(window.Torus) {throw new Error('Torus already loaded');}
 window.Torus = {
 	init: false,
 	local: '',
-	version: 242,
-	pretty_version: '2.4.2',
+	version: 2500,
+	pretty_version: '2.5.00',
 	chats: {},
 	listeners: {
 		window: {
@@ -170,63 +170,28 @@ Torus.alert = function(text, room) {
 }
 
 Torus.onload = function() {
-	Torus.load_options();
 	Torus.call_listeners(new Torus.classes.WindowEvent('load'));
-	//Torus.alert('Initialized.');
 	Torus.init = true;
 }
 
 Torus.unload = function() {
 	Torus.logout();
-	Torus.save_options();
 	Torus.call_listeners(new Torus.classes.WindowEvent('unload'));
 }
 
-Torus.save_options = function() {
-	var save = {version: Torus.version, data: Torus.options};
-	var event = new Torus.classes.ExtEvent('save_options');
-	event.options = save;
-	Torus.call_listeners(event);
-	window.localStorage.setItem('torus-options', JSON.stringify(save));
-	
-	return save;
-}
+{{core/io.js}}
 
-Torus.load_options = function() {
-	var load = JSON.parse(window.localStorage.getItem('torus-options'));
-	if(load) {
-		if(load.version < 231) {
-			window.localStorage.removeItem('torus-options');
-			load.data = {};
-		}
+{{core/chat.js}}
 
-		for(var i in load.data) {Torus.options[i] = load.data[i];}
-	}
-	Torus.call_listeners(new Torus.classes.ExtEvent('load_options'));
-	return Torus.options;
-}
+{{core/events.js}}
 
-{{io.js}}
+{{core/ext.js}}
 
-{{chat.js}}
+{{core/util.js}}
 
-{{events.js}}
-
-{{ext.js}}
-
-{{util.js}}
-
-{{cache.js}}
+{{core/cache.js}}
 
 new Torus.classes.Chat(0);
-
-
-
-{{ui/main.js}}
-
-
-
-
 
 window.addEventListener('beforeunload', Torus.unload);
 if(document.readyState == 'complete') {Torus.onload();}

@@ -278,6 +278,29 @@
 	vertical-align: bottom;
 	margin: 0;
 }
+#torus-window div.torus-option-array {border: 1px solid;}
+#torus-window div.torus-option-array ul {
+	height: 10em;
+	list-style: none;
+	margin: 0;
+	overflow-x: hidden;
+	overflow-y: scroll;
+}
+#torus-window div.torus-option-array li {
+	padding: .25em .5em;
+	font-size: larger;
+	border-bottom: 1px solid;
+	margin: 0;
+}
+#torus-window div.torus-option-array span.torus-option-array-remove {
+	float: right;
+	cursor: pointer;
+}
+#torus-window div.torus-option-array input {
+	width: 100%;
+	border: 0;
+	border-top: 1px solid;
+}
 
 #torus a.torus-fakelink {cursor: pointer;}
 

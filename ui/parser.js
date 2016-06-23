@@ -126,7 +126,7 @@ Torus.ui.parser.parse_newline = function(state) {
 
 Torus.ui.parser.parse_emote = function(state) {
 	state.text = state.text.substring(state.match.length);
-	if(Torus.options['messages-emotes-max'] != 0 && state.html.getElementsByTagName('img').length > Torus.options['messages-emotes-max']) {return document.createTextNode(state.match);}
+	if(Torus.options.ui_maxemotes != 0 && state.html.getElementsByTagName('img').length > Torus.options.ui_maxemotes) {return document.createTextNode(state.match);}
 	var img = document.createElement('img');
 		img.className = 'torus-message-emote';
 		img.src = Torus.chats[state.wiki].emotes[state.match];

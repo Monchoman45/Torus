@@ -104,7 +104,7 @@ table#torus-preview-binary.torus-theme-preview .text4, #torus.theme-binary .text
 
 #torus.theme-binary #torus-input {
 	background-color: #363636;
-	border-top: 1px solid #000000;
+	border-top-color: #000000;
 }
 #torus.theme-binary #torus-input-box {
 	background-color: #737373;
@@ -117,10 +117,17 @@ table#torus-preview-binary.torus-theme-preview .text4, #torus.theme-binary .text
 #torus.theme-binary #torus-menu-extensions a:hover {
 	background-color: #5F5F5F;
 }
-#torus.theme-binary #torus-window fieldset {border: 1px solid #FFFFFF;}
+#torus.theme-binary #torus-window fieldset {border-color: #FFFFFF;}
 #torus.theme-binary #torus-window textarea,
 #torus.theme-binary #torus-window input[type="text"],
 #torus.theme-binary #torus-window input[type="number"] {
 	background-color: #737373;
 	color: #00FF00;
 }
+#torus.theme-binary #torus-window div.torus-option-array {border-color: #FFFFFF;}
+#torus.theme-binary #torus-window div.torus-option-array ul {background-color: #5F5F5F;}
+#torus.theme-binary #torus-window div.torus-option-array li {border-bottom-color: #000000;}
+#torus.theme-binary #torus-window div.torus-option-array li:nth-child(even) {background-color: #737373;}
+#torus.theme-binary #torus-window div.torus-option-array li:nth-child(odd) {background-color: #4D4D4D;}
+#torus.theme-binary #torus-window div.torus-option-array span.torus-option-array-remove {color: #FF0000;}
+#torus.theme-binary #torus-window div.torus-option-array input {border-top-color: #FFFFFF;}

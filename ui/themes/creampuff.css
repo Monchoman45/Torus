@@ -104,7 +104,7 @@ table#torus-preview-creampuff.torus-theme-preview .text4, #torus.theme-creampuff
 
 #torus.theme-creampuff #torus-input {
 	background-color: #f66;
-	border-top: 1px solid #000;
+	border-top-color: #000;
 }
 #torus.theme-creampuff #torus-input-box {
 	background-color: #fff;
@@ -117,10 +117,17 @@ table#torus-preview-creampuff.torus-theme-preview .text4, #torus.theme-creampuff
 #torus.theme-creampuff #torus-menu-extensions a:hover {
 	background-color: #fed;
 }
-#torus.theme-creampuff #torus-window fieldset {border: 1px solid #909;}
+#torus.theme-creampuff #torus-window fieldset {border-color: #909;}
 #torus.theme-creampuff #torus-window textarea,
 #torus.theme-creampuff #torus-window input[type="text"],
 #torus.theme-creampuff #torus-window input[type="number"] {
 	background-color: #fff;
 	color: #000;
 }
+#torus.theme-creampuff #torus-window div.torus-option-array {border-color: #f66;}
+#torus.theme-creampuff #torus-window div.torus-option-array ul {background-color: #fed;}
+#torus.theme-creampuff #torus-window div.torus-option-array li {border-bottom-color: #000;}
+#torus.theme-creampuff #torus-window div.torus-option-array li:nth-child(even) {background-color: #fff;}
+#torus.theme-creampuff #torus-window div.torus-option-array li:nth-child(odd) {background-color: #f99;}
+#torus.theme-creampuff #torus-window div.torus-option-array span.torus-option-array-remove {color: red;}
+#torus.theme-creampuff #torus-window div.torus-option-array input {border-top-color: #f66;}

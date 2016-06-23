@@ -26,10 +26,11 @@ Torus.util.hardmerge = function(dest, source, prefix) {
 	for(var i in source) {dest[prefix + i] = source[i];}
 }
 
-Torus.util.timestamp = function(time) {
+Torus.util.timestamp = function(time, timezone) {
+	if(!timezone) {timezone = 0;}
 	var date = new Date();
 	if(time) {date.setTime(time);}
-	date.setUTCHours(date.getUTCHours() + Torus.options['messages-general-timezone']);
+	date.setUTCHours(date.getUTCHours() + timezone);
 	var hours = date.getUTCHours();
 	if(hours < 10) {hours = '0' + hours;}
 	var minutes = date.getUTCMinutes();
@@ -45,6 +46,7 @@ Torus.util.expiry_to_seconds = function(expiry) {
 	if(expiry == 'infinite' || expiry == 'indefinite') {return 60 * 60 * 24 * 365 * 1000;} //the server recognizes 1000 years as infinite
 	if(expiry == 'unban' || expiry == 'undo') {return 0;}
 
+	var ret = 0;
 	var split = expiry.split(',');
 	for(var i = 0; i < split.length; i++) {
 		var ex = split[i].trim();
@@ -56,15 +58,16 @@ Torus.util.expiry_to_seconds = function(expiry) {
 		if(unit.charAt(unit.length - 1) == 's') {unit = unit.substring(0, unit.length - 1);}
 
 		switch(unit) {
-			case 'second': return quant * 1;
-			case 'minute': return quant * 60;
-			case 'hour': return quant * 60 * 60;
-			case 'day': return quant * 60 * 60 * 24;
-			case 'week': return quant * 60 * 60 * 24 * 7;
-			case 'month': return quant * 60 * 60 * 24 * 30;
-			case 'year': return quant * 60 * 60 * 24 * 365;
+			case 'second': ret += quant * 1; break;
+			case 'minute': ret += quant * 60; break;
+			case 'hour': ret += quant * 60 * 60; break;
+			case 'day': ret += quant * 60 * 60 * 24; break;
+			case 'week': ret += quant * 60 * 60 * 24 * 7; break;
+			case 'month': ret += quant * 60 * 60 * 24 * 30; break;
+			case 'year': ret += quant * 60 * 60 * 24 * 365; break;
 		}
 	}
+	return ret;
 }
 
 Torus.util.seconds_to_expiry = function(seconds) {

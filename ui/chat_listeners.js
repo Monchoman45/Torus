@@ -112,7 +112,7 @@ Torus.ui.add_line = function(event) {
 		Torus.ui.ids['window'].appendChild(Torus.ui.render_line(event));
 		if(scroll) {Torus.ui.ids['window'].scrollTop = Torus.ui.ids['window'].scrollHeight;}
 
-		if(Torus.ui.ids['window'].children.length > Torus.options['messages-general-max']) {Torus.ui.ids['window'].removeChild(Torus.ui.ids['window'].children[0]);}
+		if(Torus.options.ui_maxmessages != 0 && Torus.ui.ids['window'].children.length > Torus.options.ui_maxmessages) {Torus.ui.ids['window'].removeChild(Torus.ui.ids['window'].children[0]);}
 	}
 	else {
 		if(event.event == 'message' || event.event == 'me') {
@@ -263,7 +263,7 @@ Torus.ui.parse_message = function(event) {
 	if(event.ping) {Torus.ui.ping(event.room);}
 
 	var hooks = {};
-	if(Torus.options['messages-emotes-enabled']) {
+	if(Torus.options.ui_showemotes) {
 		if(event.room.parent) {var emotes = event.room.parent.emotes;}
 		else {var emotes = event.room.emotes;}
 		for(var i in emotes) {hooks[i] = Torus.ui.parser.parse_emote;}

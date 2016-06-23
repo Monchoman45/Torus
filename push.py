@@ -20,10 +20,16 @@ if len(sys.argv) < 3:
 	sys.exit(1)
 
 targets = {
-	'main.js': 'MediaWiki:Torus.js/main.js',
-	'ui/main.css': 'MediaWiki:Torus.js/ui/main.css',
-	'ext/ccui/main.js': 'MediaWiki:Torus.js/ext/ccui/main.js',
-	'ext/ccui/main.css': 'MediaWiki:Torus.js/ext/ccui/main.css',
+	'core/main.js': 'MediaWiki:Torus.js/modules/core.js',
+	'ui/main.js': 'MediaWiki:Torus.js/modules/ui.js',
+	'ui/main.css': 'MediaWiki:Torus.js/modules/ui.css',
+	'cmd/main.js': 'MediaWiki:Torus.js/modules/cmd.js',
+	'ext/ccui/main.js': 'MediaWiki:Torus.js/modules/ext/ccui.js',
+	'ext/ccui/main.css': 'MediaWiki:Torus.js/modules/ext/ccui.css',
+
+	'packages/ui.js': 'MediaWiki:Torus.js/ui.js',
+	'packages/cmd.js': 'MediaWiki:Torus.js/cmd.js',
+	'packages/everything.js': 'MediaWiki:Torus.js/everything.js',
 }
 
 variables = {
@@ -79,8 +85,12 @@ print('Connecting...')
 session = ''
 while not session:
 	sock = http.client.HTTPConnection(sys.argv[1], timeout=300)
-	user = quote(input('Username: '))
-	password = quote(getpass('Password: '))
+	try:
+		user = quote(input('Username: '))
+		password = quote(getpass('Password: '))
+	except KeyboardInterrupt:
+		print()
+		sys.exit(1)
 	sock.request(
 		'POST',
 		'/api.php',

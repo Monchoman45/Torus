@@ -119,11 +119,13 @@ Torus.ui.themes.unrender = function(event) {
 	Torus.ui.themes.html = event.old_window;
 };
 
-Torus.ui.themes.load = function(event) {
+Torus.ui.themes.onload = function(event) {
 	Torus.ui.themes.select('default');
 	Torus.ui.themes.rebuild();
 };
 
 Torus.ui.themes.add_listener('ui', 'activate', Torus.ui.themes.render);
 Torus.ui.themes.add_listener('ui', 'deactivate', Torus.ui.themes.unrender);
-Torus.add_listener('window', 'load', Torus.ui.themes.load);
+
+if(document.readyState == 'complete') {Torus.ui.themes.onload();}
+else {Torus.addEventListener('window', 'load', Torus.ui.themes.onload);}
