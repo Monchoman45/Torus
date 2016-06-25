@@ -147,8 +147,20 @@ for i in pages:
 	)
 	result = json.loads(sock.getresponse().read().decode('utf-8'))
 	print('Publishing: ' + pages[i]['title'] + ' ... ', end='')
-	if 'edit' in result:  print(result['edit']['result'])
-	else: print('Error ' + result['error']['code'] + ': ' + result['error']['info'] + '\n', result)
+	if 'error' in result:
+		print('Error ' + result['error']['code'] + ': ' + result['error']['info'] + '\n', result)
+		continue
+	print(result['edit']['result'])
+
+	if sys.argv[1].find('.wikia.com') != -1:
+		print('Submitting for review ... ', end='\r');
+		sock.request(
+			'POST',
+			'/wikia.php?controller=ContentReviewApi&method=submitPageForReview&format=json',
+			'pageName=' + quote(pages[i]['title']) + '&editToken=' + quote(pages[i]['edittoken']),
+			{'Content-Type': 'application/x-www-form-urlencoded', 'Connection': 'Keep alive', 'Cookie': session, 'User-Agent': 'push.py'}
+		)
+		print('Submitting for review ... Done')
 
 print('Logging out...')
 sock.request('GET', '/api.php?action=logout', '', {'Connection': 'close', 'Cookie': session, 'User-Agent': 'push.py'})

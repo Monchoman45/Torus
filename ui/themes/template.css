@@ -11,29 +11,27 @@
  * weird. Feel free to manually tweak stuff, you don't have to follow
  * all the suggestions here.
  * 
+ * If you want to go beyond a recolor and do more interesting things,
+ * feel free, but make sure you prefix all of your selectors with
+ * `#torus.theme-$name`, and keep the large brick after this comment
+ * (it sets colors for your preview on the theme selector and also
+ * the colors that extensions will use). You can do as much or as
+ * little as you want as long as it looks good.
+ * 
  * Replace $name with a UNIQUE IDENTIFIER for torus to use for your
  * theme. Please use all lowercase letters; if you want spaces, use
  * underscores.
  * 
- * To make your theme selectable, add it to the top of ui/themes.js:
- * '$name': {
- * 	url: 'http://@DOMAIN@/wiki/MediaWiki:Torus.js/ui/themes/$name.css?action=raw&ctype=text/css',
- * 	name: 'A pretty name for people to see',
- * 	loaded: true,
- * },
- * Please keep the list alphabetical, so if your theme is called
- * "aaaaaaaaaaaa", put it at the top. Please also don't name your
- * theme "aaaaaaaaaaaa".
- * Then open ui/main.css, go to the bottom, and add:
- * {{MediaWiki:Torus.js/ui/themes/$name.css}}
- * Please keep this list alphabetical too.
- * You can then select your theme from the theme menu.
+ * You can use ui/themes/template.js to load your theme into Torus.
+ * When you distribute the theme, distribute only the JS file - you
+ * don't need to show people where the CSS is (it'll be loaded by
+ * the JS).
  * 
- * Once you're done and you like what you have, remove this comment,
- * commit your changes, and open a pull request to
- * https://github.com/Monchoman45/Torus. PLEASE DON'T COMMIT TO THE
- * MASTER BRANCH, BAD THINGS MIGHT HAPPEN. Create your own branch and
- * commit to that.
+ * If you want to submit your theme to be available as a default
+ * option in Torus, you can either send me (Monchoman45) the CSS
+ * file, or if you know how to use git, you can fork me on github
+ * (https://github.com/Monchoman45/Torus) and submit a PR with the
+ * CSS. If approved, I'll add the JS to make it load up on start.
  */
 
 table#torus-preview-$name.torus-theme-preview .bg1, #torus.theme-$name .bg1 {background-color: $bg1;} /* dark UI backgrounds (sidebar, tabs, input) */
