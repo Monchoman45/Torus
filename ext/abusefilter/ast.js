@@ -9,6 +9,7 @@ Torus.classes.AFAST.Node = function(token, type) {
 
 Torus.classes.AFAST.Filter = function() {
 	this.type = 'filter';
+	this.full_text = '';
 	this.statements = [];
 }
 

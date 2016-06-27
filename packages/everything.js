@@ -17,3 +17,9 @@
 
 
 {{ext/ccui/main.js}}
+
+
+
+
+
+{{ext/abusefilter/main.js}}

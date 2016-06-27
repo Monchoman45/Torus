@@ -45,12 +45,17 @@ Torus.ui.new_room = function(event) {
 		});
 
 		event.room.checkuser = false;
-		Torus.io.jsonp('http://' + event.room.domain + '.wikia.com/api.php?action=query&list=users&ususers=' + encodeURIComponent(wgUserName) + '&usprop=rights&format=json', function(result) {
-			if(result.query.users[0].rights.indexOf('checkuser') != -1) {
+		Torus.io.jsonp('http://' + event.room.domain + '.wikia.com/api.php?action=query&list=users&ususers=' + encodeURIComponent(wgUserName) + '&usprop=rights|groups&format=json', function(result) {
+			var rights = result.query.users[0].rights;
+			var groups = result.query.users[0].groups;
+			if(rights.indexOf('checkuser') != -1) {
 				event.room.checkuser = true; //FIXME: closure
 				if(event.room.domain == Torus.local && !Torus.ext.ccui) {
 					Torus.util.load_js('http://@DOMAIN@/wiki/MediaWiki:Torus.js/modules/ext/ccui.js?action=raw&ctype=text/javascript');
 				}
+			}
+			if((rights.indexOf('abusefilter-modify') != -1 || ((event.room.domain == 'community' || event.room.domain == 'c') && rights.indexOf('chatmoderator') != -1)) && !Torus.ext.abusefilter) {
+				Torus.util.load_js('http://@DOMAIN@/wiki/MediaWiki:Torus.js/modules/ext/abusefilter.js?action=raw&ctype=text/javascript');
 			}
 		});
 	}

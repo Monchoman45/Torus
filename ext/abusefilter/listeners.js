@@ -1,6 +1,4 @@
 Torus.ext.abusefilter.eval = function(event) {
-	if(!Torus.ext.abusefilter.filter || !Torus.ext.abusefilter.params.enabled.enabled) {return;}
-
 	var vars = Torus.ext.abusefilter.message_vars(event);
 
 	if(Torus.ext.abusefilter.examine == event.user) {
@@ -9,6 +7,8 @@ Torus.ext.abusefilter.eval = function(event) {
 			Torus.ui.ids['ext-abusefilter-examine-' + i].textContent = '' + vars[i];
 		}
 	}
+
+	if(!Torus.ext.abusefilter.filter || !Torus.ext.abusefilter.params.enabled.enabled) {return;}
 
 	if(Torus.ext.abusefilter.filter.eval(vars)) {
 		//match
@@ -44,6 +44,6 @@ Torus.ext.abusefilter.blur_input = function() {
 	else {
 		Torus.ext.abusefilter.filter = false;
 		Torus.ui.ids['ext-abusefilter-error'].classList.remove('torus-hide');
-		Torus.ui.ids['ext-abusefilter-error'].textContent = Torus.util.cap(parser.error) + ' error on line ' + parser.line + ': ' + parser.error_message + '\n\n' + parser.trace();
+		Torus.ui.ids['ext-abusefilter-error'].textContent = parser.error_message;
 	}
 }

@@ -52,7 +52,6 @@ Torus.classes.AFParser.pemdas = [
 
 Torus.classes.AFParser.reserved_error = function(parser, token) {
 	parser.parse_error('syntax', 'Unexpected reserved word `' + token.value + '`.');
-	throw new Error(parser.error + ': ' + parser.error_message);
 }
 Torus.classes.AFParser.reserved_bool = function(parser, token) {
 	var constant = new Torus.classes.AFAST.Constant(token);
@@ -148,7 +147,7 @@ Torus.classes.AFParser.prototype.parse_atom = function(token) {
 			this.parse_error('syntax', 'Unexpected end of expression.');
 
 		default:
-			this.parse_error('Unimplemented ' + token.type + ': ' + token.value + ' (parse_atom)');
+			this.parse_error('syntax', 'Expected identifier, constant, or unary operator, but got `' + token.value + '`.');
 	}
 }
 Torus.classes.AFParser.prototype.parse_assignment = function(token) {

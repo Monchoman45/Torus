@@ -26,6 +26,8 @@ targets = {
 	'cmd/main.js': 'MediaWiki:Torus.js/modules/cmd.js',
 	'ext/ccui/main.js': 'MediaWiki:Torus.js/modules/ext/ccui.js',
 	'ext/ccui/main.css': 'MediaWiki:Torus.js/modules/ext/ccui.css',
+	'ext/abusefilter/main.js': 'MediaWiki:Torus.js/modules/ext/abusefilter.js',
+	'ext/abusefilter/main.css': 'MediaWiki:Torus.js/modules/ext/abusefilter.css',
 
 	'packages/ui.js': 'MediaWiki:Torus.js/ui.js',
 	'packages/cmd.js': 'MediaWiki:Torus.js/cmd.js',

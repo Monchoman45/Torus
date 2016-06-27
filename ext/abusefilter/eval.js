@@ -178,7 +178,7 @@ Torus.classes.AFAST.Unary.prototype.eval = function(state) {
 		case '!': return !op;
 		case '+': return op;
 		case '-': return -op;
-		default: state.interp_error('syntax', 'Unknown unary operator `' + this.operator + '`.');
+		default: state.interp_error(this, 'syntax', 'Unknown unary operator `' + this.operator + '`.');
 	}
 }
 Torus.classes.AFAST.Math.prototype.eval = function(state) {
@@ -192,7 +192,7 @@ Torus.classes.AFAST.Math.prototype.eval = function(state) {
 		case '/': return left / right;
 		case '%': return left % right;
 		case '**': return Math.pow(left, right);
-		default: state.interp_error('syntax', 'Unknown math operator `' + this.operator + '`.');
+		default: state.interp_error(this, 'syntax', 'Unknown math operator `' + this.operator + '`.');
 	}
 }
 Torus.classes.AFAST.Comparison.prototype.eval = function(state) {
@@ -211,7 +211,9 @@ Torus.classes.AFAST.Comparison.prototype.eval = function(state) {
 		case '<': return left < right;
 		case '<=': return left <= right;
 		case '==': return left == right;
-		case '^': //i never thought of it this way but yea xor is !=
+		case '^':
+			if(left && !right || !left && right) {return true;}
+			else {return false;}
 		case '!=': return left != right;
 		case 'in': return right.indexOf(left) != -1;
 		case 'like': //FIXME: this is supposed to support glob patterns (eg * and ? wildcards)
@@ -221,7 +223,7 @@ Torus.classes.AFAST.Comparison.prototype.eval = function(state) {
 			var regex = Torus.util.parse_regex(right);
 			regex.ignoreCase = true;
 			return regex.text(left);
-		default: state.interp_error('syntax', 'Unknown comparison operator `' + this.operator + '`.');
+		default: state.interp_error(this, 'syntax', 'Unknown comparison operator `' + this.operator + '`.');
 	}
 }
 Torus.classes.AFAST.Call.prototype.eval = function(state) {
@@ -232,12 +234,24 @@ Torus.classes.AFAST.Call.prototype.eval = function(state) {
 }
 Torus.classes.AFAST.Constant.prototype.eval = function(state) {return this.value;}
 Torus.classes.AFAST.Variable.prototype.eval = function(state) {
-	if(state.vars[this.name] === undefined) {this.interp_error('reference');}
+	if(state.vars[this.name] === undefined) {state.interp_error(this, 'reference', 'Variable `' + this.name + '` is undefined.');}
 	return state.vars[this.name];
 }
 
-Torus.classes.AFEvaluator.interp_error = function(type, message) {
-	this.error = type;
-	this.error_message = message;
-	throw new Error(type + ': ' + message);
+Torus.classes.AFEvaluator.prototype.interp_error = function(node, error, message) {
+	this.error = error;
+	this.error_message = Torus.util.cap(error) + ' error on line ' + node.line + ': ' + message + '\n\n' + this.trace(node);
+	throw new Error(this.error_message);
+}
+Torus.classes.AFEvaluator.prototype.trace = function(node) {
+	var end = this.ast.full_text.indexOf('\n', node.line_start);
+	if(end == -1) {end = this.ast.full_text.length;}
+	var line = this.ast.full_text.substring(node.line_start, end);
+	line += '\n';
+	for(var i = 0; i < node.index - node.line_start - 1; i++) {
+		if(line.charAt(i) == '\t') {line += '\t';}
+		else {line += ' ';}
+	}
+	line += '^';
+	return line;
 }

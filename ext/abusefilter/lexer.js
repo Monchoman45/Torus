@@ -1,5 +1,5 @@
 Torus.classes.AFToken = function(line, line_start, index) {
-	if(!line) {line = 0;}
+	if(!line) {line = 1;}
 	if(!line_start) {line_start = 0;}
 	if(!index) {index = 0;}
 
@@ -103,7 +103,6 @@ Torus.classes.AFLexer.prototype.next_token = function() {
 			if(c == '\n' || c == '\r' || (this.index >= this.text.length && c != delim)) {
 				this.index = start_i; //set this back so the error points to the starting quote mark
 				this.parse_error('syntax', 'This string runs off the end of the line.');
-				return new Torus.classes.AFToken();
 			}
 			return token;
 
@@ -136,10 +135,7 @@ Torus.classes.AFLexer.prototype.next_token = function() {
 				token.value = ':=';
 				return token;
 			}
-			else {
-				this.parse_error('syntax', 'Can\'t figure out what this `:` is for.');
-				return new Torus.classes.AFToken();
-			}
+			else {this.parse_error('syntax', 'Can\'t figure out what this `:` is for.');}
 
 		//Boolean operators
 		case '!':
@@ -161,10 +157,7 @@ Torus.classes.AFLexer.prototype.next_token = function() {
 				token.value = '==';
 				return token;
 			}
-			else {
-				this.parse_error('syntax', 'Can\'t figure out what this `=` is for.');
-				return new Torus.classes.AFToken();
-			}
+			else {this.parse_error('syntax', 'Can\'t figure out what this `=` is for.');}
 		case '<':
 		case '>':
 			token.type = 'comparison';
@@ -193,16 +186,15 @@ Torus.classes.AFLexer.prototype.next_token = function() {
 
 	//Error
 	this.parse_error('syntax', 'Can\'t figure out what this `' + c + '` is for.');
-	return new Torus.classes.AFToken();
 }
 
 Torus.classes.AFLexer.prototype.get = function() {
-	var ret = this.text.charAt(this.index)
+	var ret = this.text.charAt(this.index);
 	this.index++;
 	return ret;
 }
 Torus.classes.AFLexer.prototype.getCode = function() {
-	var ret = this.text.charCodeAt(this.index)
+	var ret = this.text.charCodeAt(this.index);
 	this.index++;
 	return ret;
 }
@@ -211,8 +203,8 @@ Torus.classes.AFLexer.prototype.peekCode = function() {return this.text.charCode
 Torus.classes.AFLexer.prototype.unget = function(token) {this.ungot = token;}
 Torus.classes.AFLexer.prototype.parse_error = function(error, message) {
 	this.error = error;
-	this.error_message = message;
-	throw new Error(error + ' error: ' + message);
+	this.error_message = Torus.util.cap(error) + ' error on line ' + this.line + ': ' + message + '\n\n' + this.trace();
+	throw new Error(this.error_message);
 }
 Torus.classes.AFLexer.prototype.trace = function() {
 	var end = this.text.indexOf('\n', this.line_start);
