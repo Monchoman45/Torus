@@ -31,3 +31,18 @@ Torus.util.color_hash = function(str, hue, sat, val) {
 		case 5: return '#' + C + O + X;
 	}
 }
+
+Torus.util.parse_regex = function(regex) {
+	if(!regex) {return false;}
+
+	if(regex.charAt(0) == '/') {
+		var pattern = regex.substring(1, regex.lastIndexOf('/'));
+		var mode = regex.substring(regex.lastIndexOf('/') + 1);
+	}
+	else {
+		var pattern = regex;
+		var mode = '';
+	}
+	try {return new RegExp(pattern, mode);}
+	catch(err) {return false;}
+}

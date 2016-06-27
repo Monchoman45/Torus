@@ -24,12 +24,12 @@ Torus.ui.input = function(event) {
 				}
 
 				var result = Torus.commands.eval(command);
-				if(result === false) {Torus.alert('Can\'t find command `' + command.substring(0, command.indexOf(' ')) + '`.');}
+				if(result === false) {Torus.alert(Torus.i18n.text('command-notfound', command.substring(0, command.indexOf(' '))));}
 				else if(result != undefined) {Torus.alert('' + result);}
 			}
 		}
 		if(this.value && Torus.ui.active.id > 0) {
-			if(this.value.indexOf('./') == 0) {Torus.ui.active.send_message(this.value.substring(1));}
+			if(this.value.indexOf('./') == 0 || this.value.indexOf('//') == 0 || this.value.indexOf('\\/') == 0) {Torus.ui.active.send_message(this.value.substring(1));}
 			else {Torus.ui.active.send_message(this.value);}
 			this.value = '';
 		}

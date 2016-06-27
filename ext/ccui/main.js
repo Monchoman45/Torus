@@ -587,10 +587,17 @@ Torus.util.match_ip16 = function(ip1, ip2) {
 	return (ip1 & 0xffff0000) == (ip2 & 0xffff0000);
 }
 
+Torus.ext.ccui.onload = function() {
+	Torus.util.load_css('http://@DOMAIN@/wiki/MediaWiki:Torus.js/modules/ext/ccui.css?action=raw&ctype=text/css');
+}
+
 if(Torus.ui) {
 	Torus.add_listener('ui', 'render_popup', Torus.ext.ccui.render_popup); //FIXME: also do this to the ccon on bans (from ui/render.js)
 	Torus.ext.ccui.add_listener('ui', 'activate', Torus.ext.ccui.render);
 	Torus.ext.ccui.add_listener('ui', 'deactivate', Torus.util.null); //FIXME: i'm sure something important is supposed to go here
+
+	if(Torus.init) {Torus.ext.ccui.onload();}
+	else {Torus.add_listener('window', 'load', Torus.ext.ccui.onload);}
 }
 
 {{ext/ccui/i18n/en.js}}

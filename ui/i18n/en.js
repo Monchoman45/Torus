@@ -7,6 +7,7 @@ Torus.i18n['en'] = {
 	'error-login': 'You don\'t appear to be logged in. You must have an account to use chat on Wikia. Please [[Special:UserSignup|register]] or [[Special:UserLogin|log in]].',
 	'error-otherbrowser': 'You are connected to $1 from another window.',
 	'error-cantkickmods': 'Can\'t kick moderators.',
+	'error-longmessage': 'You can\'t send messages that long - try shortening it, or send it as two messages.',
 
 	'title': 'Torus - It\'s a donut - $1',
 
@@ -109,6 +110,7 @@ Torus.i18n['en'] = {
 	'themes-name-default': 'Default',
 	'themes-name-plain': 'Plain',
 
+	'commands-notfound': 'Can\'t find command `$1`.',
 	'commands-help': 'Help: $1:\n$2',
 	'commands-nohelp': 'No help data for $1',
 	'commands-dir': 'Commands:\n$1\nFull documentation: [[w:c:monchbox:Torus]]',

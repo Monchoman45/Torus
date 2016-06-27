@@ -1,5 +1,5 @@
 Torus.ui.new_room = function(event) {
-	event.room.add_listener('io', 'initial', Torus.ui.initial);
+	/*event.room.add_listener('io', 'initial', Torus.ui.initial);
 
 	event.room.add_listener('io', 'join', Torus.ui.update_user);
 	event.room.add_listener('io', 'update_user', Torus.ui.update_user);
@@ -19,7 +19,7 @@ Torus.ui.new_room = function(event) {
 	event.room.add_listener('io', 'kick', Torus.ui.add_line);
 	event.room.add_listener('io', 'ban', Torus.ui.add_line);
 	event.room.add_listener('io', 'unban', Torus.ui.add_line);
-	event.room.add_listener('io', 'error', Torus.ui.add_line);
+	event.room.add_listener('io', 'error', Torus.ui.add_line);*/
 
 	if(!event.room.parent && !Torus.ui.pings.dir[event.room.domain]) {
 		Torus.ui.pings.dir[event.room.domain] = {};
@@ -49,8 +49,7 @@ Torus.ui.new_room = function(event) {
 			if(result.query.users[0].rights.indexOf('checkuser') != -1) {
 				event.room.checkuser = true; //FIXME: closure
 				if(event.room.domain == Torus.local && !Torus.ext.ccui) {
-					Torus.util.load_js('http://@DOMAIN@/wiki/MediaWiki:Torus.js/ext/ccui/main.js?action=raw&ctype=text/javascript');
-					Torus.util.load_css('http://@DOMAIN@/wiki/MediaWiki:Torus.js/ext/ccui/main.css?action=raw&ctype=text/css');
+					Torus.util.load_js('http://@DOMAIN@/wiki/MediaWiki:Torus.js/modules/ext/ccui.js?action=raw&ctype=text/javascript');
 				}
 			}
 		});
@@ -230,8 +229,8 @@ Torus.ui.initial = function(event) {
 }
 
 Torus.ui.parse_message = function(event) {
-	event.ping = false;
-	if(event.user != wgUserName && !event.room.parent && event.room != Torus.chats[0] && Torus.ui.pings.dir['#global'].enabled) {
+	if(!event.ping && event.user != wgUserName && !event.room.parent && event.room != Torus.chats[0] && Torus.ui.pings.dir['#global'].enabled) {
+		event.ping = false;
 		var text = event.text.toLowerCase();
 		var global = Torus.ui.pings.dir['#global'];
 		var local = Torus.ui.pings.dir[event.room.domain];

@@ -303,6 +303,9 @@
 }
 
 #torus a.torus-fakelink {cursor: pointer;}
+#torus .torus-hide {display: none;}
+#torus h2 {color: inherit;}
+#torus table.wikitable {width: 100%;}
 
 {{ui/themes/binary.css}}
 

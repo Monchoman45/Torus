@@ -181,7 +181,28 @@ Torus.ui.onload = function() {
 
 Torus.ui.window.addEventListener('mouseover', Torus.ui.window_mouseover);
 
-Torus.chats[0].add_listener('io', 'alert', Torus.ui.add_line);
+Torus.add_listener('io', 'initial', Torus.ui.initial);
+
+Torus.add_listener('io', 'join', Torus.ui.update_user);
+Torus.add_listener('io', 'update_user', Torus.ui.update_user);
+Torus.add_listener('io', 'part', Torus.ui.remove_user);
+Torus.add_listener('io', 'logout', Torus.ui.remove_user);
+Torus.add_listener('io', 'ghost', Torus.ui.remove_user);
+
+Torus.add_listener('io', 'alert', Torus.ui.add_line);
+Torus.add_listener('io', 'message', Torus.ui.add_line);
+Torus.add_listener('io', 'me', Torus.ui.add_line);
+Torus.add_listener('io', 'join', Torus.ui.add_line);
+Torus.add_listener('io', 'part', Torus.ui.add_line);
+Torus.add_listener('io', 'logout', Torus.ui.add_line);
+Torus.add_listener('io', 'ghost', Torus.ui.add_line);
+Torus.add_listener('io', 'ctcp', Torus.ui.add_line);
+Torus.add_listener('io', 'mod', Torus.ui.add_line);
+Torus.add_listener('io', 'kick', Torus.ui.add_line);
+Torus.add_listener('io', 'ban', Torus.ui.add_line);
+Torus.add_listener('io', 'unban', Torus.ui.add_line);
+Torus.add_listener('io', 'error', Torus.ui.add_line);
+
 for(var i in Torus.logs) {Torus.logs[i][0] = [];}
 Torus.chats[0].listeners.ui = {};
 Torus.ui.add_room({room: Torus.chats[0]});

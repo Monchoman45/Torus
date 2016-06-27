@@ -68,7 +68,9 @@ Torus.ui.render_line = function(message) {
 	if(message.type != 'io') {throw new Error('Torus.ui.render_line: Event type must be `io`.');}
 
 	var line = document.createElement('div');
-	line.className = 'torus-message torus-room-' + message.room.domain;
+	line.classList.add('torus-message');
+	line.classList.add('torus-room-' + message.room.domain);
+	if(message.ping) {line.classList.add('torus-message-ping');}
 	if(message.room != Torus.ui.active) {line.classList.add('torus-message-inactive');}
 	var time = document.createElement('span');
 		time.className = 'torus-message-timestamp';
@@ -95,14 +97,13 @@ Torus.ui.render_line = function(message) {
 		var span = document.createElement('span');
 			span.className = 'torus-whitespace';
 			span.textContent = indent;
-		line.appendChild(indent);
+		line.appendChild(span);
 	}
 	line.appendChild(document.createTextNode(' '));
 
 	switch(message.event) {
 		case 'me':
 		case 'message':
-			if(message.ping) {line.classList.add('torus-message-ping');}
 			if(message.event == 'message') {
 				var span = document.createElement('span'); //this is arguably one of the dumber things i've ever done
 				span.className = 'torus-whitespace'; //it works though

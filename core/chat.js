@@ -273,6 +273,8 @@ Torus.classes.Chat.prototype.event_updateUser = function(data) {
 		status_message: data.attrs.statusMessage,
 		edits: data.attrs.editCount,
 	};
+	while(event.data.edits.indexOf(',') != -1) {event.data.edits = event.data.edits.replace(',', '');}
+	event.data.edits *= 1;
 
 	if(event.data.status_state.indexOf('CTCP|') == 0) {
 		var split = event.data.status_state.split('|');
@@ -351,6 +353,12 @@ Torus.classes.Chat.prototype.event_forceReconnect = function(data) {
 Torus.classes.Chat.prototype.event_disableReconnect = function(data) {
 	var event = new Torus.classes.IOEvent('force_disconnect', this);
 	Torus.call_listeners(event);
+	return event;
+}
+Torus.classes.Chat.prototype.event_longMessage = function(data) {
+	var event = new Torus.classes.IOEvent('error', this);
+	event.error = 'error-longmessage';
+	event.args = [];
 	return event;
 }
 
