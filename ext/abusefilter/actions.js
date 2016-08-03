@@ -28,6 +28,6 @@ Torus.ext.abusefilter.actions.block = function(event, params) {
 		if(i == 'enabled') {continue;}
 		str += '&' + i + '=' + encodeURIComponent(params[i]);
 	}
-	str += '&token=' + encodeURIComponent(mw.user.tokens.values.editToken); //FIXME: global
+	str += '&token=' + encodeURIComponent(Torus.io.token);
 	xhr.send(str);
 }

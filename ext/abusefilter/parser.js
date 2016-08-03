@@ -1,4 +1,6 @@
 Torus.classes.AFParser = function(text) {
+	if(!(this instanceof Torus.classes.AFParser)) {throw new Error('Torus.classes.AFParser must be called with `new`.');}
+
 	Torus.classes.AFLexer.call(this, text);
 
 	this.vars = {};

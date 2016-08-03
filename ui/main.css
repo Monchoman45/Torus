@@ -36,6 +36,7 @@
 	border-radius: .4em;
 	font-size: 1.5em;
 	cursor: pointer;
+	white-space: nowrap;
 }
 #torus-tabs span.torus-tab-active,
 #torus-tabs span.torus-tab-active:hover {

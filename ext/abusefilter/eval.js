@@ -1,4 +1,6 @@
 Torus.classes.AFEvaluator = function(ast) {
+	if(!(this instanceof Torus.classes.AFEvaluator)) {throw new Error('Torus.classes.AFEvaluator must be called with `new`.');}
+
 	this.vars = {};
 	this.ast = ast;
 }

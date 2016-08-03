@@ -2,12 +2,8 @@ Torus.commands = {};
 Torus.commands.join = {
 	help: 'commands-help-join',
 	func: function(room) {
-		if(room == '0') {
-			Torus.logout();
-			return;
-		}
-
-		Torus.open(room);
+		if(room == '0') {Torus.logout();}
+		else {Torus.open(room);}
 	}
 };
 Torus.commands.part = {

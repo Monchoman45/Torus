@@ -1,4 +1,6 @@
 Torus.classes.AFToken = function(line, line_start, index) {
+	if(!(this instanceof Torus.classes.AFToken)) {throw new Error('Torus.classes.AFToken must be called with `new`.');}
+
 	if(!line) {line = 1;}
 	if(!line_start) {line_start = 0;}
 	if(!index) {index = 0;}
@@ -12,6 +14,8 @@ Torus.classes.AFToken = function(line, line_start, index) {
 }
 
 Torus.classes.AFLexer = function(text) {
+	if(!(this instanceof Torus.classes.AFLexer)) {throw new Error('Torus.classes.AFLexer must be called with `new`.');}
+
 	this.line = 1;
 	this.line_start = 0;
 	this.index = 0;

@@ -132,7 +132,7 @@ Torus.io.jsonp_cleanup = function() {
 Torus.io.transports.polling = function(domain, info) {
 	if(!(this instanceof Torus.io.transports.polling)) {throw new Error('Must create transport with `new`.');}
 
-	this.open = false;
+	this.open = true;
 	this.domain = domain;
 	this.host = info.host;
 	this.port = info.port;
@@ -144,56 +144,60 @@ Torus.io.transports.polling = function(domain, info) {
 	this.xhr = null;
 	this.ping_interval = 0;
 	this.iid = 0;
+	this.retries = 0;
 	this.listeners = {
 		'io': {},
 	};
 
-	this.add_listener('io', 'disconnect', this.close);
-
 	if(!this.host || !this.port || !this.wiki || !this.room) {
-		var sock = this; //FIXME: this forces a closure scope
+		var sock = this; //FIXME: closure
 		Torus.io.spider(this.domain, function(data) {
 			if(data.error == 'nochat') {
-				sock.call_listeners({
-					type: 'io',
-					event: 'disconnect',
-					message: 'no chat',
-					sock: sock
-				});
+				this.close('nochat');
 				return;
 			}
-			else if(data.error) {throw new Error('transport: CORS proxy returned error `' + data.error + '`');}
+			else if(data.error) {
+				this.close('cors-error');
+				throw new Error('transport: CORS proxy returned error `' + data.error + '`');
+			}
 
 			if(!sock.host) {sock.host = data.host;}
 			if(!sock.port) {sock.port = data.port;}
 			if(!sock.wiki) {sock.wiki = data.wiki;}
 			if(!sock.room) {sock.room = data.room;}
 
-			if(sock.host && sock.port && sock.wiki && sock.room && sock.key && !sock.open) {sock.poll();} //FIXME: long
+			if(sock.host && sock.port && sock.wiki && sock.room && sock.key && !sock.xhr) {sock.poll('init');} //FIXME: long
 		});
 	}
 
 	if(!this.key) {
-		var sock = this; //FIXME: this forces a closure scope
+		var sock = this; //FIXME: closure
 		Torus.io.key(function(key) {
-			if(!key) {throw new Error('transport: not logged in');}
+			if(!key) {
+				this.close('loggedout');
+				return;
+			}
 			sock.key = key;
-			if(sock.host && sock.port && sock.wiki && sock.room && sock.key && !sock.open) {sock.poll();} //FIXME: long
+			if(sock.host && sock.port && sock.wiki && sock.room && sock.key && !sock.xhr) {sock.poll('init');} //FIXME: long
 		});
 	}
 
-	if(this.host && this.port && this.wiki && this.room && this.key && !this.open) {this.poll();} //FIXME: long
+	if(this.host && this.port && this.wiki && this.room && this.key) {this.poll('init');} //FIXME: long
 }
-Torus.io.transports.polling.prototype.poll = function() {
+Torus.io.transports.polling.prototype.poll = function(from) {
+	//console.log('poll: ' + from);
 	this.url = 'http://' + this.host + ':' + this.port + '/socket.io/?EIO=2&transport=polling&name=' + encodeURIComponent(wgUserName) + '&key=' + this.key + '&roomId=' + this.room + '&serverId=' + this.wiki + '&wikiId=' + this.wiki;
 	if(this.session) {this.url += '&sid=' + this.session;}
-	this.open = true;
 
+	if(this.xhr) {this.xhr.abort();}
 	this.xhr = new XMLHttpRequest();
 	this.xhr.sock = this;
-	this.xhr.addEventListener('loadend', function() { //FIXME: hardcoded function
-		if(this.sock.xhr != this) {console.log('xhr returned and found itself orphaned:', this.sock);}
-		if(this.status == 200) {
+	this.xhr.addEventListener('loadend', function() { //FIXME: hardcoded
+		var sock = this.sock;
+		if(sock.xhr != this) {return;}
+		else if(this.status == 200) {
+			sock.retries = 0;
+
 			//As far as I know all messages begin with a null byte (to tell socket.io that they are strings)
 			//after this is the length, encoded in the single most ridiculously stupid format ever created
 			//the decimal representation of the length is encoded in binary, terminated by \ufffd: for example,
@@ -206,16 +210,12 @@ Torus.io.transports.polling.prototype.poll = function() {
 
 			var data = this.responseText;
 			while(data.length > 0) {
-			//for(var ufffd = this.responseText.indexOf('\ufffd'); ufffd != -1; ufffd = this.responseText.indexOf('\ufffd', ufffd + 1)) {
 				var ufffd = data.indexOf('\ufffd');
 				var end = 1 + ufffd + Torus.util.stupid_to_int(data.substring(1, ufffd));
 				var text = data.substring(1 + ufffd, end);
 				data = data.substring(end);
 				var packet_type = text.charAt(0) * 1;
 				text = text.substring(1);
-				
-
-				var sock = this.sock;
 
 				switch(packet_type) {
 					case 0: //connect
@@ -224,15 +224,11 @@ Torus.io.transports.polling.prototype.poll = function() {
 						sock.session = data.sid;
 						sock.ping_interval = Math.floor(data.pingTimeout * 3 / 4); //pingTimeout is the longest we can go without disconnecting
 						if(sock.iid) {clearInterval(sock.iid);}
-						sock.iid = setInterval(function() {sock.ping();}, sock.ping_interval); //FIXME: this forces a closure scope
+						sock.iid = setInterval(function() {sock.ping();}, sock.ping_interval); //FIXME: closure
 						break;
 					case 1: //disconnect
-						sock.call_listeners({
-							type: 'io',
-							event: 'disconnect',
-							message: 'Server closed the connection',
-							sock: sock
-						});
+						//sock.close('server');
+						sock.retry(); //F DA POLICE
 						return;
 					case 2: //ping
 						sock.ping();
@@ -240,49 +236,33 @@ Torus.io.transports.polling.prototype.poll = function() {
 					case 4: //message
 						var message_type = text.charAt(0) * 1;
 						text = text.substring(1);
-						//Torus.logs.socket[sock.room].push({id: (new Date()).getTime(), type: message_type, message: text}); //FIXME: ui
 						switch(message_type) { //yep, there are two of these
 							case 0: //connect
 								sock.call_listeners({
 									type: 'io',
 									event: 'connect',
-									sock: sock
+									sock: sock,
 								});
 								break;
 							case 1: //disconnect
-								sock.call_listeners({
-									type: 'io',
-									event: 'disconnect',
-									message: 'Server closed the connection',
-									sock: sock
-								});
+								sock.retry();
 								return;
 							case 2: //event
 								sock.call_listeners({
 									type: 'io',
 									event: 'message',
 									message: JSON.parse(text)[1],
-									sock: sock
+									sock: sock,
 								});
 								break;
 							case 4: //error
-								sock.call_listeners({
-									type: 'io',
-									event: 'disconnect',
-									message: 'Protocol error: ' + JSON.parse(text),
-									sock: sock
-								});
+								sock.close('protocol');
 								return;
 							case 3: //ack
 							case 5: //binary event
 							case 6: //binary ack
 								console.log('Unimplemented data type: ' + this.responseText);
-								sock.call_listeners({
-									type: 'io',
-									event: 'disconnect',
-									message: 'Protocol error: Received unimplemented data type `' + message_type + '`',
-									sock: sock
-								});
+								sock.close('protocol');
 								return;
 						}
 						break;
@@ -292,31 +272,17 @@ Torus.io.transports.polling.prototype.poll = function() {
 					case 5: //upgrade
 					default:
 						console.log('Unimplemented data type: ' + this.responseText);
-						sock.call_listeners({
-							type: 'io',
-							event: 'disconnect',
-							message: 'Protocol error: Received unimplemented data type `' + packet_type + '`',
-							sock: sock
-						});
+						sock.close('protocol');
 						return;
 				}
 			}
-			this.sock.poll();
-		} //status == 200
-		else if(this.status == 400 || this.status == 404) {
-			this.sock.session = '';
-			this.sock.poll();
+			this.sock.poll('poll 200');
 		}
-		else if(this.status != 0) {
-			this.sock.call_listeners({
-				type: 'io',
-				event: 'disconnect',
-				message: 'Socket error (polling): HTTP status ' + this.status,
-				sock: this.sock
-			});
-		}
-		else {console.log('HTTP status 0: ', this.sock);}
+		else if(this.status == 400 || this.status == 404) {sock.retry();}
+		else if(this.status != 0) {sock.close('http');}
+		else if(sock.open && this.statusText != 'abort') {sock.retry();}
 	});
+	xhr.addEventListener('error', Torus.util.debug);
 	this.xhr.open('GET', this.url, true);
 	//this.xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	this.xhr.send();
@@ -324,29 +290,65 @@ Torus.io.transports.polling.prototype.poll = function() {
 Torus.io.transports.polling.prototype.send = function(message) {
 	var data = '42["message",' + Torus.util.utf8ify(JSON.stringify(message)) + ']';
 
-	var xhr = new XMLHttpRequest();
+	var xhr = new XMLHttpRequest(); //FIXME: put these somewhere
+	xhr.sock = this;
+	xhr.addEventListener('loadend', function() {
+		if(this.status == 200) {this.sock.retries = 0;}
+		else if(this.status == 400 || this.status == 404 || (this.status == 0 && this.sock.open)) {this.sock.retry();}
+	});
 	xhr.open('POST', this.url, true);
 	xhr.setRequestHeader('Content-Type', 'text/plain;charset=utf-8');
 	//xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
 	xhr.send('' + data.length + ':' + data);
 }
 Torus.io.transports.polling.prototype.ping = function() {
-	var xhr = new XMLHttpRequest();
-	xhr.open('POST', this.url, true);
-	xhr.setRequestHeader('Content-Type', 'text/plain;charset=utf-8');
+	this.ping_xhr = new XMLHttpRequest();
+	this.ping_xhr.sock = this;
+	this.ping_xhr.addEventListener('loadend', function() {
+		if(this.sock.ping_xhr != this) {return;}
+		else if(this.status == 200) {this.sock.retries = 0;}
+		else if(this.status == 400 || this.status == 404 || (this.status == 0 && this.sock.open)) {this.sock.retry();}
+		this.sock.ping_xhr = null;
+	});
+	this.ping_xhr.open('POST', this.url, true);
+	this.ping_xhr.setRequestHeader('Content-Type', 'text/plain;charset=utf-8');
 	//xhr.setRequestHeader('Api-Client', 'Torus/' + Torus.version);
-	xhr.send('1:2');
+	this.ping_xhr.send('1:2');
 }
-Torus.io.transports.polling.prototype.close = function() {
+Torus.io.transports.polling.prototype.close = function(reason) {
+	if(!this.open) {return;}
+
 	this.open = false;
 	if(this.xhr) {
 		this.xhr.abort();
 		this.xhr = null;
 	}
+	if(this.ping_xhr) {
+		this.ping_xhr.abort();
+		this.ping_xhr = null;
+	}
 	if(this.iid) {
 		clearInterval(this.iid);
 		this.iid = 0;
 	}
+	this.call_listeners({
+		type: 'io',
+		event: 'disconnect',
+		reason: reason,
+		sock: this,
+	});
+}
+Torus.io.transports.polling.prototype.retry = function() {
+	if(!this.open) {return;}
+
+	this.retries++;
+	if(this.retries > 5) {
+		this.close('dropped');
+		return;
+	}
+	this.url = '';
+	this.session = '';
+	this.poll('retry');
 }
 Torus.io.transports.polling.prototype.add_listener = Torus.add_listener;
 Torus.io.transports.polling.prototype.remove_listener = Torus.remove_listener;

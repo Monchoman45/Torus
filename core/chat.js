@@ -53,11 +53,9 @@ Torus.classes.Chat.socket_connect = function(event) {
 	event.sock.chat.connecting = false;
 	event.sock.chat.connected = true;
 	event.sock.chat.send_command('initquery');
-	//Torus.alert('Connected.', event.sock.chat); //FIXME: i18n
-	Torus.io.getBlockedPrivate();
+	Torus.io.getBlockedPrivate(); //FIXME: can probably be moved to Torus.onload
 	Torus.call_listeners(new Torus.classes.ChatEvent('connected', event.sock.chat));
 }
-Torus.classes.Chat.socket_disconnect = function(event) {event.sock.chat.disconnect(event.message);}
 Torus.classes.Chat.socket_message = function(event) {
 	if(event.message.data) {data = JSON.parse(event.message.data);}
 	else {data = {};} //disableReconnect and probably forceReconnect do this
@@ -85,31 +83,34 @@ Torus.classes.Chat.prototype.connect = function(transport) {
 	this.socket = new Torus.io.transports[transport](this.domain, info);
 	this.socket.chat = this;
 	this.socket.add_listener('io', 'connect', Torus.classes.Chat.socket_connect);
-	this.socket.add_listener('io', 'disconnect', Torus.classes.Chat.socket_disconnect);
+	this.socket.add_listener('io', 'disconnect', this.socket_disconnect);
 	this.socket.add_listener('io', 'message', Torus.classes.Chat.socket_message);
 
 	Torus.call_listeners(new Torus.classes.ChatEvent('open', this));
 }
 Torus.classes.Chat.prototype.reconnect = function() {
-	this.socket.close();
+	this.socket.close('reconnect');
 	this.connected = false;
 	this.connecting = false;
 	this.connect(this.socket.transport);
 	Torus.call_listeners(new Torus.classes.ChatEvent('reopen', this));
 }
-Torus.classes.Chat.prototype.disconnect = function(message) {
-	this.socket.close();
+Torus.classes.Chat.prototype.disconnect = function(reason) {
+	if(!this.socket) {return;}
+	this.socket.close(reason);
 	this.socket = false;
-
-	Torus.alert('Disconnected from {' + this.name + '}: ' + message);
 	this.connecting = false;
 	this.connected = false;
-	var event = new Torus.classes.ChatEvent('close', this);
-	event.message = message;
-	Torus.call_listeners(event);
+}
+Torus.classes.Chat.prototype.socket_disconnect = function(event) {
+	event.sock.chat.connecting = false;
+	event.sock.chat.connected = false;
+	var e = new Torus.classes.ChatEvent('close', event.sock.chat);
+	e.reason = event.reason;
+	Torus.call_listeners(e);
 
-	this.users = 0;
-	this.userlist = {};
+	event.sock.chat.users = 0;
+	event.sock.chat.userlist = {};
 }
 
 Torus.classes.Chat.prototype.send_message = function(text) {

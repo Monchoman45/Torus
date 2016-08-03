@@ -4,17 +4,27 @@ Torus.i18n['en'] = {
 
 	'status': '#status',
 
-	'error-login': 'You don\'t appear to be logged in. You must have an account to use chat on Wikia. Please [[Special:UserSignup|register]] or [[Special:UserLogin|log in]].',
-	'error-otherbrowser': 'You are connected to $1 from another window.',
-	'error-cantkickmods': 'Can\'t kick moderators.',
-	'error-longmessage': 'You can\'t send messages that long - try shortening it, or send it as two messages.',
-
 	'title': 'Torus - It\'s a donut - $1',
 
 	'firstheading': 'Torus',
 	'secondheading': 'It\'s a donut',
 
 	'connecting': 'Connecting to $1...',
+	'disconnected': 'Disconnected from {$1}: $2',
+	'disconnected-nochat': 'No chat',
+	'disconnected-loggedout': 'You are logged out',
+	'disconnected-server': 'Server closed the connection',
+	'disconnected-cors-error': 'CORS proxy returned an error',
+	'disconnected-protocol': 'Protocol error',
+	'disconnected-http': 'HTTP status not 200 OK',
+	'disconnected-dropped': 'Connection dropped (are you still connected to the internet?)',
+	'disconnected-closed': 'Closed',
+	'disconnected-reconnect': 'Reconnecting...',
+
+	'error-login': 'You don\'t appear to be logged in. You must have an account to use chat on Wikia. Please [[Special:UserSignup|register]] or [[Special:UserLogin|log in]].',
+	'error-otherbrowser': 'You are connected to $1 from another window.',
+	'error-cantkickmods': 'Can\'t kick moderators.',
+	'error-longmessage': 'You can\'t send messages that long - try shortening it, or send it as two messages.',
 
 	'info-public': 'Public room of $1.',
 	'info-private': 'Private room of $1, between $2.',

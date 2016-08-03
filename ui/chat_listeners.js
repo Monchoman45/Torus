@@ -1,26 +1,4 @@
 Torus.ui.new_room = function(event) {
-	/*event.room.add_listener('io', 'initial', Torus.ui.initial);
-
-	event.room.add_listener('io', 'join', Torus.ui.update_user);
-	event.room.add_listener('io', 'update_user', Torus.ui.update_user);
-	event.room.add_listener('io', 'part', Torus.ui.remove_user);
-	event.room.add_listener('io', 'logout', Torus.ui.remove_user);
-	event.room.add_listener('io', 'ghost', Torus.ui.remove_user);
-
-	event.room.add_listener('io', 'alert', Torus.ui.add_line);
-	event.room.add_listener('io', 'message', Torus.ui.add_line);
-	event.room.add_listener('io', 'me', Torus.ui.add_line);
-	event.room.add_listener('io', 'join', Torus.ui.add_line);
-	event.room.add_listener('io', 'part', Torus.ui.add_line);
-	event.room.add_listener('io', 'logout', Torus.ui.add_line);
-	event.room.add_listener('io', 'ghost', Torus.ui.add_line);
-	event.room.add_listener('io', 'ctcp', Torus.ui.add_line);
-	event.room.add_listener('io', 'mod', Torus.ui.add_line);
-	event.room.add_listener('io', 'kick', Torus.ui.add_line);
-	event.room.add_listener('io', 'ban', Torus.ui.add_line);
-	event.room.add_listener('io', 'unban', Torus.ui.add_line);
-	event.room.add_listener('io', 'error', Torus.ui.add_line);*/
-
 	if(!event.room.parent && !Torus.ui.pings.dir[event.room.domain]) {
 		Torus.ui.pings.dir[event.room.domain] = {};
 		for(var i in Torus.ui.pings.dir['#global']) {Torus.ui.pings.dir[event.room.domain][i] = Torus.ui.pings.dir['#global'][i];}
@@ -102,6 +80,10 @@ Torus.ui.remove_room = function(room) {
 
 	Torus.ui.ids['tabs'].removeChild(Torus.ui.ids['tab-' + room.domain]);
 	delete Torus.ui.ids['tab-' + room.domain];
+}
+Torus.ui.room_disconnect = function(event) {
+	if(Torus.ui.active == event.room) {Torus.util.empty(Torus.ui.ids['sidebar']);}
+	Torus.alert(Torus.i18n.text('disconnected', event.room.name, Torus.i18n.text('disconnected-' + event.reason))); //FIXME: add reconnect link
 }
 
 Torus.ui.add_line = function(event) {
@@ -279,3 +261,4 @@ Torus.ui.parse_message = function(event) {
 
 Torus.add_listener('chat', 'new', Torus.ui.new_room);
 Torus.add_listener('chat', 'open', Torus.ui.add_room);
+Torus.add_listener('chat', 'close', Torus.ui.room_disconnect);
