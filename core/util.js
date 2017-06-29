@@ -89,20 +89,6 @@ Torus.util.seconds_to_expiry = function(seconds) {
 	return str.substring(0, str.length - 2);
 }
 
-Torus.util.int_to_stupid = function(num) { //i still cannot believe they thought this was a good idea
-	var b_stupid = ''; //build backwards
-	for(num; num != 0; num = Math.floor(num / 10)) {b_stupid += String.fromCharCode(num % 10);}
-	var stupid = '';
-	for(var i = b_stupid.length - 1; i >= 0; i--) {stupid += b_stupid.charAt(i);} //reverse
-	return stupid;
-}
-
-Torus.util.stupid_to_int = function(stupid) {
-	var num = 0;
-	for(var i = 0; i < stupid.length; i++) {num += stupid.charCodeAt(stupid.length - i - 1) * Math.pow(10, i);}
-	return num;
-}
-
 Torus.util.utf8ify = function(str) {
 	str = encodeURIComponent(str);
 	for(var i = str.indexOf('%'); i != -1; i = str.indexOf('%', i + 1)) {

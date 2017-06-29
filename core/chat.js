@@ -57,8 +57,10 @@ Torus.classes.Chat.socket_connect = function(event) {
 	Torus.call_listeners(new Torus.classes.ChatEvent('connected', event.sock.chat));
 }
 Torus.classes.Chat.socket_message = function(event) {
-	if(event.message.data) {data = JSON.parse(event.message.data);}
-	else {data = {};} //disableReconnect and probably forceReconnect do this
+	var data = event.message.data;
+	if(typeof data === 'string') {
+		data = JSON.parse(data);
+	}
 
 	var e = event.sock.chat['event_' + event.message.event](data);
 	Torus.call_listeners(e);
@@ -360,6 +362,12 @@ Torus.classes.Chat.prototype.event_longMessage = function(data) {
 	var event = new Torus.classes.IOEvent('error', this);
 	event.error = 'error-longmessage';
 	event.args = [];
+	return event;
+}
+Torus.classes.Chat.prototype.event_meta = function(data) {
+	var event = new Torus.classes.IOEvent('meta', this);
+	event.hostname = data.serverHostname;
+	event.version = data.serverVersion;
 	return event;
 }
 

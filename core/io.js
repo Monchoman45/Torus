@@ -210,11 +210,11 @@ Torus.io.transports.polling.prototype.poll = function(from) {
 
 			var data = this.responseText;
 			while(data.length > 0) {
-				var ufffd = data.indexOf('\ufffd');
-				var end = 1 + ufffd + Torus.util.stupid_to_int(data.substring(1, ufffd));
-				var text = data.substring(1 + ufffd, end);
+				var colon = data.indexOf(':');
+				var end = 1 + colon + Number(data.substring(0, colon));
+				var text = data.substring(1 + colon, end);
 				data = data.substring(end);
-				var packet_type = text.charAt(0) * 1;
+				var packet_type = Number(text.charAt(0));
 				text = text.substring(1);
 
 				switch(packet_type) {
